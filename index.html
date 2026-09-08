@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pixel Refine — Image & PDF Tools</title>
+<meta name="description" content="Pixel Refine — fast online image, PDF and utility tools.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="nav">
+  <a class="brand" href="#"><span class="logo">P</span><span>Pixel <b>Refine</b></span></a>
+  <nav><a href="#tools">Tools</a><a href="#features">Features</a><a href="#faq">FAQ</a></nav>
+  <button class="theme" id="themeBtn" aria-label="Toggle theme">☾</button>
+</header>
+
+<main>
+<section class="hero">
+  <div class="badge">✦ 16 powerful tools in one place</div>
+  <h1>Edit. Convert. <span>Refine.</span></h1>
+  <p>Simple, fast and professional tools for your images, PDFs and everyday digital tasks.</p>
+  <div class="hero-actions"><a class="primary" href="#tools">Explore Tools →</a><a class="secondary" href="#features">Why Pixel Refine?</a></div>
+</section>
+
+<section class="search-wrap">
+  <div class="search">⌕ <input id="search" placeholder="Search a tool… (e.g. compress, PDF, QR)" autocomplete="off"></div>
+  <div class="chips"><button data-filter="all" class="active">All</button><button data-filter="image">Image</button><button data-filter="pdf">PDF</button><button data-filter="utility">Utility</button></div>
+</section>
+
+<section id="tools" class="tools-section">
+  <div class="section-head"><div><small>TOOLS</small><h2>Everything you need</h2></div><span id="count"></span></div>
+  <div class="grid" id="toolGrid"></div>
+</section>
+
+<section id="features" class="features">
+  <div><small>BUILT FOR YOU</small><h2>Fast tools, without the clutter.</h2><p>Pixel Refine is designed around a clean workflow: choose a tool, upload or enter your data, preview the result, and download.</p></div>
+  <div class="feature-list">
+    <article>⚡ <b>Fast workflow</b><span>Focused interfaces with fewer clicks.</span></article>
+    <article>🔒 <b>Privacy-first design</b><span>Processing can be kept in your browser where supported.</span></article>
+    <article>📱 <b>Works everywhere</b><span>Responsive on phones, tablets and desktops.</span></article>
+  </div>
+</section>
+
+<section id="faq" class="faq"><small>FAQ</small><h2>Frequently asked questions</h2>
+<details><summary>Is Pixel Refine free?</summary><p>The starter version is free. Premium/API-powered processing can be connected later.</p></details>
+<details><summary>Do you store uploaded files?</summary><p>The frontend is designed to support browser-side processing for suitable tools. Server/API tools can be configured with explicit privacy policies.</p></details>
+<details><summary>Can more tools be added?</summary><p>Yes. The tool registry is structured so additional image, PDF and AI tools can be added without redesigning the homepage.</p></details>
+</section>
+</main>
+
+<footer><div class="brand"><span class="logo">P</span><span>Pixel <b>Refine</b></span></div><p>© 2026 Pixel Refine. All rights reserved.</p></footer>
+
+<div class="modal" id="modal"><div class="modal-card"><button class="close" id="close">×</button><div id="modalContent"></div></div></div>
+<script src="app.js"></script>
+</body>
+</html>
