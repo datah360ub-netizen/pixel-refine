@@ -1,297 +1,98 @@
-const tools = [
-  { id: 'compress', cat: 'image', icon: '🗜️', name: 'Compress Image', desc: 'Reduce file size with quality control.', type: 'image-proc', action: 'Compress' },
-  { id: 'resize', cat: 'image', icon: '📐', name: 'Resize Image', desc: 'Custom pixel dimensions scaling.', type: 'image-resize', action: 'Resize' },
-  { id: 'convert', cat: 'image', icon: '🔄', name: 'Convert Image', desc: 'Convert JPG, PNG, WEBP formats.', type: 'image-convert', action: 'Convert' },
-  { id: 'grayscale', cat: 'image', icon: '⚫', name: 'Grayscale / B&W', desc: 'Convert color photos to monochrome.', type: 'image-filter', filter: 'grayscale', action: 'Process' },
-  { id: 'rotate', cat: 'image', icon: '🔃', name: 'Rotate & Flip', desc: 'Rotate 90/180/270 degrees.', type: 'image-rotate', action: 'Rotate' },
-  { id: 'watermark', cat: 'image', icon: '©️', name: 'Add Watermark', desc: 'Overlay text stamp on image.', type: 'image-watermark', action: 'Stamp' },
-  { id: 'crop-prev', cat: 'image', icon: '✂️', name: 'Crop Preview', desc: 'Center aspect ratio thumbnail crop.', type: 'image-crop', action: 'Crop' },
-  { id: 'brightness', cat: 'image', icon: '☀️', name: 'Brighten / Contrast', desc: 'Adjust exposure balance.', type: 'image-adjust', action: 'Apply' },
-  { id: 'pdf-compress', cat: 'pdf', icon: '📚', name: 'Compress PDF', desc: 'Optimize document stream structure.', type: 'pdf-sim', action: 'Optimize' },
-  { id: 'pdf-merge', cat: 'pdf', icon: '🗂️', name: 'Merge PDF', desc: 'Combine multiple PDF sequence stubs.', type: 'pdf-sim', action: 'Merge' },
-  { id: 'pdf-split', cat: 'pdf', icon: '📑', name: 'Split PDF', desc: 'Extract page ranges.', type: 'pdf-sim', action: 'Split' },
-  { id: 'jpg-pdf', cat: 'pdf', icon: '🖼️', name: 'JPG to PDF', desc: 'Package images into document container.', type: 'pdf-sim', action: 'Convert' },
-  { id: 'qr', cat: 'utility', icon: '📱', name: 'QR Code Generator', desc: 'Create custom QR code data matrix.', type: 'utility-qr', action: 'Generate' },
-  { id: 'password', cat: 'utility', icon: '🔑', name: 'Password Generator', desc: 'Cryptographically strong random secrets.', type: 'utility-pass', action: 'Generate' },
-  { id: 'barcode', cat: 'utility', icon: '|||', name: 'Barcode Generator', desc: 'Retail Code-128 linear barcodes.', type: 'utility-barcode', action: 'Generate' },
-  { id: 'json', cat: 'utility', icon: '{}', name: 'JSON Formatter', desc: 'Prettify and validate raw payloads.', type: 'utility-json', action: 'Format' }
+const tools=[
+["AI Background Remover","Remove backgrounds from photos with AI.","🪄","image"],
+["Image Compressor","Reduce file size while keeping quality.","📉","image"],
+["Image Resizer","Resize images to exact dimensions.","📏","image"],
+["Image Converter","Convert PNG, JPG and WebP files.","🔄","image"],
+["Image Upscaler (HD)","Upscale images for sharper output.","✨","image"],
+["PDF Compressor","Shrink PDF size for easy sharing.","📦","pdf"],
+["Word to PDF","Convert Word documents into PDF.","📝","pdf"],
+["PDF to Word","Turn PDF documents into editable Word files.","📄","pdf"],
+["Photo Colorize","Add realistic color to old photos.","🎨","image"],
+["Photo Enhancer","Improve clarity, lighting and detail.","🔆","image"],
+["PDF Merger","Combine multiple PDFs into one file.","🧩","pdf"],
+["PDF Splitter","Extract selected PDF pages.","✂️","pdf"],
+["QR Code Generator","Create a QR code from any text or URL.","▦","utility"],
+["Password Generator","Generate strong secure passwords.","🔑","utility"],
+["Barcode Generator","Create barcodes from text or numbers.","▥","utility"],
+["Image Size Expander","Expand image canvas while preserving the subject.","↔️","image"]
 ];
 
-let currentFilter = 'all';
-let searchQuery = '';
+const grid=document.getElementById("toolGrid"), search=document.getElementById("search"), count=document.getElementById("count");
+let filter="all";
+function render(){
+ const q=(search.value||"").toLowerCase().trim();
+ const list=tools.filter(t=>(filter==="all"||t[3]===filter)&&(`${t[0]} ${t[1]}`).toLowerCase().includes(q));
+ count.textContent=`${list.length} tools`;
+ grid.innerHTML=list.map(t=>`<article class="tool" onclick="openTool(${tools.indexOf(t)})"><div class="icon">${t[2]}</div><h3>${t[0]}</h3><p>${t[1]}</p><div class="tag">${t[3]}</div></article>`).join("");
+}
+document.querySelectorAll(".chips button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".chips button").forEach(x=>x.classList.remove("active"));b.classList.add("active");filter=b.dataset.filter;render()});
+search.oninput=render;
 
-const grid = document.getElementById('toolGrid');
-const countEl = document.getElementById('count');
-const searchInput = document.getElementById('search');
-const modal = document.getElementById('modal');
-const modalContent = document.getElementById('modalContent');
-const closeBtn = document.getElementById('close');
+const modal=document.getElementById("modal"), content=document.getElementById("modalContent");
+document.getElementById("close").onclick=()=>modal.classList.remove("show");
+modal.onclick=e=>{if(e.target===modal)modal.classList.remove("show")};
 
-function renderTools() {
-  const filtered = tools.filter(t => {
-    const matchCat = currentFilter === 'all' || t.cat === currentFilter;
-    const matchSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCat && matchSearch;
-  });
-  countEl.textContent = `${filtered.length} tools`;
-  grid.innerHTML = filtered.map(t => `
-    <div class="tool" data-id="${t.id}">
-      <div class="icon">${t.icon}</div>
-      <h3>${t.name}</h3>
-      <p>${t.desc}</p>
-      <div class="tag">${t.cat}</div>
-    </div>
-  `).join('');
+function openTool(i){
+ const [name,desc,icon,type]=tools[i];
+ if(name==="Password Generator"){passwordTool();return}
+ if(name==="QR Code Generator"){qrTool();return}
+ const imageTool=["Image Compressor","Image Resizer","Image Converter","Image Size Expander"].includes(name);
+ const accept=type==='pdf'?'.pdf,.doc,.docx':'image/*';
+ content.innerHTML=`<div class="icon">${icon}</div><h2>${name}</h2><p style="color:var(--muted);line-height:1.7">${desc}</p>
+ <div class="drop" id="dropZone"><div class="upload-icon">☁️</div><b>Upload your ${type==='pdf'?'document':'image'}</b><br><span style="color:var(--muted);font-size:13px">Tap to browse or drag & drop a file here</span><br><input type="file" id="fileInput" accept="${accept}" aria-label="Choose file">
+ <div id="fileInfo" class="file-info">No file selected</div><div id="previewBox" class="preview-box"></div><div id="toolControls"></div><div id="status" class="status"></div></div>`;
+ modal.classList.add("show");
+ const input=document.getElementById("fileInput"), zone=document.getElementById("dropZone");
+ input.addEventListener("change",()=>handleFile(input.files[0],name));
+ ["dragenter","dragover"].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add("dragging")}));
+ ["dragleave","drop"].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove("dragging")}));
+ zone.addEventListener("drop",e=>{const f=e.dataTransfer.files[0];if(f){input.files=e.dataTransfer.files;handleFile(f,name)}});
+ if(imageTool) setupImageControls(name);
 }
 
-renderTools();
-
-searchInput.addEventListener('input', (e) => {
-  searchQuery = e.target.value;
-  renderTools();
-});
-
-document.querySelectorAll('.chips button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelector('.chips button.active').classList.remove('active');
-    btn.classList.add('active');
-    currentFilter = btn.dataset.filter;
-    renderTools();
-  });
-});
-
-grid.addEventListener('click', (e) => {
-  const card = e.target.closest('.tool');
-  if (!card) return;
-  const tool = tools.find(t => t.id === card.dataset.id);
-  openToolModal(tool);
-});
-
-closeBtn.addEventListener('click', () => modal.classList.remove('show'));
-modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('show'); });
-
-function openToolModal(tool) {
-  modal.classList.add('show');
-  if (tool.type.startsWith('utility-pass')) {
-    modalContent.innerHTML = `
-      <h2>${tool.icon} ${tool.name}</h2>
-      <div class="control-group">
-        <label>Length: <span id="lenVal">16</span></label>
-        <input type="range" id="passLen" min="8" max="64" value="16">
-      </div>
-      <div class="preview-area">
-        <input type="text" id="passOutput" readonly style="width:100%;text-align:center;font-weight:bold;font-size:16px;padding:12px;">
-      </div>
-      <div class="output-actions">
-        <button class="action" id="genPassBtn">Generate New</button>
-        <button class="action" id="copyPassBtn" style="background:var(--accent);">Copy</button>
-      </div>
-    `;
-    const generatePass = () => {
-      const len = document.getElementById('passLen').value;
-      document.getElementById('lenVal').textContent = len;
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*!';
-      let res = '';
-      for (let i = 0; i < len; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
-      document.getElementById('passOutput').value = res;
-    };
-    document.getElementById('passLen').addEventListener('input', generatePass);
-    document.getElementById('genPassBtn').addEventListener('click', generatePass);
-    document.getElementById('copyPassBtn').addEventListener('click', () => {
-      navigator.clipboard.writeText(document.getElementById('passOutput').value);
-      alert('Copied to clipboard!');
-    });
-    generatePass();
-    return;
-  }
-
-  if (tool.type.startsWith('utility-qr')) {
-    modalContent.innerHTML = `
-      <h2>${tool.icon} ${tool.name}</h2>
-      <div class="control-group">
-        <label>Enter Text or URL</label>
-        <input type="text" id="qrText" value="https://pixelrefine.app" placeholder="Type text...">
-      </div>
-      <div class="preview-area" id="qrBox"></div>
-      <div class="output-actions">
-        <button class="action" id="genQrBtn">Render QR</button>
-      </div>
-    `;
-    const renderQR = () => {
-      const val = document.getElementById('qrText').value || 'PixelRefine';
-      try {
-        const qr = qrcode(0, 'M');
-        qr.addData(val);
-        qr.make();
-        document.getElementById('qrBox').innerHTML = qr.createSvgTag(5, 4);
-      } catch (err) {
-        document.getElementById('qrBox').innerHTML = '<p style="color:red;">Input too long for QR matrix</p>';
-      }
-    };
-    document.getElementById('genQrBtn').addEventListener('click', renderQR);
-    renderQR();
-    return;
-  }
-
-  if (tool.type.startsWith('utility-barcode') || tool.type.startsWith('utility-json') || tool.type.startsWith('pdf-sim')) {
-    modalContent.innerHTML = `
-      <h2>${tool.icon} ${tool.name}</h2>
-      <p style="color:var(--muted);margin-top:10px;">${tool.desc}</p>
-      <div class="control-group">
-        <label>Input Payload / Target Data</label>
-        <textarea id="stubInput" rows="3" style="width:100%;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);padding:10px;font:inherit;">Sample operational batch #1000151482</textarea>
-      </div>
-      <div class="output-actions">
-        <button class="action" id="procStubBtn">Process & Download Stub Result</button>
-      </div>
-    `;
-    document.getElementById('procStubBtn').addEventListener('click', () => {
-      alert(`Completed processing for ${tool.name} successfully!`);
-      modal.classList.remove('show');
-    });
-    return;
-  }
-
-  // Image Processing / Resize / Compress / Rotate / Filter / Watermark
-  modalContent.innerHTML = `
-    <h2>${tool.icon} ${tool.name}</h2>
-    <p style="color:var(--muted);font-size:13px;">File selected/drop ready for real browser canvas engine.</p>
-    <div class="drop" id="dropZone">
-      <input type="file" id="fileInput" accept="image/*">
-    </div>
-    <div id="editorWorkspace" style="display:none;">
-      <div class="control-group" id="extraControls"></div>
-      <div class="preview-area">
-        <canvas id="procCanvas"></canvas>
-      </div>
-      <div class="output-actions">
-        <a id="downloadBtn" class="action" download="processed-image.jpg">Download Result</a>
-      </div>
-    </div>
-  `;
-
-  const fileInput = document.getElementById('fileInput');
-  const dropZone = document.getElementById('dropZone');
-  const workspace = document.getElementById('editorWorkspace');
-  const canvas = document.getElementById('procCanvas');
-  const extraControls = document.getElementById('extraControls');
-  const downloadBtn = document.getElementById('downloadBtn');
-
-  // Build specific controls
-  if (tool.id === 'compress') {
-    extraControls.innerHTML = `<label>Quality: <span id="qVal">75</span>%</label><input type="range" id="qRange" min="10" max="95" value="75">`;
-  } else if (tool.id === 'resize') {
-    extraControls.innerHTML = `<label>Scale Percentage: <span id="sVal">50</span>%</label><input type="range" id="sRange" min="20" max="100" value="50">`;
-  } else if (tool.id === 'watermark') {
-    extraControls.innerHTML = `<label>Watermark Text</label><input type="text" id="wmText" value="PIXEL REFINE">`;
-  } else {
-    extraControls.innerHTML = '';
-  }
-
-  let loadedImg = null;
-
-  const processImage = () => {
-    if (!loadedImg) return;
-    const ctx = canvas.getContext('2d');
-    let w = loadedImg.width;
-    let h = loadedImg.height;
-
-    if (tool.id === 'resize') {
-      const scale = parseInt(document.getElementById('sRange').value) / 100;
-      w = Math.round(w * scale);
-      h = Math.round(h * scale);
-    }
-
-    canvas.width = w;
-    canvas.height = h;
-    ctx.drawImage(loadedImg, 0, 0, w, h);
-
-    if (tool.id === 'grayscale') {
-      const imgData = ctx.getImageData(0, 0, w, h);
-      for (let i = 0; i < imgData.data.length; i += 4) {
-        const avg = 0.3 * imgData.data[i] + 0.59 * imgData.data[i+1] + 0.11 * imgData.data[i+2];
-        imgData.data[i] = avg; imgData.data[i+1] = avg; imgData.data[i+2] = avg;
-      }
-      ctx.putImageData(imgData, 0, 0);
-    } else if (tool.id === 'watermark') {
-      const text = document.getElementById('wmText').value || 'WATERMARK';
-      ctx.save();
-      ctx.font = 'bold 24px Inter, sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-      ctx.lineWidth = 1;
-      ctx.textAlign = 'right';
-      ctx.fillText(text, w - 20, h - 20);
-      ctx.strokeText(text, w - 20, h - 20);
-      ctx.restore();
-    } else if (tool.id === 'rotate') {
-      // Rotate 90 deg demo step
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = h; tempCanvas.height = w;
-      const tCtx = tempCanvas.getContext('2d');
-      tCtx.translate(h / 2, w / 2);
-      tCtx.rotate(Math.PI / 2);
-      tCtx.drawImage(loadedImg, -w / 2, -h / 2);
-      canvas.width = h; canvas.height = w;
-      ctx.drawImage(tempCanvas, 0, 0);
-    }
-
-    const quality = tool.id === 'compress' ? parseInt(document.getElementById('qRange').value) / 100 : 0.92;
-    const dataUrl = canvas.toDataURL('image/jpeg', quality);
-    downloadBtn.href = dataUrl;
-  };
-
-  const handleFile = (file) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        loadedImg = img;
-        workspace.style.display = 'block';
-        dropZone.style.display = 'none';
-        processImage();
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
-  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--accent)'; });
-  dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = '#d9dbe4'; });
-  dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.style.borderColor = '#d9dbe4';
-    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-  });
-
-  // Re-bind listeners for sliders/inputs inside modal
-  setTimeout(() => {
-    const qRange = document.getElementById('qRange');
-    if (qRange) {
-      qRange.addEventListener('input', () => {
-        document.getElementById('qVal').textContent = qRange.value;
-        processImage();
-      });
-    }
-    const sRange = document.getElementById('sRange');
-    if (sRange) {
-      sRange.addEventListener('input', () => {
-        document.getElementById('sVal').textContent = sRange.value;
-        processImage();
-      });
-    }
-    const wmText = document.getElementById('wmText');
-    if (wmText) {
-      wmText.addEventListener('input', processImage);
-    }
-  }, 50);
+function setupImageControls(name){
+ const c=document.getElementById("toolControls");
+ if(name==="Image Compressor") c.innerHTML=`<label class="control-label">Quality <span id="qualityValue">80%</span></label><input id="quality" type="range" min="10" max="95" value="80" class="control-range"><button class="action" onclick="processImage()">Compress & Download</button>`;
+ if(name==="Image Resizer") c.innerHTML=`<div class="control-row"><label>Width <input id="resizeW" type="number" min="1" placeholder="Auto"></label><label>Height <input id="resizeH" type="number" min="1" placeholder="Auto"></label></div><button class="action" onclick="processImage()">Resize & Download</button>`;
+ if(name==="Image Converter") c.innerHTML=`<label class="control-label">Output format</label><select id="format" class="select"><option value="image/jpeg">JPG</option><option value="image/png">PNG</option><option value="image/webp">WebP</option></select><button class="action" onclick="processImage()">Convert & Download</button>`;
+ if(name==="Image Size Expander") c.innerHTML=`<div class="control-row"><label>Extra width <input id="expandW" type="number" min="0" value="200"></label><label>Extra height <input id="expandH" type="number" min="0" value="200"></label></div><button class="action" onclick="processImage()">Expand & Download</button>`;
+ const q=document.getElementById("quality"); if(q)q.oninput=()=>document.getElementById("qualityValue").textContent=q.value+"%";
 }
 
-// Theme toggle
-const themeBtn = document.getElementById('themeBtn');
-themeBtn.addEventListener('click', () => {
-  document.body.classList.toggle('dark');
-  themeBtn.textContent = document.body.classList.contains('dark') ? '☀️' : '☾';
-});
+let currentFile=null,currentTool="";
+function handleFile(file,name){
+ if(!file)return;
+ currentFile=file;currentTool=name;
+ const info=document.getElementById("fileInfo"), status=document.getElementById("status"), preview=document.getElementById("previewBox");
+ info.textContent=`✓ ${file.name} • ${formatBytes(file.size)}`; status.innerHTML=`<span class="success-dot"></span> File ready — choose an action below.`;
+ preview.innerHTML="";
+ if(file.type.startsWith("image/")){const url=URL.createObjectURL(file);const img=document.createElement("img");img.src=url;img.alt="Selected image preview";img.onload=()=>URL.revokeObjectURL(url);preview.appendChild(img)}
+ else preview.innerHTML=`<div class="doc-preview">📄<span>${file.type||"Document"}</span></div>`;
+}
+function formatBytes(bytes){if(bytes<1024)return bytes+" B";if(bytes<1024*1024)return (bytes/1024).toFixed(1)+" KB";return (bytes/1024/1024).toFixed(2)+" MB"}
+function processImage(){
+ if(!currentFile)return showStatus("Please choose an image first.",true);
+ if(!currentFile.type.startsWith("image/"))return showStatus("This tool requires an image file.",true);
+ const img=new Image(), url=URL.createObjectURL(currentFile); img.onload=()=>{URL.revokeObjectURL(url);let w=img.naturalWidth,h=img.naturalHeight;
+  if(currentTool==="Image Resizer"){const rw=parseInt(document.getElementById("resizeW").value),rh=parseInt(document.getElementById("resizeH").value);if(!rw&&!rh)return showStatus("Enter a width or height.",true);if(rw&&rh){w=rw;h=rh}else if(rw){w=rw;h=Math.round(img.naturalHeight*(rw/img.naturalWidth))}else{h=rh;w=Math.round(img.naturalWidth*(rh/img.naturalHeight))}}
+  if(currentTool==="Image Size Expander"){w+=Math.max(0,parseInt(document.getElementById("expandW").value)||0);h+=Math.max(0,parseInt(document.getElementById("expandH").value)||0)}
+  const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;const ctx=canvas.getContext("2d");
+  if(currentTool==="Image Size Expander"){ctx.fillStyle="#ffffff";ctx.fillRect(0,0,w,h);const x=Math.round((w-img.naturalWidth)/2),y=Math.round((h-img.naturalHeight)/2);ctx.drawImage(img,x,y)}else ctx.drawImage(img,0,0,w,h);
+  let mime=currentTool==="Image Converter"?document.getElementById("format").value:(currentTool==="Image Compressor"?"image/jpeg":(currentFile.type||"image/png"));
+  let quality=currentTool==="Image Compressor"?(parseInt(document.getElementById("quality").value)||80)/100:0.92;
+  canvas.toBlob(blob=>{if(!blob)return showStatus("Could not create the output file.",true);const ext=mime==="image/jpeg"?"jpg":mime==="image/webp"?"webp":"png";downloadBlob(blob,`pixel-refine-${currentTool.toLowerCase().replace(/[^a-z0-9]+/g,"-")}.${ext}`);showStatus(`✓ Done — output size ${formatBytes(blob.size)}. Download started.`)},mime,quality);
+ }; img.onerror=()=>{URL.revokeObjectURL(url);showStatus("This image could not be opened by the browser.",true)};img.src=url;
+}
+function downloadBlob(blob,name){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function showStatus(msg,error=false){const s=document.getElementById("status");if(s)s.innerHTML=`<span class="${error?'error-dot':'success-dot'}"></span> ${msg}`}
+
+function unsupportedProcess(){if(!currentFile)return showStatus("Please choose a file first.",true);showStatus("File is ready. This advanced tool needs its secure processing service to complete the operation.",false)}
+function passwordTool(){
+ content.innerHTML=`<div class="icon">🔑</div><h2>Password Generator</h2><p style="color:var(--muted)">Create a strong random password directly in your browser.</p><input id="pwLen" type="range" min="8" max="40" value="18" style="width:100%"><div style="margin:10px 0;color:var(--muted)">Length: <b id="len">18</b></div><div class="search"><input id="pw" readonly value=""></div><button class="action" onclick="genPw()">Generate Password</button>`;
+ modal.classList.add("show");genPw();document.getElementById("pwLen").oninput=e=>{document.getElementById("len").textContent=e.target.value;genPw()};
+}
+function genPw(){const el=document.getElementById("pw");if(!el)return;const n=+document.getElementById("pwLen").value,chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*";let s="";for(let i=0;i<n;i++)s+=chars[Math.floor(Math.random()*chars.length)];el.value=s}
+function qrTool(){content.innerHTML=`<div class="icon">▦</div><h2>QR Code Generator</h2><p style="color:var(--muted)">Enter text or a URL to create a QR code.</p><div class="search"><input id="qrText" placeholder="https://example.com"></div><button class="action" onclick="makeQR()">Generate QR</button><div id="qrOut" style="text-align:center;margin-top:20px"></div>`;modal.classList.add("show")}
+function makeQR(){const v=document.getElementById("qrText").value.trim();if(!v)return;const out=document.getElementById("qrOut");out.innerHTML=`<img alt="QR code" width="220" height="220" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(v)}"><p style="font-size:12px;color:var(--muted)">QR image generated.</p>`}
+document.getElementById("themeBtn").onclick=()=>{document.body.classList.toggle("dark");document.getElementById("themeBtn").textContent=document.body.classList.contains("dark")?"☀":"☾"};
+render();    
