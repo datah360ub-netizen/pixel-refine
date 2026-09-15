@@ -1,62 +1,342 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pixel Refine — Image, PDF & Utility Tools</title>
-<meta name="description" content="Pixel Refine — fast online image, PDF and utility tools with live browser processing.">
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Pixel Refine — Image & PDF Tools</title>
+
+  <meta
+    name="description"
+    content="Pixel Refine — fast, simple and professional online image, PDF and utility tools."
+  >
+
+  <meta name="theme-color" content="#ffffff">
+
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<header class="nav">
-  <a class="brand" href="#"><span class="logo">P</span><span>Pixel <b>Refine</b></span></a>
-  <nav><a href="#tools">Tools</a><a href="#features">Features</a><a href="#faq">FAQ</a></nav>
-  <button class="theme" id="themeBtn" aria-label="Toggle theme">☾</button>
-</header>
 
-<main>
-<section class="hero">
-  <div class="badge">✦ 16 powerful tools in one place</div>
-  <h1>Edit. Convert. <span>Refine.</span></h1>
-  <p>Simple, fast and professional tools with client-side browser processing.</p>
-  <div class="hero-actions"><a class="primary" href="#tools">Explore Tools →</a><a class="secondary" href="#features">Why Pixel Refine?</a></div>
-</section>
+  <!-- ================= HEADER ================= -->
+  <header class="nav">
 
-<section class="search-wrap">
-  <div class="search">⌕ <input id="search" placeholder="Search a tool… (e.g. compress, resize, QR, password)" autocomplete="off"></div>
-  <div class="chips"><button data-filter="all" class="active">All</button><button data-filter="image">Image</button><button data-filter="pdf">PDF</button><button data-filter="utility">Utility</button></div>
-</section>
+    <a class="brand" href="#">
+      <span class="logo">P</span>
+      <span>Pixel <b>Refine</b></span>
+    </a>
 
-<section id="tools" class="tools-section">
-  <div class="section-head"><div><small>TOOLS</small><h2>Everything you need</h2></div><span id="count"></span></div>
-  <div class="grid" id="toolGrid"></div>
-</section>
+    <nav>
+      <a href="#tools">Tools</a>
+      <a href="#features">Features</a>
+      <a href="#faq">FAQ</a>
+    </nav>
 
-<section id="features" class="features">
-  <div><small>BUILT FOR YOU</small><h2>Fast tools, without the clutter.</h2><p>Designed around a clean workflow: choose a tool, upload/configure, preview the result, and download.</p></div>
-  <div class="feature-list">
-    <article>⚡ <b>Fast workflow</b><span>Focused interfaces with fewer clicks.</span></article>
-    <article>🔒 <b>Privacy-first design</b><span>Image & utility processing runs locally in your browser.</span></article>
-    <article>📱 <b>Works everywhere</b><span>Responsive on phones, tablets and desktops.</span></article>
+    <button
+      class="theme"
+      id="themeBtn"
+      aria-label="Toggle theme"
+      type="button"
+    >
+      ☾
+    </button>
+
+  </header>
+
+
+  <!-- ================= MAIN ================= -->
+  <main>
+
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+
+      <div class="badge">
+        ✦ 16 powerful tools in one place
+      </div>
+
+      <h1>
+        Edit. Convert. <span>Refine.</span>
+      </h1>
+
+      <p>
+        Simple, fast and professional tools for your images,
+        PDFs and everyday digital tasks.
+      </p>
+
+      <div class="hero-actions">
+
+        <a
+          class="primary"
+          href="#tools"
+        >
+          Explore Tools →
+        </a>
+
+        <a
+          class="secondary"
+          href="#features"
+        >
+          Why Pixel Refine?
+        </a>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= SEARCH ================= -->
+    <section class="search-wrap">
+
+      <div class="search">
+
+        <span aria-hidden="true">⌕</span>
+
+        <input
+          id="search"
+          type="search"
+          placeholder="Search a tool… (e.g. compress, PDF, QR)"
+          autocomplete="off"
+          aria-label="Search tools"
+        >
+
+      </div>
+
+
+      <div class="chips">
+
+        <button
+          data-filter="all"
+          class="active"
+          type="button"
+        >
+          All
+        </button>
+
+        <button
+          data-filter="image"
+          type="button"
+        >
+          Image
+        </button>
+
+        <button
+          data-filter="pdf"
+          type="button"
+        >
+          PDF
+        </button>
+
+        <button
+          data-filter="utility"
+          type="button"
+        >
+          Utility
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= TOOLS ================= -->
+    <section
+      id="tools"
+      class="tools-section"
+    >
+
+      <div class="section-head">
+
+        <div>
+          <small>TOOLS</small>
+          <h2>Everything you need</h2>
+        </div>
+
+        <span id="count"></span>
+
+      </div>
+
+
+      <!-- Tool cards are generated by app.js -->
+      <div
+        class="grid"
+        id="toolGrid"
+      ></div>
+
+    </section>
+
+
+    <!-- ================= FEATURES ================= -->
+    <section
+      id="features"
+      class="features"
+    >
+
+      <div>
+
+        <small>BUILT FOR YOU</small>
+
+        <h2>
+          Fast tools, without the clutter.
+        </h2>
+
+        <p>
+          Pixel Refine is designed around a clean workflow:
+          choose a tool, upload or enter your data, preview the
+          result, and download.
+        </p>
+
+      </div>
+
+
+      <div class="feature-list">
+
+        <article>
+          ⚡
+          <b>Fast workflow</b>
+          <span>
+            Focused interfaces with fewer clicks.
+          </span>
+        </article>
+
+
+        <article>
+          🔒
+          <b>Privacy-first design</b>
+          <span>
+            Processing can be kept in your browser
+            where supported.
+          </span>
+        </article>
+
+
+        <article>
+          📱
+          <b>Works everywhere</b>
+          <span>
+            Responsive on phones, tablets and desktops.
+          </span>
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= FAQ ================= -->
+    <section
+      id="faq"
+      class="faq"
+    >
+
+      <small>FAQ</small>
+
+      <h2>
+        Frequently asked questions
+      </h2>
+
+
+      <details>
+
+        <summary>
+          Is Pixel Refine free?
+        </summary>
+
+        <p>
+          The starter version is free.
+          Premium and API-powered processing can
+          be connected later.
+        </p>
+
+      </details>
+
+
+      <details>
+
+        <summary>
+          Do you store uploaded files?
+        </summary>
+
+        <p>
+          The frontend is designed to support
+          browser-side processing for suitable tools.
+          Server or API tools can be configured with
+          explicit privacy policies.
+        </p>
+
+      </details>
+
+
+      <details>
+
+        <summary>
+          Can more tools be added?
+        </summary>
+
+        <p>
+          Yes. The tool registry is structured so
+          additional image, PDF and AI tools can be
+          added without redesigning the homepage.
+        </p>
+
+      </details>
+
+    </section>
+
+  </main>
+
+
+  <!-- ================= FOOTER ================= -->
+  <footer>
+
+    <div class="brand">
+
+      <span class="logo">P</span>
+
+      <span>
+        Pixel <b>Refine</b>
+      </span>
+
+    </div>
+
+    <p>
+      © 2026 Pixel Refine. All rights reserved.
+    </p>
+
+  </footer>
+
+
+  <!-- ================= TOOL MODAL ================= -->
+  <div
+    class="modal"
+    id="modal"
+    aria-hidden="true"
+  >
+
+    <div
+      class="modal-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+    >
+
+      <button
+        class="close"
+        id="close"
+        type="button"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+      <div id="modalContent"></div>
+
+    </div>
+
   </div>
-</section>
 
-<section id="faq" class="faq"><small>FAQ</small><h2>Frequently asked questions</h2>
-<details><summary>Is Pixel Refine free?</summary><p>Yes, all local client-side tools run completely free in your browser.</p></details>
-<details><summary>Do you store uploaded files?</summary><p>No file leaves your browser for image and utility operations.</p></details>
-<details><summary>Can more tools be added?</summary><p>Yes, modular registry in app.js supports easy scaling.</p></details>
-</section>
-</main>
 
-<footer><div class="brand"><span class="logo">P</span><span>Pixel <b>Refine</b></span></div><p>© 2026 Pixel Refine. All rights reserved.</p></footer>
+  <!-- ================= JAVASCRIPT ================= -->
+  <script src="app.js"></script>
 
-<div class="modal" id="modal">
-  <div class="modal-card">
-    <button class="close" id="close">×</button>
-    <div id="modalContent"></div>
-  </div>
-</div>
-<script src="app.js"></script>
 </body>
 </html>
