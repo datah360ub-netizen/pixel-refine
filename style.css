@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 :root{--bg:#f7f8fc;--card:#fff;--text:#111827;--muted:#667085;--line:#e7e9ef;--accent:#635bff;--accent2:#8b5cf6;--shadow:0 16px 45px rgba(17,24,39,.08)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text)}
 .nav{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 6%;background:rgba(255,255,255,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
