@@ -1,26 +1,20 @@
-# Pixel Refine
+Pixel Refine — Professional Starter
+This build contains 17 tool cards, including the new Magic Eraser, plus a more complete product-style UI.
 
-Professional starter website for an all-in-one image, PDF and utility tools platform.
+Added in this version
+Magic Eraser with brush, undo/reset and transparent PNG export
+Login / create-account demo with User ID
+Account panel with plan, coins and logout
+Settings panel
+Free / Pro Monthly ₹50 / Pro Yearly ₹500 plan UI
+10 daily coins added once per calendar day in the browser
+1 coin is consumed by supported image actions
+Dark-theme action buttons fixed with high-contrast colors
+More polished pricing, account, coin and modal UI
+Important
+The login, User ID, coins and subscription selection are frontend/localStorage demo features. They are not secure authentication or real payments. For production, connect a backend/auth provider and Razorpay/Stripe (or another payment gateway), and move coin balances and subscription status to the server.
 
-## Included
-- 16-tool responsive homepage
-- Tool search and category filters
-- Professional responsive UI
-- Light/dark mode
-- Working password generator
-- QR code generator UI
-- Upload modal for all other tools
-- GitHub Pages-friendly static structure
+AI Background Remover, Photo Colorize and PDF processing still require a real processing API/library.
 
-## Production note
-AI Background Remover, AI Upscaler, Photo Colorize/Enhancer, PDF conversion/compression/merge/split and Barcode generation need a processing engine/API to be connected. The frontend is intentionally structured so those endpoints can be added without changing the overall design.
-
-## Run
-Open `index.html` locally, or upload the three files to a GitHub repository and enable GitHub Pages.
-
-## Suggested production architecture
-Frontend: GitHub Pages / static hosting
-Backend: serverless API or VPS
-Storage: temporary object storage only when required
-AI: background removal/upscaling/colorization API or self-hosted models
-PDF: server-side PDF processing/conversion
+GitHub Pages
+Replace index.html, style.css and app.js in your pixel-refine repository, then wait for GitHub Pages to rebuild.
