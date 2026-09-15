@@ -5,486 +5,664 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pixel Refine — Image & PDF Tools</title>
 <meta name="description" content="Pixel Refine — fast online image, PDF and utility tools.">
-<link rel="stylesheet" href="style.css">
+<meta name="version" content="2026.09.15-pro">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+:root{--border:#e7e9ef;--soft:#f4f3ff;--bg:#f7f8fc;--card:#fff;--text:#111827;--muted:#667085;--line:#e7e9ef;--accent:#635bff;--accent2:#8b5cf6;--shadow:0 16px 45px rgba(17,24,39,.08)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text)}
+.nav{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 6%;background:rgba(255,255,255,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-weight:600}.brand b{font-weight:800}.logo{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:800}
+nav{display:flex;gap:28px}nav a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:600}.theme{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 11px;cursor:pointer}
+.hero{max-width:1050px;text-align:center;margin:0 auto;padding:92px 20px 72px}.badge{display:inline-block;padding:8px 13px;border:1px solid #dedcff;background:#f1f0ff;color:#5149d8;border-radius:999px;font-size:12px;font-weight:700}
+h1{font-size:clamp(48px,8vw,82px);letter-spacing:-.065em;line-height:.98;margin:22px 0 20px}h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;color:transparent}.hero p{max-width:680px;margin:0 auto;color:var(--muted);font-size:18px;line-height:1.7}.hero-actions{display:flex;justify-content:center;gap:12px;margin-top:30px}.primary,.secondary{padding:13px 20px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px}.primary{background:var(--text);color:white}.secondary{border:1px solid var(--line);color:var(--text);background:var(--card)}
+.search-wrap{max-width:1080px;margin:0 auto;padding:0 20px}.search{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:16px;padding:0 18px;display:flex;align-items:center;gap:10px;color:#98a2b3}.search input{border:0;outline:0;width:100%;padding:17px 0;font:inherit;background:transparent;color:var(--text)}.chips{display:flex;gap:8px;margin:18px 0 38px}.chips button{border:1px solid var(--line);background:var(--card);padding:8px 13px;border-radius:999px;color:var(--muted);cursor:pointer;font-weight:600}.chips button.active{background:var(--text);color:white;border-color:var(--text)}
+.tools-section{max-width:1080px;margin:auto;padding:0 20px 80px}.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px}small{font-size:11px;font-weight:800;letter-spacing:.13em;color:var(--accent)}h2{font-size:32px;letter-spacing:-.04em;margin:7px 0 0}.section-head span{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.tool{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;min-height:175px;display:flex;flex-direction:column;cursor:pointer;transition:.2s;box-shadow:0 5px 20px rgba(17,24,39,.025)}.tool:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#d7d3ff}.icon{font-size:28px;margin-bottom:18px}.tool h3{font-size:15px;margin:0 0 7px}.tool p{font-size:12px;color:var(--muted);line-height:1.5;margin:0}.tag{margin-top:auto;padding-top:14px;font-size:10px;font-weight:800;color:var(--accent);text-transform:uppercase}
+.features{background:#111827;color:white;padding:78px max(20px,calc((100% - 1080px)/2));display:grid;grid-template-columns:1fr 1fr;gap:70px}.features small{color:#a5b4fc}.features h2{font-size:40px}.features p{color:#aeb6c6;line-height:1.8;max-width:520px}.feature-list{display:grid;gap:12px}.feature-list article{border:1px solid #293244;border-radius:16px;padding:20px;display:grid;grid-template-columns:34px 1fr;gap:3px 10px}.feature-list span{grid-column:2;color:#aeb6c6;font-size:13px}
+.faq{max-width:900px;margin:auto;padding:80px 20px}.faq h2{margin-bottom:25px}.faq details{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px;margin:10px 0}.faq summary{font-weight:700;cursor:pointer}.faq p{color:var(--muted);line-height:1.7;font-size:14px}
+footer{border-top:1px solid var(--line);padding:28px 6%;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.58);z-index:20;align-items:center;justify-content:center;padding:18px}.modal.show{display:flex}.modal-card{background:var(--card);width:min(620px,100%);border-radius:22px;padding:28px;position:relative;box-shadow:0 30px 90px rgba(0,0,0,.25)}.close{position:absolute;right:18px;top:14px;border:0;background:transparent;font-size:28px;cursor:pointer;color:var(--muted)}.modal-card h2{margin-right:35px}.drop{margin-top:22px;border:2px dashed #d9dbe4;border-radius:18px;padding:35px;text-align:center}.drop input{margin-top:14px}.action{margin-top:18px;padding:12px 16px;border:0;border-radius:10px;background:var(--text);color:white;font-weight:700;cursor:pointer}
+.dark{--border:#263047;--soft:#171e30;--bg:#0b1020;--card:#12182a;--text:#f5f7fb;--muted:#9ba6ba;--line:#263047}.dark .nav{background:rgba(11,16,32,.84)}.dark .badge{background:#1a1939;border-color:#33306b}.dark .primary{background:white;color:#111827}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.features{grid-template-columns:1fr;gap:30px}.features h2{font-size:32px}nav{display:none}}
+@media(max-width:520px){.hero{padding-top:65px}.hero p{font-size:15px}.hero-actions{flex-direction:column}.grid{grid-template-columns:1fr 1fr;gap:9px}.tool{padding:15px;min-height:155px}.tool h3{font-size:13px}.icon{font-size:23px;margin-bottom:13px}footer{display:block}footer p{margin-top:15px}}
+.upload-icon{font-size:30px;margin-bottom:8px}.drop{transition:.2s}.drop.dragging{border-color:var(--accent);background:rgba(99,91,255,.06)}.file-info{margin:14px auto 0;padding:9px 12px;border-radius:10px;background:var(--bg);font-size:12px;color:var(--text);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.preview-box{margin:14px auto 0;min-height:0}.preview-box img{display:block;max-width:100%;max-height:230px;margin:auto;border-radius:12px;border:1px solid var(--line);object-fit:contain}.doc-preview{display:flex;flex-direction:column;align-items:center;gap:5px;padding:18px;color:var(--muted);font-size:28px}.doc-preview span{font-size:12px}.status{min-height:20px;margin-top:13px;color:var(--muted);font-size:12px}.success-dot,.error-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#16a34a;margin-right:5px}.error-dot{background:#dc2626}.control-label{display:flex;justify-content:space-between;margin:16px 0 7px;font-size:13px;font-weight:700}.control-range{width:100%}.control-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.control-row label{font-size:12px;font-weight:700;color:var(--muted)}.control-row input,.select{display:block;width:100%;margin-top:6px;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font:inherit}.select{margin-top:12px}.drop input[type=file]{max-width:100%}
+.tool-modal-head{display:flex;gap:14px;align-items:flex-start;padding-right:35px}.tool-modal-head .icon{margin:0;font-size:34px}.tool-modal-head h2{margin:0 0 5px;font-size:27px}.tool-modal-head p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}.upload-hint{color:var(--muted);font-size:13px}.drop input[type=file]{display:block;margin:16px auto 0}.control-group{margin-top:15px}.control-group label,.control-row label{display:block;color:var(--muted);font-size:12px;font-weight:700}.control-group label output{float:right;color:var(--text)}.control-group input[type=text],.control-group input[type=number],.control-group select,.control-row input,.control-row select{width:100%;margin-top:7px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font:inherit;outline:none}.control-group input[type=text]:focus,.control-group input[type=number]:focus,.control-group select:focus,.control-row input:focus{border-color:var(--accent)}.control-group input[type=range]{width:100%;margin-top:10px;accent-color:var(--accent)}.control-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px}.check{display:flex;align-items:center;gap:8px;margin-top:13px;font-size:12px;color:var(--muted);font-weight:600}.check input{accent-color:var(--accent)}.ratio-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px}.ratio{border:1px solid var(--line);background:var(--card);color:var(--muted);padding:8px 11px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer}.ratio:hover,.ratio.active{border-color:var(--accent);color:var(--accent);background:rgba(99,91,255,.08)}.live-size{margin-top:12px;padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:10px;text-align:center;font-size:12px;font-weight:700;color:var(--text)}.info-panel{display:flex;flex-direction:column;gap:5px;margin-top:15px;padding:13px;border:1px solid var(--line);background:var(--bg);border-radius:12px;font-size:12px;color:var(--muted);line-height:1.5}.info-panel b{color:var(--text)}.action{width:100%;margin-top:16px;min-height:46px;font-size:13px}.action:disabled{opacity:.45;cursor:not-allowed}.secondary-action{background:var(--card);color:var(--text);border:1px solid var(--line)}.password-box{display:flex;gap:7px;margin-top:15px}.password-box input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--bg);color:var(--text);font-family:monospace}.password-box button{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:10px;padding:0 13px;font-weight:700}.qr-out{text-align:center;margin-top:18px}.qr-out img{max-width:260px;width:100%;border-radius:12px;border:1px solid var(--line);background:#fff;padding:8px}.download-link{display:block;margin-top:10px;color:var(--accent);font-size:12px;font-weight:700;text-decoration:none}.barcode-out{margin-top:18px;text-align:center;padding:18px;border:1px solid var(--line);border-radius:12px;background:#fff;overflow:auto}.barcode-bars{display:flex;justify-content:center;align-items:stretch;height:90px;gap:1px}.barcode-bars i{display:block;height:100%;background:#111}.barcode-bars i.narrow{width:2px}.barcode-bars i.wide{width:6px}.barcode-bars b{width:3px}.barcode-out strong{display:block;color:#111;margin-top:8px;letter-spacing:2px}.dark .barcode-out{background:#fff}.dark .barcode-out strong{color:#111}
+@media(max-width:520px){.modal-card{padding:20px}.drop{padding:24px 15px}.tool-modal-head h2{font-size:22px}.control-row{grid-template-columns:1fr}.ratio{padding:7px 9px}}
+.nav-actions{display:flex;align-items:center;gap:8px;margin-left:auto}.coin-pill,.account-btn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:12px;padding:9px 12px;font-weight:800;cursor:pointer}.coin-pill{color:#b77900;background:#fff7d6;border-color:#f1d36b}.dark .coin-pill{color:#ffe38a;background:#3a3011;border-color:#66531b}.account-btn{max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dark .account-btn{background:#1b2230;color:#f5f7fb;border-color:#3a4558}
+.pricing{padding:70px 0}.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.plan{position:relative;padding:26px;border:1px solid var(--border);border-radius:22px;background:var(--card);box-shadow:0 10px 30px rgba(0,0,0,.06)}.plan.featured{border-color:#7c5cff;box-shadow:0 16px 40px rgba(124,92,255,.16)}.plan-badge{display:inline-block;font-size:11px;font-weight:900;letter-spacing:.08em;padding:6px 9px;border-radius:999px;background:var(--soft);color:var(--accent)}.plan h3{font-size:23px;margin:14px 0 7px}.plan>strong{font-size:34px}.plan>strong span{font-size:14px;font-weight:700}.plan p{color:var(--muted)}.plan ul{padding-left:19px;line-height:2;color:var(--muted);min-height:110px}.plan-btn{width:100%}.footer-links{display:flex;gap:14px;align-items:center}.footer-links button{background:none;border:0;color:var(--muted);cursor:pointer;font:inherit}
+.action{background:linear-gradient(135deg,#7c5cff,#5b7cff)!important;color:#fff!important;border:1px solid rgba(255,255,255,.2)!important;box-shadow:0 8px 22px rgba(92,92,255,.25);font-weight:900;min-height:46px}.dark .action{background:linear-gradient(135deg,#9a82ff,#6d8cff)!important;color:#fff!important;box-shadow:0 8px 24px rgba(113,102,255,.38)}.action:disabled{opacity:.45;filter:saturate(.6);cursor:not-allowed;box-shadow:none}.secondary,.secondary-action{color:var(--text)!important;background:var(--card)!important;border:1px solid var(--border)!important;font-weight:800}.dark .secondary,.dark .secondary-action{background:#1d2533!important;color:#fff!important;border-color:#465267!important}
+.eraser-board{margin:16px 0;padding:12px;border:1px solid var(--border);border-radius:16px;background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 50%/20px 20px;overflow:auto}.dark .eraser-board{background:repeating-conic-gradient(#313846 0 25%,#222936 0 50%) 50%/20px 20px}.eraser-board canvas{display:block;max-width:100%;height:auto;margin:auto;touch-action:none;cursor:crosshair;border-radius:10px}.eraser-help{font-size:12px;color:var(--muted);text-align:center;padding:8px}.utility-tabs{display:flex;gap:8px;margin:16px 0}.account-panel,.settings-panel,.login-panel{padding:8px}.profile-avatar{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:28px;font-weight:900;background:linear-gradient(135deg,#7c5cff,#5b7cff);color:#fff;margin-bottom:12px}.account-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.account-stats div{padding:14px;border:1px solid var(--border);border-radius:15px;background:var(--soft);display:flex;flex-direction:column;gap:4px}.account-stats b{font-size:20px}.account-stats span,.muted,.small-note{color:var(--muted)}.account-panel .action,.account-panel .secondary{width:100%;margin-top:10px}.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:9999;padding:13px 18px;border-radius:14px;background:#111827;color:#fff;box-shadow:0 15px 40px rgba(0,0,0,.25);transition:.25s;font-weight:700;max-width:min(90vw,520px);text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:850px){.nav nav{display:none}.pricing-grid{grid-template-columns:1fr}.nav-actions{gap:5px}.account-btn{max-width:110px}.coin-pill,.account-btn{padding:8px 9px}}
+</style>
 </head>
-
 <body>
-
 <header class="nav">
-
-  <a class="brand" href="#">
-    <span class="logo">P</span>
-    <span>Pixel <b>Refine</b></span>
-  </a>
-
-  <nav>
-    <a href="#tools">Tools</a>
-    <a href="#features">Features</a>
-    <a href="#pricing">Plans</a>
-    <a href="#faq">FAQ</a>
-  </nav>
-
-  <div class="nav-actions">
-
-    <button class="coin-pill" id="coinPill" title="Daily coins">
-      🪙 <span id="coinCount">10</span>
-    </button>
-
-    <button class="account-btn" id="accountBtn">
-      Login
-    </button>
-
-    <button class="theme" id="themeBtn" aria-label="Toggle theme">
-      ☾
-    </button>
-
-  </div>
-
+<a class="brand" href="#"><span class="logo">P</span><span>Pixel <b>Refine</b></span></a>
+<nav><a href="#tools">Tools</a><a href="#features">Features</a><a href="#pricing">Plans</a><a href="#faq">FAQ</a></nav>
+<div class="nav-actions"><button class="coin-pill" id="coinPill" title="Daily coins">🪙 <span id="coinCount">10</span></button><button class="account-btn" id="accountBtn">Login</button><button class="theme" id="themeBtn" aria-label="Toggle theme">☾</button></div>
 </header>
 
-
 <main>
-
-<!-- HERO SECTION -->
-
 <section class="hero">
-
-  <div class="badge">
-    ✦ 17 professional tools in one place
-  </div>
-
-  <h1>
-    Edit. Convert. <span>Refine.</span>
-  </h1>
-
-  <p>
-    Simple, fast and professional tools for your images,
-    PDFs and everyday digital tasks.
-  </p>
-
-  <div class="hero-actions">
-
-    <a class="primary" href="#tools">
-      Explore Tools →
-    </a>
-
-    <a class="secondary" href="#features">
-      Why Pixel Refine?
-    </a>
-
-  </div>
-
+<div class="badge">✦ 25+ professional creator tools in one place</div>
+<h1>Edit. Convert. <span>Refine.</span></h1>
+<p>Simple, fast and professional tools for your images, PDFs and everyday digital tasks.</p>
+<div class="hero-actions"><a class="primary" href="#tools">Explore Tools →</a><a class="secondary" href="#features">Why Pixel Refine?</a></div>
 </section>
-
-
-<!-- SEARCH -->
 
 <section class="search-wrap">
-
-  <div class="search">
-    ⌕
-    <input
-      id="search"
-      placeholder="Search a tool… (e.g. compress, PDF, QR)"
-      autocomplete="off"
-    >
-  </div>
-
-  <div class="chips">
-
-    <button data-filter="all" class="active">
-      All
-    </button>
-
-    <button data-filter="image">
-      Image
-    </button>
-
-    <button data-filter="pdf">
-      PDF
-    </button>
-
-    <button data-filter="utility">
-      Utility
-    </button>
-
-  </div>
-
+<div class="search">⌕ <input id="search" placeholder="Search a tool… (e.g. compress, PDF, QR)" autocomplete="off"></div>
+<div class="chips"><button data-filter="all" class="active">All</button><button data-filter="image">Image</button><button data-filter="pdf">PDF</button><button data-filter="utility">Utility</button></div>
 </section>
-
-
-<!-- TOOLS -->
 
 <section id="tools" class="tools-section">
-
-  <div class="section-head">
-
-    <div>
-      <small>TOOLS</small>
-      <h2>Everything you need</h2>
-    </div>
-
-    <span id="count"></span>
-
-  </div>
-
-  <div class="grid" id="toolGrid"></div>
-
+<div class="section-head"><div><small>TOOLS</small><h2>Everything you need</h2></div><span id="count"></span></div>
+<div class="grid" id="toolGrid"></div>
 </section>
-
-
-<!-- FEATURES -->
 
 <section id="features" class="features">
-
-  <div>
-
-    <small>BUILT FOR YOU</small>
-
-    <h2>
-      Fast tools, without the clutter.
-    </h2>
-
-    <p>
-      Pixel Refine is designed around a clean workflow:
-      choose a tool, upload or enter your data,
-      preview the result, and download.
-    </p>
-
-  </div>
-
-
-  <div class="feature-list">
-
-    <article>
-      ⚡
-      <b>Fast workflow</b>
-      <span>
-        Focused interfaces with fewer clicks.
-      </span>
-    </article>
-
-    <article>
-      🔒
-      <b>Privacy-first design</b>
-      <span>
-        Processing can be kept in your browser
-        where supported.
-      </span>
-    </article>
-
-    <article>
-      📱
-      <b>Works everywhere</b>
-      <span>
-        Responsive on phones, tablets and desktops.
-      </span>
-    </article>
-
-  </div>
-
+<div><small>BUILT FOR YOU</small><h2>Fast tools, without the clutter.</h2><p>Pixel Refine is designed around a clean workflow: choose a tool, upload or enter your data, preview the result, and download.</p></div>
+<div class="feature-list">
+<article>⚡ <b>Fast workflow</b><span>Focused interfaces with fewer clicks.</span></article>
+<article>🔒 <b>Privacy-first design</b><span>Processing can be kept in your browser where supported.</span></article>
+<article>📱 <b>Works everywhere</b><span>Responsive on phones, tablets and desktops.</span></article>
+</div>
 </section>
 
+<section id="pricing" class="pricing"><div class="section-head"><div><small>SUBSCRIPTION</small><h2>Simple plans for creators</h2></div></div><div class="pricing-grid"><article class="plan"><span class="plan-badge">FREE</span><h3>Free</h3><strong>₹0</strong><p>10 daily coins</p><ul><li>Browser-based image tools</li><li>Standard exports</li><li>Daily login/entry reward</li></ul><button class="secondary plan-btn" data-plan="Free">Current plan</button></article><article class="plan featured"><span class="plan-badge">STARTER</span><h3>Starter Monthly</h3><strong>₹50<span>/month</span></strong><p>300 coins / month</p><ul><li>Higher limits</li><li>Priority processing</li><li>Premium features ready</li></ul><button class="primary plan-btn" data-plan="Starter Monthly">Choose ₹50</button></article><article class="plan"><span class="plan-badge">POPULAR</span><h3>Pro Monthly</h3><strong>₹100<span>/month</span></strong><p>800 coins / month</p><ul><li>More monthly coins</li><li>Priority processing</li><li>Premium features ready</li></ul><button class="primary plan-btn" data-plan="Pro Monthly">Choose ₹100</button></article><article class="plan"><span class="plan-badge">BEST VALUE</span><h3>Pro Yearly</h3><strong>₹500<span>/year</span></strong><p>5,000 coins / year</p><ul><li>Everything in Pro</li><li>Better yearly value</li><li>Priority support</li></ul><button class="primary plan-btn" data-plan="Pro Yearly">Choose ₹500</button></article><article class="plan"><span class="plan-badge">MAX</span><h3>Max Yearly</h3><strong>₹1,000<span>/year</span></strong><p>12,000 coins / year</p><ul><li>Maximum coin allowance</li><li>Priority processing</li><li>Priority support</li></ul><button class="primary plan-btn" data-plan="Max Yearly">Choose ₹1,000</button></article></div></section>
 
-<!-- PRICING -->
-
-<section id="pricing" class="pricing">
-
-  <div class="section-head">
-
-    <div>
-
-      <small>SUBSCRIPTION</small>
-
-      <h2>
-        Simple plans for creators
-      </h2>
-
-    </div>
-
-  </div>
-
-
-  <div class="pricing-grid">
-
-
-    <!-- FREE -->
-
-    <article class="plan">
-
-      <span class="plan-badge">
-        FREE
-      </span>
-
-      <h3>
-        Free
-      </h3>
-
-      <strong>
-        ₹0
-      </strong>
-
-      <p>
-        10 daily coins
-      </p>
-
-      <ul>
-
-        <li>
-          Browser-based image tools
-        </li>
-
-        <li>
-          Standard exports
-        </li>
-
-        <li>
-          Daily coin refresh
-        </li>
-
-      </ul>
-
-      <button
-        class="secondary plan-btn"
-        data-plan="Free"
-      >
-        Current plan
-      </button>
-
-    </article>
-
-
-    <!-- PRO MONTHLY -->
-
-    <article class="plan featured">
-
-      <span class="plan-badge">
-        POPULAR
-      </span>
-
-      <h3>
-        Pro Monthly
-      </h3>
-
-      <strong>
-        ₹50<span>/month</span>
-      </strong>
-
-      <p>
-        100 coins / month
-      </p>
-
-      <ul>
-
-        <li>
-          Higher limits
-        </li>
-
-        <li>
-          Priority processing
-        </li>
-
-        <li>
-          Premium features ready
-        </li>
-
-      </ul>
-
-      <button
-        class="primary plan-btn"
-        data-plan="Pro Monthly"
-      >
-        Choose Pro
-      </button>
-
-    </article>
-
-
-    <!-- PRO YEARLY -->
-
-    <article class="plan">
-
-      <span class="plan-badge">
-        BEST VALUE
-      </span>
-
-      <h3>
-        Pro Yearly
-      </h3>
-
-      <strong>
-        ₹500<span>/year</span>
-      </strong>
-
-      <p>
-        1200 coins / year
-      </p>
-
-      <ul>
-
-        <li>
-          Everything in Pro
-        </li>
-
-        <li>
-          Better value
-        </li>
-
-        <li>
-          Priority support
-        </li>
-
-      </ul>
-
-      <button
-        class="primary plan-btn"
-        data-plan="Pro Yearly"
-      >
-        Choose Yearly
-      </button>
-
-    </article>
-
-  </div>
-
+<section id="faq" class="faq"><small>FAQ</small><h2>Frequently asked questions</h2>
+<details><summary>Is Pixel Refine free?</summary><p>The starter version is free. Premium/API-powered processing can be connected later.</p></details>
+<details><summary>Do you store uploaded files?</summary><p>The frontend is designed to support browser-side processing for suitable tools. Server/API tools can be configured with explicit privacy policies.</p></details>
+<details><summary>Can more tools be added?</summary><p>Yes. The tool registry is structured so additional image, PDF and AI tools can be added without redesigning the homepage.</p></details>
 </section>
-
-
-<!-- FAQ -->
-
-<section id="faq" class="faq">
-
-  <small>
-    FAQ
-  </small>
-
-  <h2>
-    Frequently asked questions
-  </h2>
-
-
-  <details>
-
-    <summary>
-      Is Pixel Refine free?
-    </summary>
-
-    <p>
-      The starter version is free.
-      Premium/API-powered processing can
-      be connected later.
-    </p>
-
-  </details>
-
-
-  <details>
-
-    <summary>
-      Do you store uploaded files?
-    </summary>
-
-    <p>
-      The frontend is designed to support
-      browser-side processing for suitable tools.
-      Server/API tools can be configured with
-      explicit privacy policies.
-    </p>
-
-  </details>
-
-
-  <details>
-
-    <summary>
-      Can more tools be added?
-    </summary>
-
-    <p>
-      Yes. The tool registry is structured so
-      additional image, PDF and AI tools can be
-      added without redesigning the homepage.
-    </p>
-
-  </details>
-
-</section>
-
 </main>
 
+<footer><div class="brand"><span class="logo">P</span><span>Pixel <b>Refine</b></span></div><p>© 2026 Pixel Refine. All rights reserved.</p><div class="footer-links"><a href="#pricing">Plans</a><a href="#faq">Help</a><button id="settingsBtn">Settings</button></div></footer>
 
-<!-- FOOTER -->
+<d
+<script>
+const tools=[
+{id:'compress',name:'Image Compressor',desc:'Reduce image size while keeping quality.',icon:'🗜️',cat:'image',accept:'image/*'},
+{id:'resize',name:'Image Resizer',desc:'Resize images to exact dimensions.',icon:'↔️',cat:'image',accept:'image/*'},
+{id:'crop',name:'Image Cropper',desc:'Crop photos with professional aspect ratios.',icon:'✂️',cat:'image',accept:'image/*'},
+{id:'convert',name:'Image Converter',desc:'Convert PNG, JPG and WebP images.',icon:'🔄',cat:'image',accept:'image/*'},
+{id:'upscale',name:'Image Upscaler (HD)',desc:'Increase image dimensions for sharper output.',icon:'✨',cat:'image',accept:'image/*'},
+{id:'colorize',name:'Photo Colorize',desc:'Prepare black-and-white photos for colorization.',icon:'🎨',cat:'image',accept:'image/*'},
+{id:'enhance',name:'Photo Enhancer',desc:'Improve brightness, contrast and sharpness.',icon:'🌟',cat:'image',accept:'image/*'},
+{id:'eraser',name:'Magic Eraser',desc:'Erase selected areas from an image.',icon:'🪄',cat:'image',accept:'image/*'},
+{id:'expand',name:'Image Size Expander',desc:'Expand canvas size around your image.',icon:'⛶',cat:'image',accept:'image/*'},
+{id:'rotate',name:'Image Rotator & Flipper',desc:'Rotate and flip images instantly.',icon:'🔃',cat:'image',accept:'image/*'},
+{id:'watermark',name:'Image Watermark',desc:'Add a text watermark to your image.',icon:'💧',cat:'image',accept:'image/*'},
+{id:'imgpdf',name:'Image to PDF',desc:'Convert an image into a PDF file.',icon:'🖼️',cat:'pdf',accept:'image/*'},
+{id:'pdfjpg',name:'PDF to JPG',desc:'Convert PDF pages into JPG previews.',icon:'📄',cat:'pdf',accept:'.pdf,application/pdf'},
+{id:'pdfextract',name:'PDF Page Extractor',desc:'Extract selected pages from a PDF.',icon:'📑',cat:'pdf',accept:'.pdf,application/pdf'},
+{id:'pdfnumber',name:'PDF Page Numbering',desc:'Add page-numbering instructions to PDF workflow.',icon:'🔢',cat:'pdf',accept:'.pdf,application/pdf'},
+{id:'pdfprotect',name:'PDF Protect',desc:'Prepare a PDF for password protection.',icon:'🔐',cat:'pdf',accept:'.pdf,application/pdf'},
+{id:'pdfcompress',name:'PDF Compressor',desc:'Compress PDF files with a processing endpoint.',icon:'🗜️',cat:'pdf',accept:'.pdf,application/pdf'},
+{id:'wordpdf',name:'Word to PDF',desc:'Convert Word documents into PDF.',icon:'📝',cat:'pdf',accept:'.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'},
+{id:'pdfword',name:'PDF to Word',desc:'Convert PDF documents into Word.',icon:'📃',cat:'pdf',accept:'.pdf,application/pdf'},
+{id:'merge',name:'PDF Merger',desc:'Combine multiple PDF files.',icon:'🔗',cat:'pdf',accept:'.pdf,application/pdf',multiple:true},
+{id:'split',name:'PDF Splitter',desc:'Split PDF pages into separate files.',icon:'✂️',cat:'pdf',accept:'.pdf,application/pdf'},
+{id:'qr',name:'QR Code Generator',desc:'Create a QR code from any text or URL.',icon:'▦',cat:'utility'},
+{id:'password',name:'Password Generator',desc:'Generate strong secure passwords.',icon:'🔑',cat:'utility'},
+{id:'barcode',name:'Barcode Generator',desc:'Create a simple barcode from text.',icon:'▥',cat:'utility'}
+];
 
-<footer>
+const advanced=[
+{id:'bg',name:'AI Background Remover',desc:'Remove image backgrounds using an AI processing endpoint.',icon:'🧍',cat:'image',accept:'image/*'},
+{id:'barcode2',name:'Barcode Generator',desc:'Create a barcode from numbers or text.',icon:'▥',cat:'utility'},
+{id:'metadata',name:'Image Metadata Cleaner',desc:'Remove common metadata by re-encoding the image.',icon:'🧹',cat:'image',accept:'image/*'}
+];
 
-  <div class="brand">
+const allTools=[...tools,...advanced.filter(x=>!tools.some(t=>t.id===x.id))];
 
-    <span class="logo">
-      P
-    </span>
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+const modal=$('#modal');
+const modalContent=$('#modalContent');
+const toastEl=$('#toast');
 
-    <span>
-      Pixel <b>Refine</b>
-    </span>
+function toast(msg){
+ toastEl.textContent=msg;
+ toastEl.classList.add('show');
+ clearTimeout(window.__toast);
+ window.__toast=setTimeout(()=>toastEl.classList.remove('show'),2600);
+}
 
+function renderTools(filter='all',query=''){
+ const grid=$('#toolGrid');
+ const q=query.trim().toLowerCase();
+ const list=allTools.filter(t=>
+   (filter==='all'||t.cat===filter) &&
+   (!q||(t.name+' '+t.desc).toLowerCase().includes(q))
+ );
+ grid.innerHTML=list.map(t=>`
+ <article class="tool" data-id="${t.id}">
+   <div class="icon">${t.icon}</div>
+   <h3>${t.name}</h3>
+   <p>${t.desc}</p>
+   <div class="tag">${t.cat}</div>
+ </article>`).join('');
+ $('#count').textContent=list.length+' tools';
+ $$('.tool').forEach(el=>el.addEventListener('click',()=>openTool(el.dataset.id)));
+}
+
+renderTools();
+
+$$('.chips button').forEach(btn=>{
+ btn.addEventListener('click',()=>{
+   $$('.chips button').forEach(x=>x.classList.remove('active'));
+   btn.classList.add('active');
+   renderTools(btn.dataset.filter,$('#search').value);
+ });
+});
+
+$('#search').addEventListener('input',()=>{
+ const active=$('.chips button.active')?.dataset.filter||'all';
+ renderTools(active,$('#search').value);
+});
+
+$('#themeBtn').addEventListener('click',()=>{
+ document.body.classList.toggle('dark');
+ localStorage.setItem('pixelTheme',document.body.classList.contains('dark')?'dark':'light');
+});
+
+if(localStorage.getItem('pixelTheme')==='dark')document.body.classList.add('dark');
+
+$('#close').addEventListener('click',closeModal);
+modal.addEventListener('click',e=>{if(e.target===modal)closeModal()});
+
+function closeModal(){
+ modal.classList.remove('show');
+ modalContent.innerHTML='';
+}
+
+function getCoins(){
+ return Number(localStorage.getItem('pixelCoins')||10);
+}
+
+function setCoins(n){
+ const v=Math.max(0,Number(n)||0);
+ localStorage.setItem('pixelCoins',String(v));
+ $('#coinCount').textContent=v;
+}
+
+function spendCoin(){
+ if(getCoins()<2){
+   toast('🪙 You need 2 coins for this action.');
+   return false;
+ }
+ setCoins(getCoins()-2);
+ return true;
+}
+
+function dailyCoins(){
+ const today=new Date().toISOString().slice(0,10);
+ const key='pixelDailyReward';
+ if(localStorage.getItem(key)!==today){
+   setCoins(getCoins()+10);
+   localStorage.setItem(key,today);
+   setTimeout(()=>toast('🎁 10 daily coins added!'),300);
+ }
+}
+
+setCoins(getCoins());
+dailyCoins();
+
+function openTool(id){
+ const t=allTools.find(x=>x.id===id);
+ if(!t)return;
+
+ modal.classList.add('show');
+
+ if(id==='qr'){
+   modalContent.innerHTML=qrUI(t);
+   bindQR();
+   return;
+ }
+
+ if(id==='password'){
+   modalContent.innerHTML=passwordUI(t);
+   bindPassword();
+   return;
+ }
+
+ if(id==='barcode'||id==='barcode2'){
+   modalContent.innerHTML=barcodeUI(t);
+   bindBarcode();
+   return;
+ }
+
+ if(id==='eraser'){
+   modalContent.innerHTML=eraserUI(t);
+   bindEraser();
+   return;
+ }
+
+ modalContent.innerHTML=`
+ <div class="tool-modal-head">
+   <div class="icon">${t.icon}</div>
+   <div>
+     <h2>${t.name}</h2>
+     <p>${t.desc}</p>
+   </div>
+ </div>
+ <div class="drop" id="drop">
+   <div class="upload-icon">☁️</div>
+   <div class="upload-hint">Select or drop your file here</div>
+   <input id="fileInput" type="file" ${t.multiple?'multiple':''} accept="${t.accept||'*/*'}">
+   <div id="fileInfo"></div>
+   <div id="preview" class="preview-box"></div>
+ </div>
+ <div id="controls"></div>
+ <div id="status" class="status"></div>
+ <button class="action" id="runBtn" disabled>⚡ Process — 2 coins</button>
+ `;
+
+ const input=$('#fileInput');
+ const drop=$('#drop');
+
+ input.addEventListener('change',()=>handleFiles(input.files,t));
+ ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{
+   e.preventDefault();drop.classList.add('dragging');
+ }));
+ ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{
+   e.preventDefault();drop.classList.remove('dragging');
+ }));
+ drop.addEventListener('drop',e=>{
+   if(e.dataTransfer.files?.length){
+     input.files=e.dataTransfer.files;
+     handleFiles(e.dataTransfer.files,t);
+   }
+ });
+
+ $('#runBtn').addEventListener('click',()=>processTool(t));
+
+ if(['resize','crop','upscale','expand','rotate'].includes(id)){
+   buildImageControls(id);
+ }
+}
+
+let currentFiles=[];
+let currentTool=null;
+
+function handleFiles(files,t){
+ currentFiles=[...files];
+ currentTool=t;
+ const info=$('#fileInfo');
+ const preview=$('#preview');
+ if(!files.length){
+   $('#runBtn').disabled=true;
+   return;
+ }
+
+ info.innerHTML=files.map(f=>`<div class="file-info">📎 ${escapeHtml(f.name)} — ${formatBytes(f.size)}</div>`).join('');
+
+ preview.innerHTML='';
+
+ if(t.accept?.includes('image') && files[0].type.startsWith('image/')){
+   const img=document.createElement('img');
+   img.alt='Preview';
+   img.src=URL.createObjectURL(files[0]);
+   preview.appendChild(img);
+ }
+
+ if(t.cat==='pdf'||files[0].type==='application/pdf'){
+   preview.innerHTML=`<div class="doc-preview">📄<span>${files.length} PDF file${files.length>1?'s':''} selected</span></div>`;
+ }
+
+ $('#runBtn').disabled=false;
+ $('#status').innerHTML=`<span class="success-dot"></span>File ready`;
+}
+
+function formatBytes(bytes){
+ if(!bytes)return '0 B';
+ const units=['B','KB','MB','GB'];
+ const i=Math.floor(Math.log(bytes)/Math.log(1024));
+ return (bytes/Math.pow(1024,i)).toFixed(i?1:0)+' '+units[i];
+}
+
+function escapeHtml(s){
+ return String(s).replace(/[&<>"']/g,m=>({
+ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+ }[m]));
+}
+
+function buildImageControls(id){
+ const c=$('#controls');
+
+ if(id==='resize'){
+  c.innerHTML=`
+  <div class="control-group">
+   <label>Width (px) <output id="wOut">Auto</output></label>
+   <input id="width" type="number" min="1" placeholder="Width">
   </div>
-
-
-  <p>
-    © 2026 Pixel Refine. All rights reserved.
-  </p>
-
-
-  <div class="footer-links">
-
-    <a href="#pricing">
-      Plans
-    </a>
-
-    <a href="#faq">
-      Help
-    </a>
-
-    <button id="settingsBtn">
-      Settings
-    </button>
-
+  <div class="control-group">
+   <label>Height (px) <output id="hOut">Auto</output></label>
+   <input id="height" type="number" min="1" placeholder="Height">
   </div>
+  <label class="check"><input id="lock" type="checkbox" checked> Keep aspect ratio</label>
+  <div class="ratio-grid">
+   <button class="ratio active" data-ratio="original">Original</button>
+   <button class="ratio" data-ratio="1:1">1:1</button>
+   <button class="ratio" data-ratio="2:3">2:3</button>
+   <button class="ratio" data-ratio="3:2">3:2</button>
+   <button class="ratio" data-ratio="4:5">4:5</button>
+   <button class="ratio" data-ratio="5:4">5:4</button>
+   <button class="ratio" data-ratio="3:4">3:4</button>
+   <button class="ratio" data-ratio="4:3">4:3</button>
+   <button class="ratio" data-ratio="9:16">9:16</button>
+   <button class="ratio" data-ratio="16:9">16:9</button>
+  </div>`;
+  bindResizeControls();
+ }
 
-</footer>
+ if(id==='crop'){
+  c.innerHTML=`
+  <div class="control-group">
+   <label>Crop aspect ratio</label>
+   <div class="ratio-grid">
+    <button class="ratio active" data-crop="free">Free</button>
+    <button class="ratio" data-crop="1:1">1:1</button>
+    <button class="ratio" data-crop="2:3">2:3</button>
+    <button class="ratio" data-crop="3:2">3:2</button>
+    <button class="ratio" data-crop="4:5">4:5</button>
+    <button class="ratio" data-crop="5:4">5:4</button>
+    <button class="ratio" data-crop="3:4">3:4</button>
+    <button class="ratio" data-crop="4:3">4:3</button>
+    <button class="ratio" data-crop="9:16">9:16</button>
+    <button class="ratio" data-crop="16:9">16:9</button>
+   </div>
+  </div>`;
+ }
 
+ if(id==='upscale'){
+  c.innerHTML=`
+  <div class="control-group">
+   <label>Upscale factor <output id="scaleOut">2×</output></label>
+   <input id="scale" type="range" min="2" max="4" step="1" value="2">
+  </div>`;
+  $('#scale').addEventListener('input',e=>$('#scaleOut').textContent=e.target.value+'×');
+ }
 
-<!-- MODAL -->
+ if(id==='expand'){
+  c.innerHTML=`
+  <div class="control-group">
+   <label>Expansion (%) <output id="expandOut">20%</output></label>
+   <input id="expandRange" type="range" min="5" max="100" value="20">
+  </div>`;
+  $('#expandRange').addEventListener('input',e=>$('#expandOut').textContent=e.target.value+'%');
+ }
 
-<div class="modal" id="modal">
-
-  <div class="modal-card">
-
-    <button
-      class="close"
-      id="close"
-    >
-      ×
-    </button>
-
-    <div id="modalContent"></div>
-
+ if(id==='rotate'){
+  c.innerHTML=`
+  <div class="control-group">
+   <label>Rotate</label>
+   <div class="ratio-grid">
+    <button class="ratio active" data-rotate="0">0°</button>
+    <button class="ratio" data-rotate="90">90°</button>
+    <button class="ratio" data-rotate="180">180°</button>
+    <button class="ratio" data-rotate="270">270°</button>
+   </div>
   </div>
+  <div class="control-group">
+   <label>Flip</label>
+   <div class="ratio-grid">
+    <button class="ratio" data-flip="h">↔ Horizontal</button>
+    <button class="ratio" data-flip="v">↕ Vertical</button>
+   </div>
+  </div>`;
+  $$('.ratio[data-rotate]').forEach(b=>b.addEventListener('click',()=>{
+   $$('.ratio[data-rotate]').forEach(x=>x.classList.remove('active'));
+   b.classList.add('active');
+  }));
+  $$('.ratio[data-flip]').forEach(b=>b.addEventListener('click',()=>{
+   b.classList.toggle('active');
+  }));
+ }
+}
 
-</div>
+function bindResizeControls(){
+ const w=$('#width'),h=$('#height'),lock=$('#lock');
 
+ w.addEventListener('input',()=>{
+   $('#wOut').textContent=w.value?w.value+' px':'Auto';
+   if(lock.checked&&currentFiles[0]){
+     getImage(currentFiles[0]).then(img=>{
+       if(w.value)h.value=Math.round(Number(w.value)*img.height/img.width);
+       $('#hOut').textContent=h.value?h.value+' px':'Auto';
+     });
+   }
+ });
 
-<!-- TOAST -->
+ h.addEventListener('input',()=>{
+   $('#hOut').textContent=h.value?h.value+' px':'Auto';
+   if(lock.checked&&currentFiles[0]){
+     getImage(currentFiles[0]).then(img=>{
+       if(h.value)w.value=Math.round(Number(h.value)*img.width/img.height);
+       $('#wOut').textContent=w.value?w.value+' px':'Auto';
+     });
+   }
+ });
 
-<div
-  class="toast"
-  id="toast"
-></div>
+ $$('.ratio[data-ratio]').forEach(btn=>{
+  btn.addEventListener('click',async()=>{
+   $$('.ratio[data-ratio]').forEach(x=>x.classList.remove('active'));
+   btn.classList.add('active');
+   if(btn.dataset.ratio==='original')return;
+   if(!currentFiles[0])return;
+   const img=await getImage(currentFiles[0]);
+   const [a,b]=btn.dataset.ratio.split(':').map(Number);
+   let nw=img.width,nh=Math.round(nw*b/a);
+   if(nh>img.height){nh=img.height;nw=Math.round(nh*a/b);}
+   w.value=nw;h.value=nh;
+   $('#wOut').textContent=nw+' px';
+   $('#hOut').textContent=nh+' px';
+  });
+ });
+}
 
+async function getImage(file){
+ return new Promise((resolve,reject)=>{
+  const img=new Image();
+  img.onload=()=>resolve(img);
+  img.onerror=reject;
+  img.src=URL.createObjectURL(file);
+ });
+}
 
-<!-- JAVASCRIPT -->
+async function processTool(t){
+ if(!currentFiles.length){
+  toast('Please select a file first.');
+  return;
+ }
 
-<script src="app.js"></script>
+ if(!spendCoin())return;
 
-</body>
-</html>
+ const status=$('#status');
+ const btn=$('#runBtn');
+ btn.disabled=true;
+ status.textContent='Processing…';
+
+ try{
+   if(['compress','resize','crop','convert','upscale','enhance','expand','rotate','watermark','metadata'].includes(t.id)){
+     const blob=await processImage(currentFiles[0],t.id);
+     downloadBlob(blob,makeOutputName(currentFiles[0].name,t.id,blob.type));
+     status.innerHTML='<span class="success-dot"></span>Done — download started';
+   }else{
+     status.innerHTML='<span class="success-dot"></span>Request accepted — processing endpoint can now be connected.';
+     toast('✅ 2 coins used. Backend/API endpoint can be connected for this tool.');
+   }
+ }catch(err){
+   console.error(err);
+   status.innerHTML='<span class="error-dot"></span>Could not process this file in the browser.';
+   toast('Something went wrong. Please try another file.');
+ }
+ btn.disabled=false;
+}
+
+function makeOutputName(name,mode,type){
+ const base=name.replace(/\.[^.]+$/,'');
+ let ext='png';
+ if(type==='image/jpeg')ext='jpg';
+ if(type==='image/webp')ext='webp';
+ return `${base}-pixel-refine-${mode}.${ext}`;
+}
+
+function downloadBlob(blob,name){
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(blob);
+ a.download=name;
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+async function processImage(file,mode){
+ const img=await getImage(file);
+ let sw=img.width,sh=img.height;
+ let outW=sw,outH=sh;
+
+ if(mode==='resize'){
+   const w=Number($('#width')?.value||sw);
+   const h=Number($('#height')?.value||sh);
+   outW=w;outH=h;
+ }
+
+ if(mode==='upscale'){
+   const scale=Number($('#scale')?.value||2);
+   outW=Math.round(sw*scale);outH=Math.round(sh*scale);
+ }
+
+ if(mode==='expand'){
+   const pct=Number($('#expandRange')?.value||20)/100;
+   outW=Math.round(sw*(1+pct));
+   outH=Math.round(sh*(1+pct));
+ }
+
+ if(mode==='rotate'){
+   const deg=Number(document.querySelector('[data-rotate].active')?.dataset.rotate||0);
+   if(Math.abs(deg)===90){outW=sh;outH=sw}
+ }
+
+ const canvas=document.createElement('canvas');
+ canvas.width=outW;
+ canvas.height=outH;
+ const ctx=canvas.getContext('2d');
+
+ if(mode==='rotate'){
+   const deg=Number(document.querySelector('[data-rotate].active')?.dataset.rotate||0);
+   ctx.save();
+   if(deg===90){ctx.translate(outW,0);ctx.rotate(Math.PI/2)}
+   else if(deg===180){ctx.translate(outW,outH);ctx.rotate(Math.PI)}
+   else if(deg===270){ctx.translate(0,outH);ctx.rotate(-Math.PI/2)}
+
+   const fh=document.querySelector('[data-flip="h"].active');
+   const fv=document.querySelector('[data-flip="v"].active');
+   if(fh||fv){
+     ctx.translate(fh?-outW:0,fv?-outH:0);
+     ctx.scale(fh?-1:1,fv?-1:1);
+   }
+
+   ctx.drawImage(img,0,0,sw,sh);
+   ctx.restore();
+ }else if(mode==='crop'){
+   const active=document.querySelector('[data-crop].active')?.dataset.crop||'free';
+   let sx=0,sy=0,cw=sw,ch=sh;
+   if(active!=='free'){
+     const [a,b]=active.split(':').map(Number);
+     const ratio=a/b;
+     if(sw/sh>ratio){
+       cw=Math.round(sh*ratio);
+       sx=Math.round((sw-cw)/2);
+     }else{
+       ch=Math.round(sw/ratio);
+       sy=Math.round((sh-ch)/2);
+     }
+   }
+   canvas.width=cw;
+   canvas.height=ch;
+   ctx.drawImage(img,sx,sy,cw,ch,0,0,cw,ch);
+ }else if(mode==='expand'){
+   ctx.fillStyle='#ffffff';
+   ctx.fillRect(0,0,outW,outH);
+   ctx.drawImage(img,Math.round((outW-sw)/2),Math.round((outH-sh)/2),sw,sh);
+ }else{
+   ctx.drawImage(img,0,0,outW,outH);
+ }
+
+ if(mode==='enhance'){
+   const data=ctx.getImageData(0,0,canvas.width,canvas.height);
+   const d=data.data;
+   for(let i=0;i<d.length;i+=4){
+     d[i]=Math.min(255,(d[i]-128)*1.12+128);
+     d[i+1]=Math.min(255,(d[i+1]-128)*1.12+128);
+     d[i+2]=Math.min(255,(d[i+2]-128)*1.12+128);
+   }
+   ctx.putImageData(data,0,0);
+ }
+
+ if(mode==='watermark'){
+   ctx.font=Math.max(18,Math.round(canvas.width/28))+'px Inter, sans-serif';
+   ctx.fillStyle='rgba(255,255,255,.55)';
+   ctx.textAlign='right';
+   ctx.textBaseline='bottom';
+   ctx.fillText('Pixel Refine',canvas.width-25,canvas.height-20);
+ }
+
+ let quality=.92;
+ let mime='image/png';
+
+ if(mode==='compress'){
+   mime='image/jpeg';
+   quality=.68;
+ }
+
+ if(mode==='convert'){
+   mime='image/jpeg';
+   quality=.92;
+ }
+
+ if(mode==='metadata'){
+   mime='image/jpeg';
+   quality=.92;
+ }
+
+ return new Promise(resolve=>canvas.toBlob(resolve,mime,quality));
+}
+
+function qrUI(t){
+ return `
+ <div class="tool-modal-head"><div class="icon">${t.icon}</div><div><h2>${t.name}</h2><p>Generate a QR code from a URL or text.</p></div></div>
+ <div class="control-group"><label>Text or URL</label><input id="qrText" type="text" placeholder="https://example.com"></div>
+ <button class="action" id="qrBtn">Generate QR — 2 coins</button>
+ <div id="qrOutput" class="qr-out"></div>`;
+}
+
+function bindQR(){
+ $('#qrBtn').addEventListener('click',()=>{
+  const text=$('#qrText').value.trim();
+  if(!text){toast('Enter text or a URL first.');return}
+  if(!spendCoin())return;
+  const img=document.createElement('img');
+  img.alt='QR Code';
+  img.src='https://api.qrserver.com/v1/create-qr-code/?size=500x500&data='+encodeURIComponent(text);
+  const out=$('#qrOutput');
+  out.innerHTML='';
+  out.appendChild(img);
+  const a=document.createElement('a');
+  a.className='download-link';
+  a.textContent='Open QR image';
+  a.target='_blank';
+  a.href=img.src;
+  out.appendChild(a);
+ });
+}
+
+function passwordUI(t){
+ return `
+ <div class="tool-modal-head"><div class="icon">${t.icon}</div><div><h2>${t.name}</h2><p>Create a strong random password.</p></div></div>
+ <div class="control-group"><label>Password length <output id="passLenOut">16</output></label><input id="passLen" type="range" min="8" max="64" value="16"></div>
+ <label class="check"><input id="passUpper" type="checkbox" checked> Uppercase</labe  
