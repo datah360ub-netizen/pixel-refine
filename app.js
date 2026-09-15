@@ -19,6 +19,16 @@ const tools = [
   ["Password & Barcode Generator","Generate secure passwords or simple Code 39 barcodes.","🔑","utility","utility"]
 ];
 
+tools.push(
+  ["Image Rotator & Flipper","Rotate 90°, 180° or 270° and flip images horizontally or vertically.","🔁","image","rotate"],
+  ["Image Watermark","Add custom text watermark with size, opacity and position controls.","©️","image","watermark"],
+  ["Image to PDF","Convert an image into a downloadable PDF document.","🖼️","pdf","advanced"],
+  ["PDF to JPG","Convert PDF pages to JPG images.","📑","pdf","advanced"],
+  ["PDF Page Extractor","Extract selected pages from a PDF.","📚","pdf","advanced"],
+  ["PDF Page Numbering","Add page numbers to PDF documents.","🔢","pdf","advanced"],
+  ["PDF Protect","Add password protection to a PDF.","🔐","pdf","advanced"],
+  ["Image Metadata Cleaner","Prepare images for metadata/privacy cleaning.","🧹","image","advanced"]
+);
 const grid=document.getElementById('toolGrid');
 const search=document.getElementById('search');
 const count=document.getElementById('count');
@@ -73,12 +83,13 @@ function openTool(index){
   ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove('dragging')}));
   zone.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f){handleFile(f);}});
   setupControls(t[4],t[3]);
+  setTimeout(enhanceRatios,0);
 }
 
 function setupControls(mode,type){
   const c=document.getElementById('toolControls'); if(!c)return;
   if(type==='pdf'){
-    c.innerHTML=`<div class="info-panel"><b>Secure processing required</b><span>This tool is ready for the interface. PDF conversion/compression/merge needs a PDF processing service or library.</span></div><button class="action secondary-action" id="advancedAction" disabled>Continue</button>`;
+    c.innerHTML=`<div class="info-panel"><b>PDF processing</b><span>Select your file first. Browser-supported PDF actions can be connected here; advanced conversion/compression may require a backend/API.</span></div><button class="action secondary-action" id="advancedAction">Continue</button>`;
     document.getElementById('advancedAction').onclick=()=>showStatus('Your file is selected. Connect a PDF processing service to complete this operation.',false); return;
   }
   const commonAction=(label,fn)=>{c.innerHTML+=`<button class="action" id="mainAction" disabled>${label}</button>`;document.getElementById('mainAction').onclick=()=>{if(spendCoin())fn()}};
@@ -116,7 +127,22 @@ function setupControls(mode,type){
     c.innerHTML=`<div class="control-row"><label>Extra width (px)<input id="expandW" type="number" min="0" value="200"></label><label>Extra height (px)<input id="expandH" type="number" min="0" value="200"></label></div><label class="control-group">Background<select id="expandBg"><option value="#ffffff">White</option><option value="#000000">Black</option><option value="transparent">Transparent</option></select></label>`; commonAction('Expand & Download',processImage);
   }
   if(mode==='advanced' && type==='image'){
-    c.innerHTML=`<div class="info-panel"><b>AI/API feature</b><span>Your upload is ready. This feature needs an image-processing API to perform the AI operation.</span></div><button class="action" id="advancedAction" disabled>Process Image</button>`; document.getElementById('advancedAction').onclick=()=>showStatus('File ready. Connect the secure AI processing endpoint to complete this tool.',false);
+    c.innerHTML=`<div class="info-panel"><b>AI/API feature</b><span>Your upload is ready. A secure AI endpoint is required for the actual AI operation.</span></div><button class="action" id="advancedAction">Process Image</button>`; document.getElementById('advancedAction').onclick=()=>showStatus('File ready. Connect the secure AI processing endpoint to complete this tool.',false);
+  }
+}
+
+function enhanceRatios(){
+  const resize=document.querySelector('#toolControls .ratio-grid');
+  if(currentTool&&currentTool[4]==='resize'&&resize&&!resize.dataset.enhanced){
+    const labels=[['2:3','2:3'],['3:2','3:2'],['5:4','5:4'],['3:4','3:4'],['4:3','4:3'],['9:16','9:16']];
+    labels.forEach(([v,l])=>{const b=document.createElement('button');b.className='ratio';b.dataset.r=v;b.textContent=l;resize.appendChild(b)});
+    resize.dataset.enhanced='1';setupResizeLogic();
+  }
+  const crop=document.querySelector('#toolControls .ratio-grid');
+  if(currentTool&&currentTool[4]==='crop'&&crop&&!crop.dataset.enhanced){
+    const labels=[['2:3','2:3'],['3:2','3:2'],['5:4','5:4'],['4:3','4:3']];
+    labels.forEach(([v,l])=>{const b=document.createElement('button');b.className='ratio';b.dataset.crop=v;b.textContent=l;crop.appendChild(b)});
+    crop.dataset.enhanced='1';setupCropLogic();
   }
 }
 
@@ -151,14 +177,4 @@ function updateCropInfo(){const ids=['cropX','cropY','cropW','cropH'];if(!ids.ev
 function previewEditor(){const ids=['bright','contrast','sat','blur'];if(!ids.every(id=>document.getElementById(id)))return;brightV.textContent=bright.value;contrastV.textContent=contrast.value;satV.textContent=sat.value;blurV.textContent=blur.value+'px'}
 
 let eraserHistory=[];
-function initEraserCanvas(img){const canvas=document.getElementById('eraseCanvas');if(!canvas)return;const maxW=Math.min(760,document.getElementById('dropZone')?.clientWidth||760);const scale=Math.min(1,maxW/img.naturalWidth);canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);eraserHistory=[ctx.getImageData(0,0,canvas.width,canvas.height)];let drawing=false;const paint=e=>{if(!drawing)return;const r=canvas.getBoundingClientRect();const x=(e.clientX-r.left)*canvas.width/r.width,y=(e.clientY-r.top)*canvas.height/r.height,brush=(+document.getElementById('eraseSize')?.value||40)*canvas.width/img.naturalWidth;ctx.save();ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(x,y,brush/2,0,Math.PI*2);ctx.fill();ctx.restore()};canvas.onpointerdown=e=>{drawing=true;canvas.setPointerCapture(e.pointerId);eraserHistory.push(ctx.getImageData(0,0,canvas.width,canvas.height));paint(e)};canvas.onpointermove=paint;canvas.onpointerup=()=>drawing=false;canvas.onpointercancel=()=>drawing=false;document.getElementById('eraseUndo').onclick=()=>{if(eraserHistory.length>1){eraserHistory.pop();ctx.putImageData(eraserHistory[eraserHistory.length-1],0,0)}};document.getElementById('eraseReset').onclick=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);eraserHistory=[ctx.getImageData(0,0,canvas.width,canvas.height)]};document.getElementById('eraseDownload').disabled=false}
-function downloadEraser(){const canvas=document.getElementById('eraseCanvas');if(!canvas)return;if(!spendCoin())return;canvas.toBlob(b=>{if(b){downloadBlob(b,'pixel-refine-magic-eraser.png');showStatus('✓ Magic Eraser complete — transparent PNG downloaded.')}},'image/png')}
-
-function processImage(){
-  if(!currentFile||!currentFile.type.startsWith('image/'))return showStatus('Please upload an image first.',true);
-  const mode=currentTool[4]; const img=new Image(), url=URL.createObjectURL(currentFile);
-  img.onload=()=>{URL.revokeObjectURL(url);let sw=img.naturalWidth,sh=img.naturalHeight;
-    let outW=sw,outH=sh, sx=0,sy=0, cropW=sw,cropH=sh;
-    if(mode==='resize'){outW=+document.getElementById('resizeW').value||sw;outH=+document.getElementById('resizeH').value||sh}
-    if(mode==='crop'){sx=Math.max(0,+document.getElementById('cropX').value||0);sy=Math.max(0,+document.getElementById('cropY').value||0);cropW=Math.max(1,+document.getElementById('cropW').value||sw);cropH=Math.max(1,+document.getElementById('cropH').value||sh);cropW=Math.min(cropW,sw-sx);cropH=Math.min(cropH,sh-sy);outW=cropW;outH=cropH}
-    if(mode==='upscale'){const b=document.querySelector('[data-scale].active');const scale=b?+b.dataset.scale:2;outW=Math.round(sw
+function initEraserCanvas(img){const canvas=document.getElementById('eraseCanvas');if(!canvas)return;const maxW=Math.min(760,document.getElementById('dropZone')?.clientWidth||760);const scale=Math.min(1,maxW/img.naturalWidth);canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);eraserHistory=[ctx.getImageData(0,0,canvas.width,canvas.height)];let drawing=false;const paint=e=>{if(!drawing)return;const r=canvas.getBoundingClientRect();const x=(e.clientX-r.left)*canvas.width/r.width,y=(e.clientY-r.top)*canvas.height/r.height,brush=(+document.getElementById('eraseSize')?.value||40)*canvas.width/img.naturalWidth;ctx.save();ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(x,y,brush/2,0,Math.PI*2);ctx.fill();ctx.restore()};canvas.onpointerdown=e=>{drawing=true;canvas.setPointerCapture(e.pointerId);eraserHistory.push(ctx.getImageData(0,0,canvas.width,canvas.height));paint(e)};canvas.onpointermove=paint;canvas.onpointerup=()=>drawing=false;canvas.onpointercancel=()=>draw
