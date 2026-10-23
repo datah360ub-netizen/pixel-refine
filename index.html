@@ -597,7 +597,7 @@
 
 
   <!-- JavaScript -->
-<script src="app.js?v=20261023-16"></script>
+<script src="app.js?v=20261023-17"></script>
 <script>
 /* Standalone header controls: keep these working even if another tool script fails. */
 (function () {
@@ -636,7 +636,7 @@
       if (button) button.onclick = function () {
         const input = document.getElementById('headerLoginEmail');
         const status = document.getElementById('headerLoginStatus');
-        status.textContent = input && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(input.value.trim()) ? 'This is a demo only; secure sign-in still needs a backend.' : 'Please enter a valid email address.';
+        status.textContent = input && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim()) ? 'This is a demo only; secure sign-in still needs a backend.' : 'Please enter a valid email address.';
       };
       return;
     }
