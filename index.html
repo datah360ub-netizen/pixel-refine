@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css?v=20261023-2">
+  <link rel="stylesheet" href="style.css?v=20261023-3">
 </head>
 
 <body>
@@ -597,7 +597,64 @@
 
 
   <!-- JavaScript -->
-<script src="app.js?v=20261023-2"></script>  
+<script src="app.js?v=20261023-3"></script>
+<script>
+/* Standalone header controls: keep these working even if another tool script fails. */
+(function () {
+  const modal = document.getElementById('modal');
+  const modalContent = document.getElementById('modalContent');
+  function openHeaderDialog(title, html) {
+    if (!modal || !modalContent) return;
+    modalContent.innerHTML = '<h2 id="modalTitle">' + title + '</h2>' + html;
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+  function closeHeaderDialog() {
+    if (modal) {
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  }
+  document.addEventListener('click', function (event) {
+    const theme = event.target.closest && event.target.closest('#themeBtn');
+    if (theme) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const dark = !document.body.classList.contains('dark-mode');
+      document.body.classList.toggle('dark-mode', dark);
+      try { localStorage.setItem('pixelRefineTheme', dark ? 'dark' : 'light'); } catch (_) {}
+      theme.textContent = dark ? '☀' : '☾';
+      theme.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+      return;
+    }
+    const account = event.target.closest && event.target.closest('#accountBtn');
+    if (account) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      openHeaderDialog('Log in', '<p>Login is not connected to a secure account service yet.</p><label>Email <input id="headerLoginEmail" type="email" autocomplete="email" placeholder="you@example.com"></label><button class="primary" id="headerLoginContinue" type="button">Continue</button><p id="headerLoginStatus" role="status"></p>');
+      const button = document.getElementById('headerLoginContinue');
+      if (button) button.onclick = function () {
+        const input = document.getElementById('headerLoginEmail');
+        const status = document.getElementById('headerLoginStatus');
+        status.textContent = input && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(input.value.trim()) ? 'This is a demo only; secure sign-in still needs a backend.' : 'Please enter a valid email address.';
+      };
+      return;
+    }
+    if (event.target.closest && event.target.closest('#close')) closeHeaderDialog();
+    if (event.target === modal) closeHeaderDialog();
+  }, true);
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') closeHeaderDialog();
+  });
+  try {
+    const saved = localStorage.getItem('pixelRefineTheme');
+    const dark = saved ? saved === 'dark' : false;
+    document.body.classList.toggle('dark-mode', dark);
+    const button = document.getElementById('themeBtn');
+    if (button) button.textContent = dark ? '☀' : '☾';
+  } catch (_) {}
+})();
+</script>  
 
 </body>
  </html>
