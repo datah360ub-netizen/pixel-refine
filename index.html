@@ -18,6 +18,24 @@
 
   <link rel="stylesheet" href="style.css?v=20261023-7">
   <style>
+
+    .pixel-brand{gap:11px!important;flex-shrink:0}
+    .pixel-mark{width:38px;height:38px;position:relative;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+    .pixel-mark b{font-family:Manrope,sans-serif;font-size:31px;line-height:1;font-weight:800;color:transparent;background:linear-gradient(145deg,#10d8f4 8%,#2778ff 48%,#d946ef 92%);background-clip:text;-webkit-background-clip:text;filter:drop-shadow(0 2px 8px rgba(40,120,255,.2))}
+    .pixel-mark i{position:absolute;width:6px;height:6px;border-radius:1px;background:linear-gradient(135deg,#12d8f4,#b946f5)}
+    .pixel-mark i:nth-child(1){left:0;top:5px}.pixel-mark i:nth-child(2){left:8px;top:0}.pixel-mark i:nth-child(3){left:1px;top:14px}
+    .pixel-wordmark{font-family:Manrope,sans-serif;font-weight:800;letter-spacing:-.8px;color:var(--text);white-space:nowrap}
+    .pixel-wordmark b{font-weight:800;color:transparent;background:linear-gradient(100deg,#17c9f4,#4574ff 48%,#d946ef);background-clip:text;-webkit-background-clip:text}
+    .header-icon-btn,.header-language-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--text);cursor:pointer;transition:background .2s,border-color .2s}
+    .header-icon-btn{width:40px}
+    .header-icon-btn svg,.header-language-btn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .header-language-btn{padding:0 10px;font-size:13px;font-weight:800;letter-spacing:.3px}
+    .language-chevron{font-size:18px;line-height:1;margin-left:0;transform:translateY(-2px)}
+    .header-icon-btn:hover,.header-language-btn:hover{background:var(--surface,rgba(255,255,255,.08));border-color:var(--border,rgba(255,255,255,.12))}
+    .nav-actions{gap:8px}
+    @media(max-width:700px){.pixel-wordmark{font-size:15px}.pixel-mark{width:31px;height:31px}.pixel-mark b{font-size:26px}.header-language-btn{padding:0 6px;gap:5px}.header-icon-btn{width:34px}.nav-actions{gap:3px}}
+    @media(max-width:440px){.pixel-brand{gap:6px!important}.pixel-wordmark{font-size:13px}.pixel-mark{width:27px;height:27px}.pixel-mark b{font-size:23px}.header-language-btn svg{width:18px;height:18px}.header-icon-btn{width:30px}.more-menu-btn{width:31px!important;height:34px!important}}
+
     .more-menu-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid var(--border,#ddd);border-radius:12px;background:var(--surface,rgba(255,255,255,.08));color:var(--text,inherit);font-size:25px;line-height:1;cursor:pointer}
     .more-menu-btn:hover{border-color:var(--accent,#8b5cf6);transform:translateY(-1px)}
     .settings-intro{color:var(--muted);font-size:14px;line-height:1.6;margin:8px 0 18px}
@@ -37,9 +55,9 @@
   <!-- NAVIGATION -->
   <header class="nav" id="top">
 
-    <a class="brand" href="#top" aria-label="Pixel Refine home">
-      <span class="logo">P</span>
-      <span>Pixel <b>Refine</b></span>
+    <a class="brand pixel-brand" href="#top" aria-label="Pixel Refine home">
+      <span class="pixel-mark" aria-hidden="true"><i></i><i></i><i></i><b>P</b></span>
+      <span class="pixel-wordmark">Pixel <b>Refine</b></span>
     </a>
 
     <nav class="main-nav" aria-label="Main navigation">
@@ -64,6 +82,13 @@
         Log in
       </button>
 
+      <button class="header-icon-btn" id="headerSearchBtn" type="button" aria-label="Search tools" title="Search tools">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 4.2 4.2"></path></svg>
+      </button>
+      <button class="header-language-btn" id="headerLanguageBtn" type="button" aria-label="Choose language" title="Choose language">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3.5 9h17M3.5 15h17M12 3c2.4 2.5 3.5 5.5 3.5 9s-1.1 6.5-3.5 9c-2.4-2.5-3.5-5.5-3.5-9S9.6 5.5 12 3Z"></path></svg>
+        <span id="headerLanguageLabel">EN</span><span class="language-chevron">⌄</span>
+      </button>
       <button class="more-menu-btn"
               id="moreMenuBtn"
               type="button"
@@ -706,7 +731,15 @@
       document.head.appendChild(script);
     }
   }
+  function updateHeaderLanguageLabel() {
+    let lang = "en";
+    try { lang = localStorage.getItem("pixelRefineLanguage") || "en"; } catch (_) {}
+    const labels = {en:"EN",hi:"HI",or:"OD",bn:"BN",es:"ES",fr:"FR",pt:"PT",ar:"AR",zh:"ZH",ja:"JA",de:"DE",ru:"RU",ur:"UR",id:"ID",it:"IT",ko:"KO",tr:"TR",ta:"TA",te:"TE",mr:"MR",pa:"PA"};
+    const label = document.getElementById("headerLanguageLabel");
+    if (label) label.textContent = labels[lang] || lang.toUpperCase();
+  }
   function applySavedTranslation() {
+    updateHeaderLanguageLabel();
     let lang = window.pixelRefineCurrentLanguage || "en";
     try { lang = window.pixelRefineCurrentLanguage || localStorage.getItem("pixelRefineLanguage") || "en"; } catch (_) {}
     if (lang === "en") return;
@@ -761,6 +794,7 @@
         else values.forEach(([k])=>localStorage.removeItem(k));
         document.documentElement.lang = document.getElementById("settingsLanguage").value;
         window.pixelRefineCurrentLanguage = document.getElementById("settingsLanguage").value;
+        updateHeaderLanguageLabel();
         if (remember) { try { localStorage.setItem("pixelRefineLanguage", document.getElementById("settingsLanguage").value); } catch (_) {} }
         initGoogleTranslate();
         setTimeout(applySavedTranslation, 250);
@@ -777,10 +811,24 @@
     document.body.classList.toggle("settings-compact",localStorage.getItem("pixelRefineCompact")==="1");
     document.documentElement.lang = localStorage.getItem("pixelRefineLanguage") || "en";
     window.pixelRefineCurrentLanguage = document.documentElement.lang;
+    updateHeaderLanguageLabel();
     initGoogleTranslate();
     window.addEventListener("load", function(){ setTimeout(applySavedTranslation, 900); });
   } catch (_) {}
   document.addEventListener('click', function (event) {
+    const searchBtn = event.target.closest && event.target.closest('#headerSearchBtn');
+    if (searchBtn) {
+      event.preventDefault(); event.stopImmediatePropagation();
+      const search = document.getElementById('search');
+      if (search) { search.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>search.focus(),250); }
+      return;
+    }
+    const languageBtn = event.target.closest && event.target.closest('#headerLanguageBtn');
+    if (languageBtn) {
+      event.preventDefault(); event.stopImmediatePropagation(); showMoreOptions();
+      setTimeout(()=>{ const select=document.getElementById('settingsLanguage'); if(select){select.focus();select.scrollIntoView({behavior:'smooth',block:'nearest'});} },80);
+      return;
+    }
     const more = event.target.closest && event.target.closest('#moreMenuBtn');
     if (more) { event.preventDefault(); event.stopImmediatePropagation(); showMoreOptions(); return; }
     const theme = event.target.closest && event.target.closest('#themeBtn');
