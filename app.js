@@ -143,6 +143,12 @@ function openTool(index) {
     </div>
 
     <div id="optionsArea"></div>
+    <div class="live-progress" id="liveProgress" aria-live="polite">
+      <div class="live-progress-top"><strong>Live processing demo</strong><span id="livePercent">Ready</span></div>
+      <div class="live-track"><div id="liveBar"></div></div>
+      <ol id="liveSteps"><li class="step-active">Waiting for a file</li><li>Preparing image</li><li>Processing</li><li>Preparing download</li></ol>
+      <p class="live-caption" id="liveCaption">Upload a file to watch each stage here.</p>
+    </div>
     <div id="status" role="status" aria-live="polite"></div>
 
     <div class="modal-actions">
@@ -283,15 +289,29 @@ function getOption(id, fallback = '') {
 
 function setStatus(message, error = false) {
   const el = document.getElementById('status');
-  if (!el) return;
-  el.textContent = message;
-  el.style.color = error ? '#dc2626' : '';
+  if (el) {
+    el.textContent = message;
+    el.style.color = error ? '#dc2626' : '';
+  }
+  const caption = document.getElementById('liveCaption');
+  if (caption && message) caption.textContent = message;
+}
+function setLiveProgress(percent, label, stepIndex = 0) {
+  const bar = document.getElementById('liveBar');
+  const value = document.getElementById('livePercent');
+  const steps = document.querySelectorAll('#liveSteps li');
+  if (bar) bar.style.width = Math.max(0, Math.min(100, percent)) + '%';
+  if (value) value.textContent = label || (Math.round(percent) + '%');
+  steps.forEach((step, index) => {
+    step.classList.toggle('step-done', index < stepIndex);
+    step.classList.toggle('step-active', index === stepIndex);
+  });
 }
 
 function loadFile(file) {
   if (!currentTool) return;
 
-  const isImageTool = currentTool[3] === 'image';
+  const isImageTool = currentTool[3] === 'image' || currentTool[0] === 'Image to PDF';
   if (isImageTool && !file.type.startsWith('image/')) {
     setStatus('Please choose a valid image file.', true);
     return;
@@ -332,7 +352,8 @@ function loadFile(file) {
       };
 
       document.getElementById('processBtn').disabled = false;
-      setStatus('Image ready to process.');
+      setLiveProgress(0, 'Ready', 0);
+      setStatus('Image ready to process. Live stages will update while the tool runs.');
     };
   };
 
@@ -346,17 +367,61 @@ function loadFile(file) {
 
 async function processCurrentTool() {
   if (!currentTool || !currentFile || !imageState) {
-    setStatus('Please upload an image first.', true);
+    setStatus(currentTool && currentTool[3] === 'pdf' && currentTool[0] !== 'Image to PDF'
+      ? 'This PDF workflow is not implemented yet. Image to PDF is available; other PDF tools still need PDF-specific processing.'
+      : 'Please upload an image first.', true);
     return;
   }
 
   const action = currentTool[4];
 
+  const button = document.getElementById('processBtn');
+
+  // Real client-side Image to PDF using pdf-lib.
+  if (currentTool[0] === 'Image to PDF') {
+    button.disabled = true;
+    button.textContent = 'Building PDF...';
+    setLiveProgress(8, 'Starting', 0);
+    setStatus('Loading PDF engine… your image stays in this browser.');
+    try {
+      const pdfModule = await import('https://esm.sh/pdf-lib@1.17.1?bundle');
+      const PDFDocument = pdfModule.PDFDocument;
+      if (!PDFDocument) throw new Error('PDF engine did not load.');
+      setLiveProgress(35, 'Preparing image', 1);
+      await new Promise(resolve => setTimeout(resolve, 120));
+      const bytes = await currentFile.arrayBuffer();
+      const pdfDoc = await PDFDocument.create();
+      let embedded;
+      if (/jpe?g$/i.test(currentFile.name) || currentFile.type === 'image/jpeg') {
+        embedded = await pdfDoc.embedJpg(bytes);
+      } else {
+        const image = await pdfDoc.embedPng(bytes);
+        embedded = image;
+      }
+      const page = pdfDoc.addPage([embedded.width, embedded.height]);
+      page.drawImage(embedded, { x: 0, y: 0, width: embedded.width, height: embedded.height });
+      setLiveProgress(78, 'Creating PDF', 2);
+      const pdfBytes = await pdfDoc.save();
+      setLiveProgress(96, 'Preparing download', 3);
+      downloadBlob(new Blob([pdfBytes], { type: 'application/pdf' }), (currentFile.name.replace(/\.[^.]+$/, '') || 'image') + '.pdf');
+      setLiveProgress(100, 'Complete', 4);
+      setStatus('PDF created successfully. Download should start now.');
+    } catch (error) {
+      console.error('Image to PDF failed:', error);
+      setStatus('Could not create PDF: ' + (error.message || error), true);
+      setLiveProgress(0, 'Failed', 0);
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Process Image';
+    }
+    return;
+  }
+
   // AI background removal: load the library and its model assets from IMG.LY's CDN.
   if (currentTool[0] === 'AI Background Remover') {
-    const button = document.getElementById('processBtn');
     button.disabled = true;
     button.textContent = 'Loading AI model...';
+    setLiveProgress(5, 'Loading model', 0);
     setStatus('Connecting to the AI model. First use may download around 40 MB; keep the page open.');
     try {
       const module = await import('https://esm.sh/@imgly/background-removal@1.7.0?bundle&target=es2022');
@@ -364,6 +429,7 @@ async function processCurrentTool() {
       if (typeof removeBackground !== 'function') {
         throw new Error('Background-removal function was not found in the loaded library.');
       }
+      setLiveProgress(32, 'Preparing AI model', 1);
       const config = {
         publicPath: 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/',
         model: 'isnet_quint8',
@@ -371,15 +437,19 @@ async function processCurrentTool() {
         progress: (key, current, total) => {
           if (total > 0) {
             const percent = Math.round((current / total) * 100);
+            setLiveProgress(Math.max(32, percent), 'Model ' + percent + '%', 1);
             setStatus('Downloading AI model: ' + percent + '% (' + key + '). Please keep the page open.');
           }
         }
       };
       button.textContent = 'Removing background...';
+      setLiveProgress(65, 'Removing background', 2);
+      setStatus('AI is separating the subject from the background. This can take a while on phones.');
       const outputBlob = await removeBackground(currentFile, config);
       if (!(outputBlob instanceof Blob) || outputBlob.size === 0) {
         throw new Error('The AI returned an empty image.');
       }
+      setLiveProgress(92, 'Preparing download', 3);
       const url = URL.createObjectURL(outputBlob);
       const link = document.createElement('a');
       link.href = url;
@@ -387,6 +457,7 @@ async function processCurrentTool() {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      setLiveProgress(100, 'Complete', 4);
       setStatus('Background removed! Your transparent PNG download should start now.');
       setTimeout(() => URL.revokeObjectURL(url), 60000);
     } catch (error) {
@@ -400,18 +471,47 @@ async function processCurrentTool() {
     return;
   }
 
+  // Browser-based color effect: useful for a preview, but not AI reconstruction.
+  if (currentTool[0] === 'Photo Colorize') {
+    button.disabled = true;
+    button.textContent = 'Colorizing...';
+    setLiveProgress(15, 'Analyzing tones', 0);
+    setStatus('Applying a basic browser color effect. This is a demo effect, not AI restoration of historically accurate colors.');
+    try {
+      await new Promise(resolve => setTimeout(resolve, 180));
+      const image = await loadImage(imageState.src);
+      setLiveProgress(45, 'Applying color', 1);
+      const canvas = createCanvas(image.naturalWidth, image.naturalHeight);
+      const ctx = canvas.getContext('2d');
+      ctx.filter = 'saturate(1.7) sepia(0.18) contrast(1.08)';
+      ctx.drawImage(image, 0, 0);
+      ctx.filter = 'none';
+      setLiveProgress(82, 'Exporting image', 3);
+      await exportCanvas(canvas, 'image/png');
+      setLiveProgress(100, 'Complete', 4);
+      setStatus('Color effect exported. Note: true AI black-and-white photo colorization needs a dedicated model/service.');
+    } catch (error) {
+      setStatus(error.message || 'Color effect failed.', true);
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Process Image';
+    }
+    return;
+  }
+
   if (action === 'advanced' || action === 'eraser') {
     setStatus('This feature needs its own AI model or processing backend and is not connected yet.', true);
     return;
   }
-
-  const button = document.getElementById('processBtn');
   button.disabled = true;
   button.textContent = 'Processing...';
+  setLiveProgress(15, 'Preparing image', 0);
   setStatus('Please wait while your image is processed.');
 
   try {
     const image = await loadImage(imageState.src);
+    setLiveProgress(42, 'Processing image', 1);
+    await new Promise(resolve => setTimeout(resolve, 80));
     let canvas;
 
     switch (action) {
