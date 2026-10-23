@@ -1,30 +1,29 @@
 /* =====================================================
-   PIXEL REFINE — PROFESSIONAL UI
-   Responsive Design | Light & Dark Theme
+   PIXEL REFINE — PROFESSIONAL CSS
+   PART 1/5
+   Base Styles, Variables, Navbar and Buttons
    ===================================================== */
 
-
-/* 1. ROOT VARIABLES
------------------------------------------------------ */
+/* 1. COLOR VARIABLES */
 
 :root {
   color-scheme: light;
 
   --bg: #f7f8fc;
-  --bg-secondary: #f0efff;
+  --bg-secondary: #f0edff;
 
   --card: #ffffff;
   --card-hover: #fbfaff;
 
-  --text: #17172a;
-  --muted: #74778c;
+  --text: #19182b;
+  --muted: #77788d;
 
-  --border: #e7e8f0;
-  --line: #e7e8f0;
+  --border: #e7e7f0;
+  --line: #e7e7f0;
 
   --accent: #6d5dfc;
   --accent-dark: #5545e8;
-  --accent-light: #9186ff;
+  --accent-light: #978bff;
 
   --purple-soft: #f0edff;
 
@@ -47,13 +46,50 @@
 
   --container: 1160px;
 
-  --transition:
-    0.22s ease;
+  --transition: 0.22s ease;
 }
 
 
-/* 2. RESET
------------------------------------------------------ */
+/* 2. DARK MODE */
+
+body.dark,
+body.dark-mode {
+  color-scheme: dark;
+
+  --bg: #10111c;
+  --bg-secondary: #19172b;
+
+  --card: #191a29;
+  --card-hover: #202035;
+
+  --text: #f2f1ff;
+  --muted: #a4a5bd;
+
+  --border: #303146;
+  --line: #303146;
+
+  --accent: #9688ff;
+  --accent-dark: #7968ff;
+  --accent-light: #b4aaff;
+
+  --purple-soft: #292442;
+
+  --success: #43d69b;
+  --danger: #ff6977;
+  --warning: #ffcb63;
+
+  --shadow-sm:
+    0 4px 14px rgba(0, 0, 0, 0.12);
+
+  --shadow:
+    0 12px 35px rgba(0, 0, 0, 0.2);
+
+  --shadow-lg:
+    0 25px 70px rgba(0, 0, 0, 0.32);
+}
+
+
+/* 3. RESET */
 
 * {
   box-sizing: border-box;
@@ -65,14 +101,14 @@ html {
 }
 
 body {
-  margin: 0;
-
   min-width: 320px;
+  margin: 0;
 
   font-family:
     "DM Sans",
     "Manrope",
     system-ui,
+    -apple-system,
     sans-serif;
 
   font-size: 15px;
@@ -124,8 +160,9 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible,
+textarea:focus-visible,
 summary:focus-visible {
-  outline: 3px solid rgba(109, 93, 252, 0.35);
+  outline: 3px solid rgba(109, 93, 252, 0.4);
   outline-offset: 3px;
 }
 
@@ -135,13 +172,12 @@ summary:focus-visible {
 }
 
 
-/* 3. NAVIGATION
------------------------------------------------------ */
+/* 4. NAVBAR */
 
 .nav {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1000;
 
   min-height: 76px;
 
@@ -149,40 +185,43 @@ summary:focus-visible {
   align-items: center;
   justify-content: space-between;
 
-  gap: 25px;
+  gap: 20px;
 
-  padding: 12px max(24px, calc((100% - 1280px) / 2));
+  padding: 12px max(20px, calc((100% - 1280px) / 2));
 
-  background: rgba(255, 255, 255, 0.88);
-
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: var(--card);
 
   border-bottom: 1px solid var(--border);
+
+  box-shadow: var(--shadow-sm);
+
+  transition:
+    background var(--transition),
+    border-color var(--transition);
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
+
   gap: 10px;
 
+  color: var(--text);
   text-decoration: none;
   white-space: nowrap;
 
   font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -0.6px;
-
-  color: var(--text);
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .brand b {
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .logo {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
 
   display: grid;
   place-items: center;
@@ -196,35 +235,36 @@ summary:focus-visible {
   background:
     linear-gradient(
       135deg,
-      #8a75ff,
-      #5b48e8
+      #8b78ff,
+      #5946e8
     );
 
-  font-family: "Manrope", sans-serif;
-  font-size: 21px;
-  font-weight: 800;
+  font-size: 22px;
+  font-weight: 900;
 
   box-shadow:
-    0 6px 16px rgba(109, 93, 252, 0.28);
+    0 6px 18px rgba(109, 93, 252, 0.28);
 }
+
+
+/* Navigation links */
 
 .main-nav,
 .nav nav {
   display: flex;
   align-items: center;
-  gap: 30px;
+
+  gap: 25px;
 }
 
 .main-nav a,
 .nav nav a {
-  position: relative;
-
   color: var(--muted);
 
   text-decoration: none;
 
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 800;
 
   transition: color var(--transition);
 }
@@ -233,6 +273,9 @@ summary:focus-visible {
 .nav nav a:hover {
   color: var(--accent);
 }
+
+
+/* Navbar actions */
 
 .nav-actions {
   display: flex;
@@ -272,10 +315,22 @@ summary:focus-visible {
 }
 
 .coin-pill {
-  color: #9a6900;
+  color: #946700;
 
   background: #fff8dc;
   border-color: #f1df9a;
+}
+
+.coin-label {
+  font-weight: 700;
+}
+
+.account-btn {
+  max-width: 150px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .coin-pill:hover,
@@ -285,35 +340,130 @@ summary:focus-visible {
   border-color: var(--accent-light);
 }
 
-.coin-label {
-  font-weight: 700;
-}
-
-.account-btn {
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .theme {
   min-width: 40px;
   padding: 8px;
+
   font-size: 17px;
 }
 
 
-/* 4. HERO SECTION
------------------------------------------------------ */
+/* 5. GLOBAL BUTTONS */
+
+.primary,
+.secondary {
+  min-height: 46px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 12px 19px;
+
+  border: 1px solid transparent;
+  border-radius: 12px;
+
+  text-align: center;
+  text-decoration: none;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    background var(--transition),
+    border-color var(--transition);
+}
+
+.primary {
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7865ff,
+      #5948e6
+    );
+
+  box-shadow:
+    0 8px 20px rgba(109, 93, 252, 0.23);
+}
+
+.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 12px 28px rgba(109, 93, 252, 0.3);
+}
+
+.secondary {
+  color: var(--text);
+
+  background: var(--card);
+  border-color: var(--border);
+}
+
+.secondary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--accent-light);
+}
+
+.primary:active:not(:disabled),
+.secondary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+
+/* 6. GENERAL FORM ELEMENTS */
+
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+input:not([type="checkbox"]):not([type="range"]):not([type="file"]),
+select,
+textarea {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+
+/* END OF PART 1/5
+   Add PART 2 directly below this code. */
+/* =====================================================
+   PIXEL REFINE — PROFESSIONAL CSS
+   PART 2/5
+   Hero Section, Typography and Artwork
+   ===================================================== */
+
+
+/* 1. HERO SECTION */
 
 .hero {
   position: relative;
+  isolation: isolate;
   overflow: hidden;
 
+  width: 100%;
   max-width: 1440px;
-  min-height: 580px;
+  min-height: 570px;
 
-  margin: auto;
+  margin: 0 auto;
 
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
@@ -322,24 +472,25 @@ summary:focus-visible {
 
   gap: 45px;
 
-  padding: 85px max(35px, calc((100% - 1160px) / 2)) 75px;
+  padding: 80px max(35px, calc((100% - 1160px) / 2)) 75px;
 }
 
 .hero-glow {
   position: absolute;
-
-  width: 480px;
-  height: 480px;
+  z-index: -1;
 
   top: 10px;
   right: 0;
+
+  width: 480px;
+  height: 480px;
 
   pointer-events: none;
 
   background:
     radial-gradient(
       circle,
-      rgba(125, 104, 255, 0.13),
+      rgba(125, 104, 255, 0.16),
       transparent 70%
     );
 
@@ -352,6 +503,9 @@ summary:focus-visible {
 
   min-width: 0;
 }
+
+
+/* 2. HERO BADGE */
 
 .badge {
   display: inline-flex;
@@ -369,19 +523,28 @@ summary:focus-visible {
 
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.1px;
+  letter-spacing: 0.2px;
 }
 
+
+/* 3. HERO HEADING */
+
 .hero h1 {
-  margin: 25px 0 20px;
+  margin: 24px 0 20px;
 
-  font-family: "Manrope", sans-serif;
+  font-family:
+    "Manrope",
+    "DM Sans",
+    system-ui,
+    sans-serif;
 
-  font-size: clamp(44px, 5.4vw, 72px);
-  font-weight: 800;
+  font-size: clamp(42px, 5.4vw, 72px);
+  font-weight: 900;
 
-  line-height: 1.04;
-  letter-spacing: -4px;
+  line-height: 1.07;
+  letter-spacing: -3.5px;
+
+  overflow-wrap: anywhere;
 }
 
 .hero h1 span,
@@ -403,6 +566,9 @@ summary:focus-visible {
   -webkit-text-fill-color: transparent;
 }
 
+
+/* 4. HERO DESCRIPTION */
+
 .hero-copy,
 .hero p {
   max-width: 510px;
@@ -411,87 +577,42 @@ summary:focus-visible {
 
   color: var(--muted);
 
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.9;
 }
+
+
+/* 5. HERO ACTION BUTTONS */
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
 
   align-items: center;
+
   gap: 12px;
 
-  margin-top: 30px;
+  margin-top: 29px;
 }
 
-.primary,
-.secondary {
-  min-height: 47px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 8px;
-
-  padding: 13px 19px;
-
-  border: 1px solid transparent;
-  border-radius: 12px;
-
-  text-align: center;
-  text-decoration: none;
-
-  font-size: 12px;
-  font-weight: 800;
-
-  transition:
-    transform var(--transition),
-    box-shadow var(--transition),
-    background var(--transition);
+.hero-actions .primary,
+.hero-actions .secondary {
+  min-height: 48px;
+  padding: 14px 21px;
 }
 
-.primary {
-  color: #ffffff;
 
-  background:
-    linear-gradient(
-      135deg,
-      #7865ff,
-      #5948e6
-    );
-
-  box-shadow:
-    0 8px 20px rgba(109, 93, 252, 0.23);
-}
-
-.primary:hover {
-  transform: translateY(-2px);
-
-  box-shadow:
-    0 12px 28px rgba(109, 93, 252, 0.3);
-}
-
-.secondary {
-  color: var(--text);
-
-  background: var(--card);
-  border-color: var(--border);
-}
-
-.secondary:hover {
-  border-color: var(--accent-light);
-  transform: translateY(-2px);
-}
+/* 6. TRUST LABELS */
 
 .hero-trust {
   display: flex;
   flex-wrap: wrap;
 
-  gap: 16px;
+  align-items: center;
 
-  margin-top: 27px;
+  gap: 12px 18px;
+
+  margin-top: 26px;
 
   color: var(--muted);
 
@@ -499,13 +620,15 @@ summary:focus-visible {
   font-weight: 700;
 }
 
-.hero-trust span::first-letter {
-  color: var(--success);
+.hero-trust span {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
 }
 
 
-/* 5. HERO ARTWORK
------------------------------------------------------ */
+/* 7. HERO ARTWORK CONTAINER */
 
 .hero-art {
   position: relative;
@@ -513,21 +636,23 @@ summary:focus-visible {
   width: 100%;
   max-width: 510px;
 
+  min-width: 0;
+
   justify-self: end;
 
   padding: 30px 10px;
 }
 
+
+/* 8. ARTWORK WINDOW */
+
 .art-window {
   position: relative;
-
   overflow: hidden;
 
   width: 100%;
 
-  padding: 0;
-
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.75);
   border-radius: 24px;
 
   background: #ffffff;
@@ -537,15 +662,24 @@ summary:focus-visible {
     0 5px 20px rgba(25, 25, 60, 0.05);
 
   transform: rotate(1.5deg);
+
+  transition: transform 0.3s ease;
 }
 
+.art-window:hover {
+  transform: rotate(0deg) translateY(-3px);
+}
+
+
+/* 9. WINDOW TOP BAR */
+
 .art-window-top {
-  height: 49px;
+  min-height: 49px;
 
   display: flex;
   align-items: center;
 
-  gap: 6px;
+  gap: 7px;
 
   padding: 0 15px;
 
@@ -555,8 +689,10 @@ summary:focus-visible {
 }
 
 .art-window-top > span {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
+
+  flex-shrink: 0;
 
   border-radius: 50%;
 
@@ -582,9 +718,11 @@ summary:focus-visible {
   font-weight: 800;
 }
 
+
+/* 10. ARTWORK PREVIEW */
+
 .art-preview {
   position: relative;
-
   overflow: hidden;
 
   min-height: 295px;
@@ -597,6 +735,9 @@ summary:focus-visible {
       #f7d9bc 100%
     );
 }
+
+
+/* Sun */
 
 .art-sun {
   position: absolute;
@@ -619,6 +760,9 @@ summary:focus-visible {
   box-shadow:
     0 0 55px rgba(255, 240, 194, 0.7);
 }
+
+
+/* Mountains */
 
 .art-mountain {
   position: absolute;
@@ -646,6 +790,9 @@ summary:focus-visible {
   transform: scale(1.1);
 }
 
+
+/* Water */
+
 .art-water {
   position: absolute;
 
@@ -665,6 +812,9 @@ summary:focus-visible {
   opacity: 0.9;
 }
 
+
+/* Artwork label */
+
 .art-chip {
   position: absolute;
 
@@ -676,7 +826,7 @@ summary:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 9px;
 
-  background: rgba(255, 255, 255, 0.83);
+  background: rgba(255, 255, 255, 0.88);
 
   color: #5244bd;
 
@@ -685,6 +835,9 @@ summary:focus-visible {
 
   backdrop-filter: blur(10px);
 }
+
+
+/* 11. ARTWORK TOOLBAR */
 
 .art-toolbar {
   display: flex;
@@ -706,14 +859,18 @@ summary:focus-visible {
   border-radius: 9px;
 
   color: #7e7c91;
-
   background: #f5f4fa;
+
+  font-size: 14px;
 }
 
 .art-toolbar .art-toolbar-active {
   color: #ffffff;
-  background: var(--accent);
+  background: #6d5dfc;
 }
+
+
+/* 12. FLOATING INFORMATION CARDS */
 
 .floating-card {
   position: absolute;
@@ -729,7 +886,7 @@ summary:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 15px;
 
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.96);
 
   box-shadow:
     0 14px 40px rgba(25, 25, 60, 0.12);
@@ -747,9 +904,12 @@ summary:focus-visible {
   left: -20px;
 }
 
+
+/* Floating icons */
+
 .floating-icon {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
 
   display: grid;
   place-items: center;
@@ -760,6 +920,8 @@ summary:focus-visible {
 
   color: #5949e5;
   background: #efecff;
+
+  font-size: 17px;
 }
 
 .floating-icon.purple {
@@ -774,6 +936,7 @@ summary:focus-visible {
 
 .floating-card b {
   font-size: 11px;
+  font-weight: 900;
 }
 
 .floating-card small {
@@ -791,19 +954,28 @@ summary:focus-visible {
 }
 
 
-/* 6. QUICK STATS
------------------------------------------------------ */
+/* END OF PART 2/5
+   Add PART 3 directly below this code. */
+/* =====================================================
+   PIXEL REFINE — PROFESSIONAL CSS
+   PART 3/5
+   Search, Quick Stats, Filters and Tool Cards
+   ===================================================== */
+
+
+/* 1. QUICK STATS */
 
 .quick-stats {
+  width: calc(100% - 40px);
   max-width: 1050px;
 
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 
   gap: 20px;
 
   margin: 0 auto 65px;
-  padding: 23px 30px;
+  padding: 24px 30px;
 
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -811,15 +983,18 @@ summary:focus-visible {
   background: var(--card);
 
   box-shadow: var(--shadow-sm);
+
+  transition:
+    background var(--transition),
+    border-color var(--transition);
 }
 
 .quick-stats > div {
   display: flex;
   flex-direction: column;
-
   align-items: center;
 
-  gap: 3px;
+  gap: 4px;
 
   text-align: center;
 }
@@ -833,27 +1008,30 @@ summary:focus-visible {
 
   font-family: "Manrope", sans-serif;
 
-  font-size: 19px;
-  font-weight: 800;
+  font-size: 21px;
+  font-weight: 900;
 }
 
 .quick-stats span {
   color: var(--muted);
 
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 
-/* 7. SEARCH
------------------------------------------------------ */
+/* 2. SEARCH WRAPPER */
 
 .search-wrap {
+  width: 100%;
   max-width: var(--container);
 
   margin: 0 auto;
   padding: 0 24px;
 }
+
+
+/* 3. SEARCH BOX */
 
 .search {
   min-height: 61px;
@@ -874,20 +1052,23 @@ summary:focus-visible {
 
   transition:
     border-color var(--transition),
-    box-shadow var(--transition);
+    box-shadow var(--transition),
+    background var(--transition);
 }
 
 .search:focus-within {
   border-color: var(--accent-light);
 
   box-shadow:
-    0 0 0 4px rgba(109, 93, 252, 0.08);
+    0 0 0 4px rgba(109, 93, 252, 0.09);
 }
 
 .search-icon {
+  flex-shrink: 0;
+
   color: var(--accent);
 
-  font-size: 26px;
+  font-size: 25px;
   line-height: 1;
 }
 
@@ -906,8 +1087,13 @@ summary:focus-visible {
   font-size: 13px;
 }
 
+.search input:focus {
+  outline: 0;
+}
+
 .search input::placeholder {
-  color: #a1a3b4;
+  color: var(--muted);
+  opacity: 0.75;
 }
 
 .search-hint {
@@ -919,9 +1105,13 @@ summary:focus-visible {
   font-weight: 700;
 }
 
+
+/* 4. CATEGORY FILTERS */
+
 .chips {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
 
   gap: 9px;
 
@@ -931,7 +1121,7 @@ summary:focus-visible {
 .chips button {
   min-height: 36px;
 
-  padding: 8px 14px;
+  padding: 8px 15px;
 
   border: 1px solid var(--border);
   border-radius: 100px;
@@ -945,32 +1135,41 @@ summary:focus-visible {
   transition:
     color var(--transition),
     background var(--transition),
-    border-color var(--transition);
+    border-color var(--transition),
+    transform var(--transition);
 }
 
 .chips button:hover {
-  border-color: var(--accent-light);
   color: var(--accent);
+  border-color: var(--accent-light);
+
+  transform: translateY(-1px);
 }
 
 .chips button.active {
   color: #ffffff;
 
-  background: var(--text);
-  border-color: var(--text);
+  background: var(--accent);
+  border-color: var(--accent);
+
+  box-shadow:
+    0 5px 15px rgba(109, 93, 252, 0.2);
 }
 
 
-/* 8. TOOLS SECTION
------------------------------------------------------ */
+/* 5. TOOLS SECTION */
 
 .tools-section {
+  width: 100%;
   max-width: var(--container);
 
   margin: 0 auto;
 
-  padding: 0 24px 100px;
+  padding: 0 24px 95px;
 }
+
+
+/* 6. SECTION HEADING */
 
 .section-head {
   display: flex;
@@ -979,7 +1178,7 @@ summary:focus-visible {
 
   gap: 20px;
 
-  margin-bottom: 25px;
+  margin-bottom: 27px;
 }
 
 .eyebrow,
@@ -991,20 +1190,25 @@ summary:focus-visible {
   font-size: 10px;
   font-weight: 900;
 
-  letter-spacing: 1.8px;
+  letter-spacing: 1.7px;
+  text-transform: uppercase;
 }
 
 .section-head h2,
 .faq h2 {
   margin: 8px 0 10px;
 
-  font-family: "Manrope", sans-serif;
+  font-family:
+    "Manrope",
+    "DM Sans",
+    system-ui,
+    sans-serif;
 
-  font-size: clamp(27px, 3vw, 37px);
-  font-weight: 800;
+  font-size: clamp(27px, 3vw, 38px);
+  font-weight: 900;
 
   line-height: 1.2;
-  letter-spacing: -1.4px;
+  letter-spacing: -1.3px;
 }
 
 .section-head p,
@@ -1023,25 +1227,30 @@ summary:focus-visible {
   color: var(--muted);
 
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 
-/* Tool cards generated by JavaScript */
+/* 7. TOOL GRID */
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
 
-  gap: 16px;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 17px;
 }
+
+
+/* 8. INDIVIDUAL TOOL CARD */
 
 .tool {
   position: relative;
   overflow: hidden;
 
   min-width: 0;
-  min-height: 190px;
+  min-height: 195px;
 
   display: flex;
   flex-direction: column;
@@ -1063,6 +1272,9 @@ summary:focus-visible {
     box-shadow var(--transition),
     background var(--transition);
 }
+
+
+/* Gradient line on top */
 
 .tool::before {
   content: "";
@@ -1087,10 +1299,13 @@ summary:focus-visible {
   transition: opacity var(--transition);
 }
 
+
+/* Card hover effect */
+
 .tool:hover {
   transform: translateY(-5px);
 
-  border-color: #d7d0ff;
+  border-color: var(--accent-light);
 
   background: var(--card-hover);
 
@@ -1102,12 +1317,18 @@ summary:focus-visible {
   opacity: 1;
 }
 
+
+/* Keyboard focus */
+
 .tool:focus-visible {
-  outline: 3px solid rgba(109, 93, 252, 0.35);
+  outline: 3px solid rgba(109, 93, 252, 0.4);
   outline-offset: 3px;
 }
 
-.icon {
+
+/* 9. TOOL ICON */
+
+.tool .icon {
   width: 48px;
   height: 48px;
 
@@ -1116,7 +1337,7 @@ summary:focus-visible {
 
   flex-shrink: 0;
 
-  margin-bottom: 18px;
+  margin-bottom: 17px;
 
   border-radius: 14px;
 
@@ -1124,7 +1345,18 @@ summary:focus-visible {
   background: var(--purple-soft);
 
   font-size: 25px;
+
+  transition:
+    transform var(--transition),
+    background var(--transition);
 }
+
+.tool:hover .icon {
+  transform: scale(1.06);
+}
+
+
+/* 10. TOOL TITLE */
 
 .tool h3 {
   margin: 0 0 8px;
@@ -1132,10 +1364,13 @@ summary:focus-visible {
   color: var(--text);
 
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 900;
 
   line-height: 1.45;
 }
+
+
+/* 11. TOOL DESCRIPTION */
 
 .tool p {
   margin: 0 0 16px;
@@ -1143,10 +1378,13 @@ summary:focus-visible {
   color: var(--muted);
 
   font-size: 11px;
-  line-height: 1.75;
+  line-height: 1.8;
 }
 
-.tag {
+
+/* 12. TOOL CATEGORY TAG */
+
+.tool .tag {
   margin-top: auto;
   padding-top: 9px;
 
@@ -1159,13 +1397,16 @@ summary:focus-visible {
   text-transform: uppercase;
 }
 
+
+/* 13. EMPTY OR INFORMATIONAL MESSAGE */
+
 .tools-note {
   margin-top: 20px;
 
-  padding: 14px 16px;
+  padding: 15px 17px;
 
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 13px;
 
   background: var(--card);
 
@@ -1176,18 +1417,41 @@ summary:focus-visible {
 }
 
 
-/* 9. FEATURES
------------------------------------------------------ */
+/* 14. SMALL SCREEN IMPROVEMENTS */
+
+@media (max-width: 1000px) {
+  .grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+  .quick-stats {
+    max-width: 850px;
+  }
+}
+
+
+/* END OF PART 3/5
+   Add PART 4 directly below this code. */
+/* =====================================================
+   PIXEL REFINE — PROFESSIONAL CSS
+   PART 4/5
+   Features, Pricing, FAQ and Footer
+   ===================================================== */
+
+
+/* 1. FEATURES SECTION */
 
 .features {
   position: relative;
+  overflow: hidden;
 
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 
   align-items: center;
 
-  gap: 80px;
+  gap: 70px;
 
   padding: 90px max(24px, calc((100% - 1080px) / 2));
 
@@ -1202,6 +1466,9 @@ summary:focus-visible {
   color: #ffffff;
 }
 
+
+/* Features heading */
+
 .features .eyebrow,
 .features small {
   color: #b4a9ff;
@@ -1210,24 +1477,17 @@ summary:focus-visible {
 .features h2 {
   margin: 14px 0 20px;
 
-  font-family: "Manrope", sans-serif;
+  font-family:
+    "Manrope",
+    "DM Sans",
+    system-ui,
+    sans-serif;
 
-  font-size: clamp(34px, 4vw, 47px);
-  font-weight: 800;
+  font-size: clamp(32px, 4vw, 47px);
+  font-weight: 900;
 
   line-height: 1.2;
   letter-spacing: -1.8px;
-}
-
-.features p {
-  max-width: 480px;
-
-  margin: 0;
-
-  color: #b4b5cb;
-
-  font-size: 14px;
-  line-height: 1.9;
 }
 
 .features h2 span {
@@ -1244,6 +1504,23 @@ summary:focus-visible {
   -webkit-text-fill-color: transparent;
 }
 
+
+/* Features description */
+
+.features p {
+  max-width: 480px;
+
+  margin: 0;
+
+  color: #b4b5cb;
+
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+
+/* Features link */
+
 .text-link {
   display: inline-flex;
   align-items: center;
@@ -1258,11 +1535,16 @@ summary:focus-visible {
   font-weight: 800;
 
   text-decoration: none;
+
+  transition: color var(--transition);
 }
 
 .text-link:hover {
   color: #ffffff;
 }
+
+
+/* 2. FEATURE LIST */
 
 .feature-list {
   display: grid;
@@ -1271,6 +1553,7 @@ summary:focus-visible {
 
 .feature-list article {
   display: grid;
+
   grid-template-columns: 43px minmax(0, 1fr);
 
   align-items: start;
@@ -1286,14 +1569,20 @@ summary:focus-visible {
 
   transition:
     background var(--transition),
-    transform var(--transition);
+    transform var(--transition),
+    border-color var(--transition);
 }
 
 .feature-list article:hover {
   transform: translateX(3px);
 
   background: rgba(255, 255, 255, 0.075);
+
+  border-color: rgba(255, 255, 255, 0.18);
 }
+
+
+/* Feature icons */
 
 .feature-icon {
   width: 42px;
@@ -1318,7 +1607,7 @@ summary:focus-visible {
   color: #ffffff;
 
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .feature-list article span:not(.feature-icon) {
@@ -1331,10 +1620,10 @@ summary:focus-visible {
 }
 
 
-/* 10. PRICING
------------------------------------------------------ */
+/* 3. PRICING SECTION */
 
 .pricing {
+  width: 100%;
   max-width: var(--container);
 
   margin: 0 auto;
@@ -1346,14 +1635,22 @@ summary:focus-visible {
   margin-bottom: 35px;
 }
 
+
+/* Pricing cards grid */
+
 .pricing-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
 
   align-items: stretch;
 
   gap: 18px;
 }
+
+
+/* Individual plan */
 
 .plan {
   position: relative;
@@ -1375,13 +1672,18 @@ summary:focus-visible {
   transition:
     transform var(--transition),
     box-shadow var(--transition),
-    border-color var(--transition);
+    border-color var(--transition),
+    background var(--transition);
 }
 
 .plan:hover {
   transform: translateY(-4px);
+
   box-shadow: var(--shadow);
 }
+
+
+/* Featured plan */
 
 .plan.featured {
   border: 1.5px solid var(--accent);
@@ -1389,6 +1691,30 @@ summary:focus-visible {
   box-shadow:
     0 16px 40px rgba(109, 93, 252, 0.12);
 }
+
+.plan.featured::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 20px;
+  right: 20px;
+
+  height: 3px;
+
+  border-radius: 0 0 5px 5px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--accent),
+      #b38cff
+    );
+}
+
+
+/* Plan badge */
 
 .plan-badge {
   align-self: flex-start;
@@ -1408,14 +1734,24 @@ summary:focus-visible {
   letter-spacing: 1px;
 }
 
+
+/* Plan title */
+
 .plan h3 {
   margin: 18px 0 10px;
 
-  font-family: "Manrope", sans-serif;
+  font-family:
+    "Manrope",
+    "DM Sans",
+    system-ui,
+    sans-serif;
 
   font-size: 19px;
-  font-weight: 800;
+  font-weight: 900;
 }
+
+
+/* Price display */
 
 .price {
   display: flex;
@@ -1431,7 +1767,7 @@ summary:focus-visible {
   font-family: "Manrope", sans-serif;
 
   font-size: 35px;
-  font-weight: 800;
+  font-weight: 900;
 
   letter-spacing: -1.5px;
 }
@@ -1443,13 +1779,20 @@ summary:focus-visible {
   font-weight: 700;
 }
 
+
+/* Plan description */
+
 .plan-summary {
   margin: 7px 0 15px;
 
   color: var(--muted);
 
   font-size: 12px;
+  line-height: 1.8;
 }
+
+
+/* Plan features */
 
 .plan ul {
   flex: 1;
@@ -1476,8 +1819,981 @@ summary:focus-visible {
   content: "✓";
 
   position: absolute;
+
   left: 0;
+  top: 0;
 
   color: var(--success);
 
- 
+  font-size: 13px;
+  font-weight: 900;
+}
+
+
+/* Plan button */
+
+.plan > .primary,
+.plan > .secondary {
+  width: 100%;
+  margin-top: auto;
+}
+
+
+/* 4. FAQ SECTION */
+
+.faq {
+  width: 100%;
+  max-width: 1050px;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 0.8fr)
+    minmax(0, 1.2fr);
+
+  align-items: start;
+
+  gap: 65px;
+
+  margin: 0 auto;
+
+  padding: 80px 24px 100px;
+}
+
+
+/* FAQ introduction */
+
+.faq-intro {
+  position: sticky;
+  top: 110px;
+}
+
+.faq h2 {
+  margin: 10px 0 15px;
+}
+
+.faq-intro > p {
+  max-width: 350px;
+}
+
+
+/* FAQ list */
+
+.faq-list {
+  display: grid;
+  gap: 12px;
+}
+
+.faq-item {
+  overflow: hidden;
+
+  border: 1px solid var(--border);
+  border-radius: 15px;
+
+  background: var(--card);
+
+  box-shadow: var(--shadow-sm);
+
+  transition:
+    border-color var(--transition),
+    background var(--transition);
+}
+
+.faq-item:hover {
+  border-color: var(--accent-light);
+}
+
+
+/* FAQ question */
+
+.faq-item summary {
+  position: relative;
+
+  display: block;
+
+  padding: 19px 45px 19px 19px;
+
+  color: var(--text);
+
+  font-size: 12px;
+  font-weight: 900;
+
+  line-height: 1.7;
+
+  cursor: pointer;
+
+  list-style: none;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary::after {
+  content: "+";
+
+  position: absolute;
+
+  top: 50%;
+  right: 18px;
+
+  transform: translateY(-50%);
+
+  color: var(--accent);
+
+  font-size: 22px;
+  font-weight: 500;
+
+  transition: transform var(--transition);
+}
+
+.faq-item[open] summary::after {
+  content: "−";
+}
+
+
+/* FAQ answer */
+
+.faq-item p {
+  margin: 0;
+
+  padding: 0 19px 20px;
+
+  color: var(--muted);
+
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+
+/* 5. FOOTER */
+
+.footer {
+  padding: 45px 24px 25px;
+
+  border-top: 1px solid var(--border);
+
+  background: var(--card);
+
+  color: var(--muted);
+
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+}
+
+.footer-inner {
+  width: 100%;
+  max-width: var(--container);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  flex-wrap: wrap;
+
+  gap: 25px;
+
+  margin: 0 auto;
+}
+
+.footer .brand {
+  color: var(--text);
+}
+
+.footer p {
+  margin: 8px 0 0;
+
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 18px;
+}
+
+.footer-links a {
+  color: var(--muted);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  text-decoration: none;
+
+  transition: color var(--transition);
+}
+
+.footer-links a:hover {
+  color: var(--accent);
+}
+
+.footer-bottom {
+  width: 100%;
+  max-width: var(--container);
+
+  margin: 30px auto 0;
+  padding-top: 20px;
+
+  border-top: 1px solid var(--border);
+
+  text-align: center;
+
+  font-size: 10px;
+}
+
+
+/* END OF PART 4/5
+   Add PART 5 directly below this code. */
+/* ==================================================
+   PIXEL REFINE — PART 5/5
+   MODALS, IMAGE UPLOAD, PREVIEW, FORMS & RESPONSIVE
+================================================== */
+
+/* ---------- MODAL BACKDROP ---------- */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgba(15, 18, 35, 0.68);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.modal.show {
+  display: flex;
+}
+
+#modalContent {
+  position: relative;
+  width: min(100%, 720px);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 30px;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 0 25px 90px rgba(0, 0, 0, 0.25);
+  animation: modalEnter 0.25s ease;
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------- MODAL CLOSE BUTTON ---------- */
+
+#close {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  float: right;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin: -8px -8px 8px 12px;
+  padding: 0;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 23px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+#close:hover {
+  background: var(--border);
+  transform: rotate(5deg);
+}
+
+/* ---------- MODAL HEADING ---------- */
+
+.tool-modal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  margin-bottom: 24px;
+  padding-right: 30px;
+}
+
+.tool-modal-head .icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: var(--primary-soft);
+  border-radius: 17px;
+  font-size: 28px;
+}
+
+.tool-modal-head h2 {
+  margin: 0 0 7px;
+  color: var(--text);
+  font-size: clamp(21px, 3vw, 28px);
+  font-weight: 800;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.tool-modal-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ---------- FILE DROP AREA ---------- */
+
+.drop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 210px;
+  padding: 28px 20px;
+  text-align: center;
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.drop:hover,
+.drop.dragging {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.drop.dragging {
+  transform: scale(1.01);
+}
+
+.upload-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: 20px;
+  font-size: 30px;
+}
+
+.drop strong {
+  display: block;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 750;
+}
+
+.upload-hint {
+  max-width: 100%;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.upload-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* Keep the file input usable by JavaScript. */
+#fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- PREVIEW AREA ---------- */
+
+#previewArea {
+  margin-top: 22px;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+#previewArea h3 {
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 750;
+}
+
+#preview {
+  display: block;
+  width: 100%;
+  max-height: 340px;
+  margin: 0 auto;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+#fileInfo {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- TOOL OPTIONS ---------- */
+
+#optionsArea {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.option,
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 15px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+}
+
+.option label,
+.control-group label {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.option input,
+.option select,
+.option textarea,
+.control-group input,
+.control-group select,
+.control-group textarea,
+#modalContent input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+#modalContent select,
+#modalContent textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 13px;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  outline: none;
+  font: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.option textarea,
+.control-group textarea,
+#modalContent textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.option input:focus,
+.option select:focus,
+.option textarea:focus,
+.control-group input:focus,
+.control-group select:focus,
+.control-group textarea:focus,
+#modalContent input:focus,
+#modalContent select:focus,
+#modalContent textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.option input[type="checkbox"],
+.control-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.option:has(input[type="checkbox"]) {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.option:has(input[type="checkbox"]) label {
+  flex: 1;
+}
+
+/* ---------- ACTION BUTTONS ---------- */
+
+#modalContent button {
+  font-family: inherit;
+}
+
+#modalContent .action,
+#modalContent button.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 11px 18px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+#modalContent .action:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+#modalContent .action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#processBtn,
+#generatePassword,
+#generateQR,
+#generateBarcode {
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+#processBtn:hover,
+#generatePassword:hover,
+#generateQR:hover,
+#generateBarcode:hover {
+  background: var(--primary-hover);
+}
+
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+/* ---------- STATUS MESSAGES ---------- */
+
+#status,
+#passwordStatus,
+#qrStatus,
+#barcodeStatus {
+  margin-top: 14px;
+  padding: 12px 14px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+#status:empty,
+#passwordStatus:empty,
+#qrStatus:empty,
+#barcodeStatus:empty {
+  display: none;
+}
+
+/* ---------- RESULTS ---------- */
+
+#resultArea {
+  margin-top: 22px;
+}
+
+.result-success {
+  padding: 20px;
+  color: var(--text);
+  background: var(--primary-soft);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.result-success h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.result-success p {
+  margin: 0 0 15px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+#downloadAgain {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 12px 18px;
+  color: #fff;
+  background: var(--primary);
+  border: 0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 750;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#downloadAgain:hover {
+  background: var(--primary-hover);
+}
+
+/* ---------- PASSWORD / QR / BARCODE TOOLS ---------- */
+
+#generatedPassword {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.5px;
+  overflow-wrap: anywhere;
+}
+
+#qrOutput,
+#barcodeOutput {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  margin-top: 18px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  overflow: auto;
+}
+
+#qrOutput canvas,
+#qrOutput img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+#barcodeOutput svg,
+#barcodeOutput canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---------- TOAST NOTIFICATION ---------- */
+
+#toast,
+.toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 10000;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 14px 18px;
+  color: #fff;
+  background: #202438;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+}
+
+#toast.show,
+.toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ---------- GENERAL ACCESSIBILITY ---------- */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+
+::selection {
+  color: #fff;
+  background: var(--primary);
+}
+
+/* ---------- TABLET RESPONSIVE ---------- */
+
+@media (max-width: 1000px) {
+  .hero {
+    gap: 35px;
+  }
+
+  .hero-art {
+    transform: scale(0.94);
+    transform-origin: center;
+  }
+
+  .features {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pricing {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .faq {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- MOBILE RESPONSIVE ---------- */
+
+@media (max-width: 760px) {
+  .nav {
+    gap: 12px;
+  }
+
+  .nav-actions {
+    gap: 8px;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding-top: 35px;
+    padding-bottom: 35px;
+  }
+
+  .hero-art {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    transform: none;
+  }
+
+  .quick-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing {
+    grid-template-columns: 1fr;
+  }
+
+  #modalContent {
+    padding: 24px;
+  }
+
+  .tool-modal-head {
+    gap: 12px;
+  }
+
+  .tool-modal-head .icon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+}
+
+/* ---------- SMALL MOBILE ---------- */
+
+@media (max-width: 520px) {
+  .nav {
+    flex-wrap: wrap;
+  }
+
+  .nav-actions {
+    gap: 6px;
+  }
+
+  .coin-pill {
+    padding: 7px 9px;
+    font-size: 12px;
+  }
+
+  .account-btn,
+  .theme {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .hero h1 {
+    font-size: clamp(32px, 9vw, 44px);
+    line-height: 1.12;
+  }
+
+  .hero p {
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  .quick-stats {
+    gap: 10px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .tool {
+    padding: 18px;
+  }
+
+  .search {
+    width: 100%;
+  }
+
+  .chips {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .chips button {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  #modal {
+    padding: 10px;
+  }
+
+  #modalContent {
+    max-height: 94vh;
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .tool-modal-head {
+    padding-right: 22px;
+  }
+
+  .tool-modal-head h2 {
+    font-size: 21px;
+  }
+
+  .tool-modal-head p {
+    font-size: 13px;
+  }
+
+  .drop {
+    min-height: 175px;
+    padding: 22px 14px;
+  }
+
+  .upload-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 25px;
+  }
+
+  #optionsArea {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions button,
+  .modal-actions a {
+    width: 100%;
+  }
+
+  #toast,
+  .toast {
+    right: 12px;
+    bottom: 12px;
+    max-width: calc(100vw - 24px);
+  }
+
+  .footer {
+    text-align: center;
+  }
+}
+
+/* ---------- REDUCED MOTION ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==================================================
+   END OF PART 5/5 — PIXEL REFINE CSS COMPLETE
+================================================== */
