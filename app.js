@@ -1131,7 +1131,7 @@ if (accountButton) {
       emailInput.value = email;
 
       // Avoid browser-specific type=email validity quirks; validate the trimmed value directly.
-      const emailLooksValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+      const emailLooksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       if (!emailLooksValid) {
         status.textContent = 'Enter an email in the format name@example.com.';
         emailInput.focus();
