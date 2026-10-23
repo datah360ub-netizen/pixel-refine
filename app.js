@@ -308,6 +308,87 @@ function setLiveProgress(percent, label, stepIndex = 0) {
   });
 }
 
+
+function mountManualEditor(sourceUrl, compareUrl = null, label = 'Manual erase editor') {
+  const area = document.getElementById('resultArea');
+  if (!area) return;
+  area.innerHTML = `
+    <section class="manual-editor">
+      <div class="manual-editor-head"><h3>${label}</h3><p>Brush se erase karo; Restore se galti wapas lao. Changes download karne se pehle live dikhte hain.</p></div>
+      <div class="manual-toolbar">
+        <button type="button" class="secondary" id="brushErase">🖌️ Erase</button>
+        <button type="button" class="secondary" id="brushRestore">🩹 Restore</button>
+        <label>Brush <input id="brushSize" type="range" min="5" max="140" value="32"><span id="brushSizeValue">32 px</span></label>
+        <button type="button" class="secondary" id="brushUndo">↶ Undo</button>
+        <button type="button" class="secondary" id="brushReset">Reset</button>
+        <button type="button" class="primary" id="brushDownload">Download PNG</button>
+      </div>
+      <div class="compare-grid">
+        <div class="compare-panel"><b>${compareUrl ? 'Before' : 'Original / live edit'}</b><img id="manualBefore" alt="Before editing"></div>
+        <div class="compare-panel"><b>${compareUrl ? 'After / manual edit' : 'After / transparent areas'}</b><div class="editor-canvas-wrap"><canvas id="manualCanvas" aria-label="Manual eraser canvas"></canvas></div></div>
+      </div>
+      <p class="manual-hint">Tip: phone par ungli se canvas par draw karein. Transparent hissa checkerboard par dikh sakta hai.</p>
+    </section>`;
+  const canvas = document.getElementById('manualCanvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const before = document.getElementById('manualBefore');
+  before.src = compareUrl || sourceUrl;
+  const image = new Image();
+  image.onload = () => {
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    ctx.drawImage(image, 0, 0);
+    let mode = 'erase', drawing = false, history = [];
+    const remember = () => {
+      try { history.push(ctx.getImageData(0, 0, canvas.width, canvas.height)); if (history.length > 20) history.shift(); } catch (_) {}
+    };
+    remember();
+    const eraseBtn = document.getElementById('brushErase');
+    const restoreBtn = document.getElementById('brushRestore');
+    const brush = document.getElementById('brushSize');
+    const setMode = next => {
+      mode = next;
+      eraseBtn.classList.toggle('active', mode === 'erase');
+      restoreBtn.classList.toggle('active', mode === 'restore');
+    };
+    eraseBtn.onclick = () => setMode('erase');
+    restoreBtn.onclick = () => setMode('restore');
+    brush.oninput = () => document.getElementById('brushSizeValue').textContent = brush.value + ' px';
+    const point = event => {
+      const rect = canvas.getBoundingClientRect();
+      return {x:(event.clientX-rect.left)*canvas.width/rect.width,y:(event.clientY-rect.top)*canvas.height/rect.height};
+    };
+    const paint = event => {
+      const p = point(event), radius = Number(brush.value) / 2;
+      ctx.save();
+      if (mode === 'erase') {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath(); ctx.arc(p.x,p.y,radius,0,Math.PI*2); ctx.fill();
+      } else {
+        ctx.beginPath(); ctx.arc(p.x,p.y,radius,0,Math.PI*2); ctx.clip();
+        ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(image,0,0,canvas.width,canvas.height);
+      }
+      ctx.restore();
+    };
+    canvas.onpointerdown = event => { drawing=true; remember(); canvas.setPointerCapture?.(event.pointerId); paint(event); };
+    canvas.onpointermove = event => { if (drawing) paint(event); };
+    const stop = () => { drawing=false; };
+    canvas.onpointerup = stop; canvas.onpointercancel = stop;
+    document.getElementById('brushUndo').onclick = () => {
+      if (history.length > 1) { history.pop(); ctx.putImageData(history[history.length-1],0,0); }
+    };
+    document.getElementById('brushReset').onclick = () => { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(image,0,0); history=[ctx.getImageData(0,0,canvas.width,canvas.height)]; };
+    document.getElementById('brushDownload').onclick = () => canvas.toBlob(blob => {
+      if (!blob) { setStatus('Could not export the edited image.', true); return; }
+      downloadBlob(blob, (currentFile?.name || 'pixel-refine-image').replace(/\.[^.]+$/,'') + '-edited.png');
+      setStatus('Manual edit downloaded as a transparent PNG.');
+    }, 'image/png');
+    setMode('erase');
+  };
+  image.onerror = () => setStatus('Could not open image for manual editing.', true);
+  image.src = sourceUrl;
+}
+
 function loadFile(file) {
   if (!currentTool) return;
 
@@ -354,6 +435,7 @@ function loadFile(file) {
       document.getElementById('processBtn').disabled = false;
       setLiveProgress(0, 'Ready', 0);
       setStatus('Image ready to process. Live stages will update while the tool runs.');
+      if (currentTool && currentTool[0] === 'Magic Eraser') mountManualEditor(imageState.src, null, 'Magic Eraser — manual brush editor');
     };
   };
 
@@ -456,15 +538,10 @@ async function processCurrentTool() {
       }
       setLiveProgress(92, 'Preparing download', 3);
       const url = URL.createObjectURL(outputBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = (currentFile.name.replace(/\.[^.]+$/, '') || 'image') + '-no-background.png';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      mountManualEditor(url, imageState.src, 'Background Remover — compare & refine');
       setLiveProgress(100, 'Complete', 4);
-      setStatus('Background removed! Your transparent PNG download should start now.');
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      setStatus('Background removed! Compare Before/After, then use Erase or Restore to refine edges and download PNG.');
+      setTimeout(() => URL.revokeObjectURL(url), 10 * 60 * 1000);
     } catch (error) {
       console.error('Background removal failed:', error);
       const detail = error && error.message ? error.message : String(error);
@@ -504,7 +581,17 @@ async function processCurrentTool() {
     return;
   }
 
-  if (action === 'advanced' || action === 'eraser') {
+  if (action === 'eraser') {
+    const canvas = document.getElementById('manualCanvas');
+    if (!canvas) { setStatus('Upload an image to open the manual eraser.', true); return; }
+    canvas.toBlob(blob => {
+      if (!blob) { setStatus('Could not export edited image.', true); return; }
+      downloadBlob(blob, (currentFile.name.replace(/\.[^.]+$/, '') || 'image') + '-edited.png');
+      setStatus('Manual eraser result downloaded as PNG.');
+    }, 'image/png');
+    return;
+  }
+  if (action === 'advanced') {
     setStatus('This feature needs its own AI model or processing backend and is not connected yet.', true);
     return;
   }
