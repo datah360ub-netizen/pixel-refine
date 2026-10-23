@@ -352,20 +352,38 @@ async function processCurrentTool() {
 
   const action = currentTool[4];
 
-  // Background removal runs in the browser using an AI segmentation model.
+  // AI background removal: load the library and its model assets from IMG.LY's CDN.
   if (currentTool[0] === 'AI Background Remover') {
     const button = document.getElementById('processBtn');
     button.disabled = true;
     button.textContent = 'Loading AI model...';
-    setStatus('Loading the background-removal AI model. The first run may take a while.');
+    setStatus('Connecting to the AI model. First use may download around 40 MB; keep the page open.');
     try {
-      const ai = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/+esm');
+      const module = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/+esm');
+      const removeBackground = module.default || module.removeBackground;
+      if (typeof removeBackground !== 'function') {
+        throw new Error('Background-removal function was not found in the loaded library.');
+      }
+      const config = {
+        publicPath: 'https://staticimgly.com/@imgly/background-removal-data/1.4.5/dist/',
+        model: 'isnet_quint8',
+        debug: true,
+        progress: (key, current, total) => {
+          if (total > 0) {
+            const percent = Math.round((current / total) * 100);
+            setStatus('Downloading AI model: ' + percent + '% (' + key + '). Please keep the page open.');
+          }
+        }
+      };
       button.textContent = 'Removing background...';
-      const outputBlob = await ai.removeBackground(currentFile);
+      const outputBlob = await removeBackground(currentFile, config);
+      if (!(outputBlob instanceof Blob) || outputBlob.size === 0) {
+        throw new Error('The AI returned an empty image.');
+      }
       const url = URL.createObjectURL(outputBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = (currentFile.name.replace(/\\.[^.]+$/, '') || 'image') + '-no-background.png';
+      link.download = (currentFile.name.replace(/\.[^.]+$/, '') || 'image') + '-no-background.png';
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -373,36 +391,8 @@ async function processCurrentTool() {
       setTimeout(() => URL.revokeObjectURL(url), 60000);
     } catch (error) {
       console.error('Background removal failed:', error);
-      setStatus('AI background removal could not load. Check your internet connection and try again; the AI model downloads from a third-party CDN.', true);
-    } finally {
-      button.disabled = false;
-      button.textContent = 'Process Image';
-    }
-    return;
-  }
-
-  // Browser-based AI background removal: no API key is required.
-  if (currentTool[0] === 'AI Background Remover') {
-    const button = document.getElementById('processBtn');
-    button.disabled = true;
-    button.textContent = 'Loading AI model...';
-    setStatus('Loading the AI model from the internet. The first run may take a while; keep this page open.');
-    try {
-      const ai = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/+esm');
-      button.textContent = 'Removing background...';
-      const outputBlob = await ai.removeBackground(currentFile);
-      const url = URL.createObjectURL(outputBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = (currentFile.name.replace(/\\.[^.]+$/, '') || 'image') + '-no-background.png';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setStatus('Background removed. Your transparent PNG should download now.');
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-    } catch (error) {
-      console.error('Background removal failed:', error);
-      setStatus('AI model could not load. Check your internet and retry. This tool downloads a third-party model and does not require an API key.', true);
+      const detail = error && error.message ? error.message : String(error);
+      setStatus('AI could not load: ' + detail + '. Check internet/data access and retry. No API key is required for this browser model.', true);
     } finally {
       button.disabled = false;
       button.textContent = 'Process Image';
