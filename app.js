@@ -770,11 +770,15 @@ function toggleTheme() {
 
 setupTheme();
 
-/* Connect to a theme button if your HTML contains one. */
-const themeButton = document.getElementById('themeToggle');
-
+/* Connect the actual header theme button in index.html. */
+const themeButton = document.getElementById('themeBtn');
 if (themeButton) {
-  themeButton.addEventListener('click', toggleTheme);
+  themeButton.addEventListener('click', () => {
+    toggleTheme();
+    themeButton.textContent = document.body.classList.contains('dark-mode') ? '☀' : '☾';
+    themeButton.setAttribute('aria-label', document.body.classList.contains('dark-mode') ? 'Switch to light mode' : 'Switch to dark mode');
+  });
+  themeButton.textContent = document.body.classList.contains('dark-mode') ? '☀' : '☾';
 }
 
 /* ---------- Daily demo coins ---------- */
@@ -794,11 +798,8 @@ function saveCoins(value) {
 }
 
 function updateCoinDisplay() {
-  const display = document.getElementById('coinBalance');
-
-  if (display) {
-    display.textContent = String(getCoins());
-  }
+  const display = document.getElementById('coinCount') || document.getElementById('coinBalance');
+  if (display) display.textContent = String(getCoins());
 }
 
 function claimDailyCoins() {
@@ -819,6 +820,57 @@ if (localStorage.getItem(PR_COINS_KEY) === null) {
 }
 
 updateCoinDisplay();
+
+
+/* ---------- Header account, coin and settings controls (demo only) ---------- */
+function showInfoModal(title, bodyHtml) {
+  content.innerHTML = `<h2>${title}</h2>${bodyHtml}`;
+  modal.classList.add('show');
+}
+const accountButton = document.getElementById('accountBtn');
+if (accountButton) {
+  accountButton.addEventListener('click', () => {
+    showInfoModal('Pixel Refine account', `
+      <p>This is a front-end demo. Secure accounts and password storage need a backend.</p>
+      <label>Email <input id="demoEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
+      <button class="primary" id="demoContinue" type="button">Continue</button>
+      <p id="demoAccountStatus" role="status"></p>`);
+    document.getElementById('demoContinue').onclick = () => {
+      const email = document.getElementById('demoEmail').value.trim();
+      const status = document.getElementById('demoAccountStatus');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        status.textContent = 'Please enter a valid email address.';
+        return;
+      }
+      status.textContent = 'Demo only: sign-in is not connected to a secure account service yet.';
+    };
+  });
+}
+const coinPill = document.getElementById('coinPill');
+if (coinPill) coinPill.addEventListener('click', () => {
+  showInfoModal('Your coins', `<p>You have <strong>${getCoins()}</strong> demo coins.</p>
+    <p>Daily reward: 10 coins (stored only in this browser).</p>
+    <button class="primary" id="claimCoins" type="button">Claim daily 10 coins</button>
+    <p id="coinStatus" role="status"></p>`);
+  document.getElementById('claimCoins').onclick = () => {
+    const ok = claimDailyCoins();
+    document.getElementById('coinStatus').textContent = ok ? '10 demo coins added!' : 'You have already claimed today’s reward.';
+    updateCoinDisplay();
+  };
+});
+const settingsButton = document.getElementById('settingsBtn');
+if (settingsButton) settingsButton.addEventListener('click', () => {
+  showInfoModal('Settings', `<p>Theme: ${document.body.classList.contains('dark-mode') ? 'Dark' : 'Light'}.</p>
+    <button class="secondary" id="settingsTheme" type="button">Toggle theme</button>
+    <p>Account and coins are demo-only until a backend is connected.</p>`);
+  document.getElementById('settingsTheme').onclick = () => {
+    toggleTheme();
+    closeModal();
+  };
+});
+document.querySelectorAll('.plan-btn').forEach(button => button.addEventListener('click', () => {
+  showInfoModal('Plans & payments', '<p>Checkout is not connected yet. Do not enter payment details here. A payment provider and backend must be configured before plans can be purchased.</p>');
+}));
 
 /* ---------- Password Generator ---------- */
 
