@@ -18,7 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css?v=20261023-8">
+  <link rel="stylesheet" href="style.css?v=20261023-9">
   <style>
 
     .pixel-brand{gap:11px!important;flex-shrink:0}
@@ -729,18 +729,47 @@
   const countryFlags = {
     "India":"🇮🇳","United States":"🇺🇸","United Kingdom":"🇬🇧","Canada":"🇨🇦","Australia":"🇦🇺","New Zealand":"🇳🇿","Japan":"🇯🇵","China":"🇨🇳","South Korea":"🇰🇷","North Korea":"🇰🇵","Taiwan":"🇹🇼","Pakistan":"🇵🇰","Bangladesh":"🇧🇩","Nepal":"🇳🇵","Sri Lanka":"🇱🇰","Bhutan":"🇧🇹","Afghanistan":"🇦🇫","Indonesia":"🇮🇩","Malaysia":"🇲🇾","Singapore":"🇸🇬","Thailand":"🇹🇭","Vietnam":"🇻🇳","Philippines":"🇵🇭","Myanmar":"🇲🇲","Cambodia":"🇰🇭","Laos":"🇱🇦","France":"🇫🇷","Germany":"🇩🇪","Italy":"🇮🇹","Spain":"🇪🇸","Portugal":"🇵🇹","Netherlands":"🇳🇱","Belgium":"🇧🇪","Switzerland":"🇨🇭","Austria":"🇦🇹","Ireland":"🇮🇪","Iceland":"🇮🇸","Norway":"🇳🇴","Sweden":"🇸🇪","Finland":"🇫🇮","Denmark":"🇩🇰","Poland":"🇵🇱","Ukraine":"🇺🇦","Russia":"🇷🇺","Greece":"🇬🇷","Türkiye":"🇹🇷","Turkey":"🇹🇷","Saudi Arabia":"🇸🇦","United Arab Emirates":"🇦🇪","Qatar":"🇶🇦","Israel":"🇮🇱","Palestine":"🇵🇸","Egypt":"🇪🇬","South Africa":"🇿🇦","Nigeria":"🇳🇬","Kenya":"🇰🇪","Ethiopia":"🇪🇹","Ghana":"🇬🇭","Morocco":"🇲🇦","Algeria":"🇩🇿","Tunisia":"🇹🇳","Brazil":"🇧🇷","Argentina":"🇦🇷","Chile":"🇨🇱","Colombia":"🇨🇴","Peru":"🇵🇪","Mexico":"🇲🇽","Cuba":"🇨🇺","Jamaica":"🇯🇲","Venezuela":"🇻🇪","Uruguay":"🇺🇾","Paraguay":"🇵🇾","Ecuador":"🇪🇨","Costa Rica":"🇨🇷","Panama":"🇵🇦","Ukraine":"🇺🇦","Romania":"🇷🇴","Bulgaria":"🇧🇬","Czechia":"🇨🇿","Slovakia":"🇸🇰","Hungary":"🇭🇺","Croatia":"🇭🇷","Serbia":"🇷🇸","Slovenia":"🇸🇮","Estonia":"🇪🇪","Latvia":"🇱🇻","Lithuania":"🇱🇹","Luxembourg":"🇱🇺","Monaco":"🇲🇨","Andorra":"🇦🇩","Malta":"🇲🇹","Cyprus":"🇨🇾","Iran":"🇮🇷","Iraq":"🇮🇶","Jordan":"🇯🇴","Lebanon":"🇱🇧","Oman":"🇴🇲","Kuwait":"🇰🇼","Bahrain":"🇧🇭","Yemen":"🇾🇪","Kazakhstan":"🇰🇿","Uzbekistan":"🇺🇿","Mongolia":"🇲🇳","Fiji":"🇫🇯","Papua New Guinea":"🇵🇬","Samoa":"🇼🇸","Tonga":"🇹🇴","Vanuatu":"🇻🇺","Zambia":"🇿🇲","Zimbabwe":"🇿🇼","Uganda":"🇺🇬","Tanzania":"🇹🇿","Rwanda":"🇷🇼","Senegal":"🇸🇳","Cameroon":"🇨🇲","Angola":"🇦🇴","Mozambique":"🇲🇿","Madagascar":"🇲🇬","Mauritius":"🇲🇺","Seychelles":"🇸🇨","Botswana":"🇧🇼","Namibia":"🇳🇦","Eswatini":"🇸🇿","Lesotho":"🇱🇸","Sudan":"🇸🇩","South Sudan":"🇸🇸","Libya":"🇱🇾","Somalia":"🇸🇴","Eritrea":"🇪🇷","Djibouti":"🇩🇯","Gambia":"🇬🇲","Guinea":"🇬🇳","Mali":"🇲🇱","Niger":"🇳🇪","Chad":"🇹🇩","Benin":"🇧🇯","Togo":"🇹🇬","Burkina Faso":"🇧🇫","Côte d’Ivoire":"🇨🇮","Cabo Verde":"🇨🇻","Comoros":"🇰🇲","Sao Tome and Principe":"🇸🇹","São Tomé and Príncipe":"🇸🇹"
   };
-  function countryFlag(name) { return countryFlags[name] || "🌐"; }
+  // ISO country codes fill in flags for every country in the country selector.
+  const countryIso = {
+    "Albania":"AL","Antigua and Barbuda":"AG","Armenia":"AM","Azerbaijan":"AZ","Bahamas":"BS","Barbados":"BB","Belarus":"BY","Belize":"BZ","Bolivia":"BO","Bosnia and Herzegovina":"BA","Brunei":"BN","Burundi":"BI","Central African Republic":"CF","Congo (Republic)":"CG","Democratic Republic of the Congo":"CD","Dominica":"DM","Dominican Republic":"DO","El Salvador":"SV","Equatorial Guinea":"GQ","Georgia":"GE","Grenada":"GD","Guatemala":"GT","Guinea-Bissau":"GW","Guyana":"GY","Haiti":"HT","Honduras":"HN","Kiribati":"KI","Kyrgyzstan":"KG","Liberia":"LR","Liechtenstein":"LI","Malawi":"MW","Maldives":"MV","Marshall Islands":"MH","Mauritania":"MR","Micronesia":"FM","Moldova":"MD","Montenegro":"ME","Nauru":"NR","Nicaragua":"NI","North Macedonia":"MK","Palau":"PW","Saint Kitts and Nevis":"KN","Saint Lucia":"LC","Saint Vincent and the Grenadines":"VC","San Marino":"SM","Sierra Leone":"SL","Solomon Islands":"SB","Suriname":"SR","Timor-Leste":"TL","Trinidad and Tobago":"TT","Turkmenistan":"TM","Tuvalu":"TV","Vatican City":"VA","Czechia":"CZ","Cabo Verde":"CV","Côte d’Ivoire":"CI","Eswatini":"SZ","Türkiye":"TR","Russia":"RU","South Korea":"KR","North Korea":"KP","Palestine":"PS","Taiwan":"TW","São Tomé and Príncipe":"ST","United States":"US","United Kingdom":"GB","New Zealand":"NZ","South Sudan":"SS","Ivory Coast":"CI","Syria":"SY","Laos":"LA","Iran":"IR","Vietnam":"VN","Tanzania":"TZ","Bolivia":"BO","Venezuela":"VE","Brunei":"BN","Congo":"CG","Congo (Republic)":"CG","Micronesia":"FM"
+  };
+  function flagFromIso(code) {
+    return code ? String.fromCodePoint(...code.toUpperCase().split("").map(ch => 127397 + ch.charCodeAt(0))) : "";
+  }
+  function countryFlag(name) { return countryFlags[name] || flagFromIso(countryIso[name]) || "🏳️"; }
+  function ensureTranslateElement() {
+    let host = document.getElementById("google_translate_element");
+    if (!host) {
+      host = document.createElement("div");
+      host.id = "google_translate_element";
+      host.setAttribute("aria-hidden", "true");
+      host.style.cssText = "position:fixed;left:-10000px;top:0;width:1px;height:1px;overflow:hidden";
+      document.body.appendChild(host);
+    }
+    return host;
+  }
   function initGoogleTranslate() {
-    if (window.google && google.translate && google.translate.TranslateElement) return;
+    ensureTranslateElement();
     window.googleTranslateElementInit = function () {
+      const host = ensureTranslateElement();
+      if (host.dataset.initialized === "1") { applySavedTranslation(); return; }
       new google.translate.TranslateElement({pageLanguage:"en", includedLanguages:"en,hi,or,bn,es,fr,pt,ar,zh-CN,ja,de,ru,ur,id,it,ko,tr,ta,te,mr,pa", autoDisplay:false}, "google_translate_element");
-      applySavedTranslation();
+      host.dataset.initialized = "1";
+      setTimeout(applySavedTranslation, 500);
     };
+    if (window.google && window.google.translate && window.google.translate.TranslateElement) {
+      window.googleTranslateElementInit();
+      return;
+    }
     if (!document.getElementById("google-translate-script")) {
       const script = document.createElement("script");
       script.id = "google-translate-script";
       script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
       script.async = true;
+      script.onerror = function () {
+        const status = document.getElementById("settingsSaveStatus");
+        if (status) status.textContent = "Translation service could not load. Check your internet connection and try again.";
+      };
       document.head.appendChild(script);
     }
   }
@@ -773,7 +802,7 @@
     const countryHtml = countryOptions.map(c => '<option value="' + c.replace(/&/g,"&amp;").replace(/"/g,"&quot;") + '"' + (c===savedCountry?' selected':'') + '>' + countryFlag(c) + ' ' + c + '</option>').join("");
     const languageHtml = languageOptions.map(l => '<option value="' + l[0] + '"' + (l[0]===savedLanguage?' selected':'') + '>' + l[1] + '</option>').join("");
     openHeaderDialog('More options & settings',
-      '<p class="settings-intro">Choose your country and preferred language. Your choices are saved on this device.</p><div id="google_translate_element" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden" aria-hidden="true"></div>' +
+      '<p class="settings-intro">Choose your country and preferred language. Your choices are saved on this device.</p>' +
       '<div class="settings-grid">' +
       '<label class="settings-field">🌍 Country / region<select id="settingsCountry">' + countryHtml + '</select></label>' +
       '<label class="settings-field">🌐 Language<select id="settingsLanguage">' + languageHtml + '</select></label>' +
@@ -810,7 +839,8 @@
         updateHeaderLanguageLabel();
         if (remember) { try { localStorage.setItem("pixelRefineLanguage", document.getElementById("settingsLanguage").value); } catch (_) {} }
         initGoogleTranslate();
-        setTimeout(applySavedTranslation, 250);
+        setTimeout(applySavedTranslation, 350);
+        setTimeout(applySavedTranslation, 1200);
         document.body.classList.toggle("settings-reduce-motion",document.getElementById("settingReduceMotion").checked);
         document.body.classList.toggle("settings-high-contrast",document.getElementById("settingHighContrast").checked);
         document.body.classList.toggle("settings-compact",document.getElementById("settingCompact").checked);
