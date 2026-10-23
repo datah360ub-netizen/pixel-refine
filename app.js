@@ -1129,11 +1129,15 @@ if (accountButton) {
       const email = emailInput.value.trim();
       const status = document.getElementById('demoAccountStatus');
       emailInput.value = email;
-      if (!email || !emailInput.validity.valid) {
-        status.textContent = 'Please check the email format (for example, name@example.com). No spaces are allowed inside the address.';
+
+      // Avoid browser-specific type=email validity quirks; validate the trimmed value directly.
+      const emailLooksValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+      if (!emailLooksValid) {
+        status.textContent = 'Enter an email in the format name@example.com.';
         emailInput.focus();
         return;
       }
+
       status.textContent = 'Email format looks valid. Sign-in is still demo-only because a secure account service has not been connected yet.';
     };
   });
