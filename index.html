@@ -707,8 +707,8 @@
     }
   }
   function applySavedTranslation() {
-    let lang = "en";
-    try { lang = localStorage.getItem("pixelRefineLanguage") || "en"; } catch (_) {}
+    let lang = window.pixelRefineCurrentLanguage || "en";
+    try { lang = window.pixelRefineCurrentLanguage || localStorage.getItem("pixelRefineLanguage") || "en"; } catch (_) {}
     if (lang === "en") return;
     const map = {or:"or",zh:"zh-CN"};
     const code = map[lang] || lang;
@@ -760,6 +760,7 @@
         if (remember) values.forEach(([k,v])=>localStorage.setItem(k,v));
         else values.forEach(([k])=>localStorage.removeItem(k));
         document.documentElement.lang = document.getElementById("settingsLanguage").value;
+        window.pixelRefineCurrentLanguage = document.getElementById("settingsLanguage").value;
         if (remember) { try { localStorage.setItem("pixelRefineLanguage", document.getElementById("settingsLanguage").value); } catch (_) {} }
         initGoogleTranslate();
         setTimeout(applySavedTranslation, 250);
@@ -775,6 +776,7 @@
     document.body.classList.toggle("settings-high-contrast",localStorage.getItem("pixelRefineHighContrast")==="1");
     document.body.classList.toggle("settings-compact",localStorage.getItem("pixelRefineCompact")==="1");
     document.documentElement.lang = localStorage.getItem("pixelRefineLanguage") || "en";
+    window.pixelRefineCurrentLanguage = document.documentElement.lang;
     initGoogleTranslate();
     window.addEventListener("load", function(){ setTimeout(applySavedTranslation, 900); });
   } catch (_) {}
