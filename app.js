@@ -372,7 +372,7 @@ function mountManualEditor(sourceUrl, compareUrl = null, label = 'Manual erase e
     };
     canvas.onpointerdown = event => { drawing=true; remember(); canvas.setPointerCapture?.(event.pointerId); paint(event); };
     canvas.onpointermove = event => { if (drawing) paint(event); };
-    const stop = () => { drawing=false; };
+    const stop = () => { if (drawing) { drawing=false; remember(); } };
     canvas.onpointerup = stop; canvas.onpointercancel = stop;
     document.getElementById('brushUndo').onclick = () => {
       if (history.length > 1) { history.pop(); ctx.putImageData(history[history.length-1],0,0); }
@@ -435,7 +435,7 @@ function loadFile(file) {
       document.getElementById('processBtn').disabled = false;
       setLiveProgress(0, 'Ready', 0);
       setStatus('Image ready to process. Live stages will update while the tool runs.');
-      if (currentTool && currentTool[0] === 'Magic Eraser') mountManualEditor(imageState.src, null, 'Magic Eraser — manual brush editor');
+      if (currentTool && currentTool[0] === 'Magic Eraser') { setStatus('Manual Magic Eraser is ready below: use Erase/Restore, then Download PNG.'); mountManualEditor(imageState.src, null, 'Magic Eraser — manual brush editor'); }
     };
   };
 
