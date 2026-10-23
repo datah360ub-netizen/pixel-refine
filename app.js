@@ -1125,13 +1125,16 @@ if (accountButton) {
       <button class="primary" id="demoContinue" type="button">Continue</button>
       <p id="demoAccountStatus" role="status"></p>`);
     document.getElementById('demoContinue').onclick = () => {
-      const email = document.getElementById('demoEmail').value.trim();
+      const emailInput = document.getElementById('demoEmail');
+      const email = emailInput.value.trim();
       const status = document.getElementById('demoAccountStatus');
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        status.textContent = 'Please enter a valid email address.';
+      emailInput.value = email;
+      if (!email || !emailInput.validity.valid) {
+        status.textContent = 'Please check the email format (for example, name@example.com). No spaces are allowed inside the address.';
+        emailInput.focus();
         return;
       }
-      status.textContent = 'Demo only: sign-in is not connected to a secure account service yet.';
+      status.textContent = 'Email format looks valid. Sign-in is still demo-only because a secure account service has not been connected yet.';
     };
   });
 }
