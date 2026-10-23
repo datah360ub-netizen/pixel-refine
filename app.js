@@ -127,6 +127,10 @@ function openTool(index) {
         <p>${t[1]}</p>
       </div>
     </div>
+
+    <!-- Results and editing controls stay directly under the tool title, not at the bottom. -->
+    <div id="resultArea"></div>
+
     <div class="drop" id="dropZone">
       <div class="upload-icon">☁️</div>
       <b>Upload your ${t[3] === 'pdf' ? 'document' : 'image'}</b>
@@ -141,9 +145,6 @@ function openTool(index) {
       <img id="preview" alt="Image preview">
       <p id="fileInfo"></p>
     </div>
-
-    <!-- Keep manual editing tools near the top so users notice them immediately. -->
-    <div id="resultArea"></div>
 
     <div id="optionsArea"></div>
     <div class="live-progress" id="liveProgress" aria-live="polite">
