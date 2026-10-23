@@ -117,7 +117,7 @@ function openTool(index) {
   if (t[4] === 'barcode') return barcodeTool();
   if (t[4] === 'utility') return utilityTool();
 
-  const accept = t[3] === 'pdf' ? '.pdf,.doc,.docx' : 'image/*';
+  const accept = t[0] === 'Image to PDF' ? 'image/*' : (t[3] === 'pdf' ? '.pdf,.doc,.docx' : 'image/*');
 
   content.innerHTML = `
     <div class="tool-modal-head">
@@ -394,9 +394,14 @@ async function processCurrentTool() {
       let embedded;
       if (/jpe?g$/i.test(currentFile.name) || currentFile.type === 'image/jpeg') {
         embedded = await pdfDoc.embedJpg(bytes);
+      } else if (/\.png$/i.test(currentFile.name) || currentFile.type === 'image/png') {
+        embedded = await pdfDoc.embedPng(bytes);
       } else {
-        const image = await pdfDoc.embedPng(bytes);
-        embedded = image;
+        const sourceImage = await loadImage(imageState.src);
+        const pngCanvas = createCanvas(sourceImage.naturalWidth, sourceImage.naturalHeight);
+        pngCanvas.getContext('2d').drawImage(sourceImage, 0, 0);
+        const pngBlob = await new Promise((resolve, reject) => pngCanvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Could not convert this image for PDF.')), 'image/png'));
+        embedded = await pdfDoc.embedPng(await pngBlob.arrayBuffer());
       }
       const page = pdfDoc.addPage([embedded.width, embedded.height]);
       page.drawImage(embedded, { x: 0, y: 0, width: embedded.width, height: embedded.height });
