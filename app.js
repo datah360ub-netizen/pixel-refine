@@ -238,12 +238,51 @@ function openTool(index) {
     addOption('Opacity (%)', 'watermarkOpacity', 'range', 40, 5, 100);
   } else if (t[4] === 'crop') {
     addOption('Crop ratio', 'cropRatio', 'select', 'free', [
-      ['free', 'Free'],
+      ['free', 'Free / Original proportions'],
       ['1:1', 'Square 1:1'],
+      ['5:4', 'Landscape 5:4'],
       ['4:5', 'Portrait 4:5'],
+      ['3:2', 'Landscape 3:2'],
+      ['2:3', 'Portrait 2:3'],
+      ['4:3', 'Landscape 4:3'],
       ['3:4', 'Portrait 3:4'],
-      ['16:9', 'Landscape 16:9']
+      ['5:3', 'Landscape 5:3'],
+      ['3:5', 'Portrait 3:5'],
+      ['16:9', 'Widescreen 16:9'],
+      ['9:16', 'Story / Reel 9:16'],
+      ['21:9', 'Ultrawide 21:9'],
+      ['2:1', 'Panorama 2:1'],
+      ['1:2', 'Tall 1:2'],
+      ['7:5', 'Photo 7:5'],
+      ['5:7', 'Portrait 5:7']
     ]);
+    addOption('Output pixel preset', 'cropPixels', 'select', 'original', [
+      ['original', 'Use cropped image pixels'],
+      ['320x320', '320 × 320 px'],
+      ['640x480', '640 × 480 px'],
+      ['800x600', '800 × 600 px'],
+      ['1024x1024', '1024 × 1024 px'],
+      ['1080x1080', '1080 × 1080 px'],
+      ['1080x1350', '1080 × 1350 px'],
+      ['1080x1920', '1080 × 1920 px'],
+      ['1280x720', '1280 × 720 px'],
+      ['1920x1080', '1920 × 1080 px'],
+      ['custom', 'Custom width and height']
+    ]);
+    addOption('Custom width (px)', 'cropCustomWidth', 'number', 1080, 1, 12000);
+    addOption('Custom height (px)', 'cropCustomHeight', 'number', 1080, 1, 12000);
+    const preset = document.getElementById('cropPixels');
+    const customWidth = document.getElementById('cropCustomWidth');
+    const customHeight = document.getElementById('cropCustomHeight');
+    const updateCustomSizeVisibility = () => {
+      const custom = preset && preset.value === 'custom';
+      if (customWidth) customWidth.closest('.option').hidden = !custom;
+      if (customHeight) customHeight.closest('.option').hidden = !custom;
+    };
+    if (preset) {
+      preset.addEventListener('change', updateCustomSizeVisibility);
+      updateCustomSizeVisibility();
+    }
   }
 }
 
@@ -837,8 +876,19 @@ async function processCurrentTool() {
         const sx = Math.floor((image.naturalWidth - cropWidth) / 2);
         const sy = Math.floor((image.naturalHeight - cropHeight) / 2);
 
-        canvas = createCanvas(cropWidth, cropHeight);
+        let outputWidth = cropWidth;
+        let outputHeight = cropHeight;
+        const pixelPreset = getOption('cropPixels', 'original');
+        if (pixelPreset === 'custom') {
+          outputWidth = Math.max(1, Math.min(12000, Number(getOption('cropCustomWidth', 1080)) || 1080));
+          outputHeight = Math.max(1, Math.min(12000, Number(getOption('cropCustomHeight', 1080)) || 1080));
+        } else if (pixelPreset !== 'original') {
+          const dimensions = pixelPreset.split('x').map(Number);
+          outputWidth = dimensions[0];
+          outputHeight = dimensions[1];
+        }
 
+        canvas = createCanvas(outputWidth, outputHeight);
         canvas.getContext('2d').drawImage(
           image,
           sx,
@@ -847,8 +897,8 @@ async function processCurrentTool() {
           cropHeight,
           0,
           0,
-          cropWidth,
-          cropHeight
+          outputWidth,
+          outputHeight
         );
 
         await exportCanvas(canvas, 'image/png');
