@@ -142,6 +142,9 @@ function openTool(index) {
       <p id="fileInfo"></p>
     </div>
 
+    <!-- Keep manual editing tools near the top so users notice them immediately. -->
+    <div id="resultArea"></div>
+
     <div id="optionsArea"></div>
     <div class="live-progress" id="liveProgress" aria-live="polite">
       <div class="live-progress-top"><strong>Live processing demo</strong><span id="livePercent">Ready</span></div>
@@ -155,7 +158,6 @@ function openTool(index) {
       <button class="secondary" id="cancelBtn" type="button">Cancel</button>
       <button class="primary" id="processBtn" type="button" disabled>Process Image</button>
     </div>
-    <div id="resultArea"></div>
   `;
 
   modal.classList.add('show');
