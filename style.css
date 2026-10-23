@@ -2797,3 +2797,16 @@ textarea:focus-visible {
 /* ==================================================
    END OF PART 5/5 — PIXEL REFINE CSS COMPLETE
 ================================================== */
+
+
+/* Live processing progress panel */
+.live-progress{margin:16px 0;padding:14px 16px;border:1px solid var(--border,#d9dce8);border-radius:14px;background:var(--surface,#f7f8fc);color:var(--text,#202338)}
+.live-progress-top{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:.92rem;margin-bottom:10px}
+.live-progress-top span{font-weight:700;font-size:.82rem;white-space:nowrap}
+.live-track{height:8px;border-radius:999px;overflow:hidden;background:rgba(120,125,150,.18)}
+#liveBar{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#7167f8,#25b7a6);transition:width .25s ease}
+#liveSteps{display:flex;flex-wrap:wrap;gap:7px 18px;padding-left:20px;margin:12px 0 8px;font-size:.78rem;color:#85899d}
+#liveSteps li.step-active{color:var(--accent,#6557e8);font-weight:700}
+#liveSteps li.step-done{color:#16846e}
+.live-caption{font-size:.82rem;line-height:1.45;margin:8px 0 0;color:var(--muted,#73778c)}
+@media(prefers-reduced-motion:reduce){#liveBar{transition:none}}
