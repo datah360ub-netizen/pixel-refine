@@ -359,7 +359,7 @@ async function processCurrentTool() {
     button.textContent = 'Loading AI model...';
     setStatus('Connecting to the AI model. First use may download around 40 MB; keep the page open.');
     try {
-      const module = await import('https://esm.sh/@imgly/background-removal@1.7.0?bundle');
+      const module = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm');
       const removeBackground = module.default || module.removeBackground;
       if (typeof removeBackground !== 'function') {
         throw new Error('Background-removal function was not found in the loaded library.');
@@ -392,7 +392,7 @@ async function processCurrentTool() {
     } catch (error) {
       console.error('Background removal failed:', error);
       const detail = error && error.message ? error.message : String(error);
-      setStatus('Background remover failed: ' + detail + '. Check whether your network allows esm.sh and staticimgly.com, then retry. The AI runs in your browser; no API key is needed.', true);
+      setStatus('Background remover failed: ' + detail + '. Check whether your network allows jsDelivr and staticimgly.com, then retry. The AI runs in your browser; no API key is needed.', true);
     } finally {
       button.disabled = false;
       button.textContent = 'Process Image';
