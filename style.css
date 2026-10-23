@@ -2918,3 +2918,152 @@ textarea:focus-visible {
   .developer-copy{text-align:center}
   .developer-eyebrow{font-size:.66rem}
 }
+
+
+/* =====================================================
+   DEVELOPER SPOTLIGHT — AI-INSPIRED PURPLE/NAVY DESIGN
+   ===================================================== */
+.developer-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 100px 24px;
+  background:
+    radial-gradient(ellipse at 12% 20%, rgba(117, 86, 255, .28), transparent 38%),
+    radial-gradient(ellipse at 92% 80%, rgba(189, 76, 255, .16), transparent 34%),
+    linear-gradient(135deg, #0b0d1b 0%, #14142b 52%, #20153a 100%);
+  color: #f8f7ff;
+}
+.developer-section::before,
+.developer-section::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 260px;
+  height: 260px;
+  border: 1px solid rgba(177, 154, 255, .15);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.developer-section::before { top: -130px; right: 9%; box-shadow: 0 0 0 28px rgba(177,154,255,.025), 0 0 0 58px rgba(177,154,255,.02); }
+.developer-section::after { bottom: -160px; left: 3%; width: 320px; height: 320px; }
+.developer-card {
+  position: relative;
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(250px, .78fr) minmax(0, 1.22fr);
+  align-items: center;
+  gap: clamp(30px, 6vw, 76px);
+  padding: clamp(26px, 5vw, 56px);
+  border: 1px solid rgba(198, 184, 255, .22);
+  border-radius: 30px;
+  background: linear-gradient(135deg, rgba(255,255,255,.09), rgba(255,255,255,.035));
+  box-shadow: 0 28px 90px rgba(0,0,0,.3), inset 0 1px rgba(255,255,255,.08);
+  backdrop-filter: blur(18px);
+}
+.developer-photo-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 330px;
+  justify-self: center;
+  padding: 7px;
+  border-radius: 28px;
+  background: linear-gradient(145deg, #b7a4ff, #7555ef 45%, #e3a2ff);
+  box-shadow: 0 20px 60px rgba(115, 78, 255, .28);
+}
+.developer-photo-wrap::before {
+  content: "✦  CREATOR";
+  position: absolute;
+  z-index: 2;
+  top: 17px;
+  left: 17px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,.26);
+  border-radius: 999px;
+  color: white;
+  background: rgba(15, 14, 35, .72);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  backdrop-filter: blur(12px);
+}
+.developer-photo {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center 28%;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #2b2550, #17182b);
+  filter: saturate(1.08) contrast(1.04);
+}
+.developer-copy { min-width: 0; }
+.developer-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 13px;
+  color: #c6baff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2.2px;
+}
+.developer-eyebrow::before {
+  content: "";
+  width: 23px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #9c83ff, #e3a2ff);
+}
+#developer-title {
+  margin: 0;
+  color: #fff;
+  font-family: "Manrope", "DM Sans", sans-serif;
+  font-size: clamp(30px, 4.5vw, 49px);
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: -1.8px;
+}
+.developer-copy h3 {
+  margin: 12px 0 20px;
+  font-family: "Manrope", sans-serif;
+  font-size: clamp(21px, 3vw, 29px);
+  font-weight: 800;
+  letter-spacing: -.5px;
+  background: linear-gradient(90deg, #b7a5ff, #e4b3ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.developer-copy > p:not(.developer-eyebrow):not(.developer-signoff) {
+  max-width: 560px;
+  margin: 0 0 13px;
+  color: #c0bfd5;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.developer-signoff {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 12px 0 0;
+  padding: 11px 15px;
+  border: 1px solid rgba(183,165,255,.25);
+  border-radius: 12px;
+  color: #eee9ff;
+  background: rgba(151, 125, 255, .1);
+  font-size: 11px;
+  font-weight: 800;
+}
+.developer-signoff span { color: #d6a7ff; font-size: 16px; }
+@media (max-width: 700px) {
+  .developer-section { padding: 68px 17px; }
+  .developer-card { grid-template-columns: 1fr; gap: 29px; padding: 22px; border-radius: 24px; }
+  .developer-photo-wrap { max-width: 260px; }
+  .developer-copy { text-align: center; }
+  .developer-eyebrow { justify-content: center; font-size: 9px; letter-spacing: 1.5px; }
+  #developer-title { letter-spacing: -1px; }
+  .developer-copy > p:not(.developer-eyebrow):not(.developer-signoff) { margin-left: auto; margin-right: auto; }
+  .developer-signoff { justify-content: center; }
+}
