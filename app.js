@@ -352,7 +352,36 @@ async function processCurrentTool() {
 
   const action = currentTool[4];
 
-  // These features require an actual AI service.
+  // Background removal runs in the browser using an AI segmentation model.
+  if (currentTool[0] === 'AI Background Remover') {
+    const button = document.getElementById('processBtn');
+    button.disabled = true;
+    button.textContent = 'Loading AI model...';
+    setStatus('Loading the background-removal AI model. The first run may take a while.');
+    try {
+      const ai = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/+esm');
+      button.textContent = 'Removing background...';
+      const outputBlob = await ai.removeBackground(currentFile);
+      const url = URL.createObjectURL(outputBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = (currentFile.name.replace(/\\.[^.]+$/, '') || 'image') + '-no-background.png';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setStatus('Background removed! Your transparent PNG download should start now.');
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (error) {
+      console.error('Background removal failed:', error);
+      setStatus('AI background removal could not load. Check your internet connection and try again; the AI model downloads from a third-party CDN.', true);
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Process Image';
+    }
+    return;
+  }
+
+  // Other advanced tools need their own AI model or backend API.
   if (action === 'advanced' || action === 'eraser') {
     setStatus(
       'This feature requires an AI model or backend API. It has not been connected yet.',
