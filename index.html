@@ -687,13 +687,47 @@
     ["it","Italiano (Italian)"],["ko","한국어 (Korean)"],["tr","Türkçe (Turkish)"],["ta","தமிழ் (Tamil)"],["te","తెలుగు (Telugu)"],
     ["mr","मराठी (Marathi)"],["pa","ਪੰਜਾਬੀ (Punjabi)"]
   ];
+
+  const countryFlags = {
+    "India":"🇮🇳","United States":"🇺🇸","United Kingdom":"🇬🇧","Canada":"🇨🇦","Australia":"🇦🇺","New Zealand":"🇳🇿","Japan":"🇯🇵","China":"🇨🇳","South Korea":"🇰🇷","North Korea":"🇰🇵","Taiwan":"🇹🇼","Pakistan":"🇵🇰","Bangladesh":"🇧🇩","Nepal":"🇳🇵","Sri Lanka":"🇱🇰","Bhutan":"🇧🇹","Afghanistan":"🇦🇫","Indonesia":"🇮🇩","Malaysia":"🇲🇾","Singapore":"🇸🇬","Thailand":"🇹🇭","Vietnam":"🇻🇳","Philippines":"🇵🇭","Myanmar":"🇲🇲","Cambodia":"🇰🇭","Laos":"🇱🇦","France":"🇫🇷","Germany":"🇩🇪","Italy":"🇮🇹","Spain":"🇪🇸","Portugal":"🇵🇹","Netherlands":"🇳🇱","Belgium":"🇧🇪","Switzerland":"🇨🇭","Austria":"🇦🇹","Ireland":"🇮🇪","Iceland":"🇮🇸","Norway":"🇳🇴","Sweden":"🇸🇪","Finland":"🇫🇮","Denmark":"🇩🇰","Poland":"🇵🇱","Ukraine":"🇺🇦","Russia":"🇷🇺","Greece":"🇬🇷","Türkiye":"🇹🇷","Turkey":"🇹🇷","Saudi Arabia":"🇸🇦","United Arab Emirates":"🇦🇪","Qatar":"🇶🇦","Israel":"🇮🇱","Palestine":"🇵🇸","Egypt":"🇪🇬","South Africa":"🇿🇦","Nigeria":"🇳🇬","Kenya":"🇰🇪","Ethiopia":"🇪🇹","Ghana":"🇬🇭","Morocco":"🇲🇦","Algeria":"🇩🇿","Tunisia":"🇹🇳","Brazil":"🇧🇷","Argentina":"🇦🇷","Chile":"🇨🇱","Colombia":"🇨🇴","Peru":"🇵🇪","Mexico":"🇲🇽","Cuba":"🇨🇺","Jamaica":"🇯🇲","Venezuela":"🇻🇪","Uruguay":"🇺🇾","Paraguay":"🇵🇾","Ecuador":"🇪🇨","Costa Rica":"🇨🇷","Panama":"🇵🇦","Ukraine":"🇺🇦","Romania":"🇷🇴","Bulgaria":"🇧🇬","Czechia":"🇨🇿","Slovakia":"🇸🇰","Hungary":"🇭🇺","Croatia":"🇭🇷","Serbia":"🇷🇸","Slovenia":"🇸🇮","Estonia":"🇪🇪","Latvia":"🇱🇻","Lithuania":"🇱🇹","Luxembourg":"🇱🇺","Monaco":"🇲🇨","Andorra":"🇦🇩","Malta":"🇲🇹","Cyprus":"🇨🇾","Iran":"🇮🇷","Iraq":"🇮🇶","Jordan":"🇯🇴","Lebanon":"🇱🇧","Oman":"🇴🇲","Kuwait":"🇰🇼","Bahrain":"🇧🇭","Yemen":"🇾🇪","Kazakhstan":"🇰🇿","Uzbekistan":"🇺🇿","Mongolia":"🇲🇳","Fiji":"🇫🇯","Papua New Guinea":"🇵🇬","Samoa":"🇼🇸","Tonga":"🇹🇴","Vanuatu":"🇻🇺","Zambia":"🇿🇲","Zimbabwe":"🇿🇼","Uganda":"🇺🇬","Tanzania":"🇹🇿","Rwanda":"🇷🇼","Senegal":"🇸🇳","Cameroon":"🇨🇲","Angola":"🇦🇴","Mozambique":"🇲🇿","Madagascar":"🇲🇬","Mauritius":"🇲🇺","Seychelles":"🇸🇨","Botswana":"🇧🇼","Namibia":"🇳🇦","Eswatini":"🇸🇿","Lesotho":"🇱🇸","Sudan":"🇸🇩","South Sudan":"🇸🇸","Libya":"🇱🇾","Somalia":"🇸🇴","Eritrea":"🇪🇷","Djibouti":"🇩🇯","Gambia":"🇬🇲","Guinea":"🇬🇳","Mali":"🇲🇱","Niger":"🇳🇪","Chad":"🇹🇩","Benin":"🇧🇯","Togo":"🇹🇬","Burkina Faso":"🇧🇫","Côte d’Ivoire":"🇨🇮","Cabo Verde":"🇨🇻","Comoros":"🇰🇲","Sao Tome and Principe":"🇸🇹","São Tomé and Príncipe":"🇸🇹"
+  };
+  function countryFlag(name) { return countryFlags[name] || "🌐"; }
+  function initGoogleTranslate() {
+    if (window.google && google.translate && google.translate.TranslateElement) return;
+    window.googleTranslateElementInit = function () {
+      new google.translate.TranslateElement({pageLanguage:"en", includedLanguages:"en,hi,or,bn,es,fr,pt,ar,zh-CN,ja,de,ru,ur,id,it,ko,tr,ta,te,mr,pa", autoDisplay:false}, "google_translate_element");
+      applySavedTranslation();
+    };
+    if (!document.getElementById("google-translate-script")) {
+      const script = document.createElement("script");
+      script.id = "google-translate-script";
+      script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+  }
+  function applySavedTranslation() {
+    let lang = "en";
+    try { lang = localStorage.getItem("pixelRefineLanguage") || "en"; } catch (_) {}
+    if (lang === "en") return;
+    const map = {or:"or",zh:"zh-CN"};
+    const code = map[lang] || lang;
+    const trySet = () => {
+      const combo = document.querySelector(".goog-te-combo");
+      if (combo) { combo.value = code; combo.dispatchEvent(new Event("change")); return true; }
+      return false;
+    };
+    if (!trySet()) setTimeout(trySet, 700);
+    setTimeout(trySet, 1600);
+  }
+
   function showMoreOptions() {
     let savedCountry = "India", savedLanguage = "en";
     try { savedCountry = localStorage.getItem("pixelRefineCountry") || "India"; savedLanguage = localStorage.getItem("pixelRefineLanguage") || "en"; } catch (_) {}
-    const countryHtml = countryOptions.map(c => '<option value="' + c.replace(/&/g,"&amp;").replace(/"/g,"&quot;") + '"' + (c===savedCountry?' selected':'') + '>' + c + '</option>').join("");
+    const countryHtml = countryOptions.map(c => '<option value="' + c.replace(/&/g,"&amp;").replace(/"/g,"&quot;") + '"' + (c===savedCountry?' selected':'') + '>' + countryFlag(c) + ' ' + c + '</option>').join("");
     const languageHtml = languageOptions.map(l => '<option value="' + l[0] + '"' + (l[0]===savedLanguage?' selected':'') + '>' + l[1] + '</option>').join("");
     openHeaderDialog('More options & settings',
-      '<p class="settings-intro">Choose your country and preferred language. Your choices are saved on this device.</p>' +
+      '<p class="settings-intro">Choose your country and preferred language. Your choices are saved on this device.</p><div id="google_translate_element" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden" aria-hidden="true"></div>' +
       '<div class="settings-grid">' +
       '<label class="settings-field">🌍 Country / region<select id="settingsCountry">' + countryHtml + '</select></label>' +
       '<label class="settings-field">🌐 Language<select id="settingsLanguage">' + languageHtml + '</select></label>' +
@@ -726,10 +760,13 @@
         if (remember) values.forEach(([k,v])=>localStorage.setItem(k,v));
         else values.forEach(([k])=>localStorage.removeItem(k));
         document.documentElement.lang = document.getElementById("settingsLanguage").value;
+        if (remember) { try { localStorage.setItem("pixelRefineLanguage", document.getElementById("settingsLanguage").value); } catch (_) {} }
+        initGoogleTranslate();
+        setTimeout(applySavedTranslation, 250);
         document.body.classList.toggle("settings-reduce-motion",document.getElementById("settingReduceMotion").checked);
         document.body.classList.toggle("settings-high-contrast",document.getElementById("settingHighContrast").checked);
         document.body.classList.toggle("settings-compact",document.getElementById("settingCompact").checked);
-        status.textContent = "Preferences saved on this device. Language selection is saved; full-page translation is not enabled yet.";
+        status.textContent = "Preferences saved on this device. Language translation is being applied; it may take a few seconds and needs an internet connection.";
       } catch (_) { status.textContent = "Could not save preferences in this browser."; }
     };
   }
@@ -738,6 +775,8 @@
     document.body.classList.toggle("settings-high-contrast",localStorage.getItem("pixelRefineHighContrast")==="1");
     document.body.classList.toggle("settings-compact",localStorage.getItem("pixelRefineCompact")==="1");
     document.documentElement.lang = localStorage.getItem("pixelRefineLanguage") || "en";
+    initGoogleTranslate();
+    window.addEventListener("load", function(){ setTimeout(applySavedTranslation, 900); });
   } catch (_) {}
   document.addEventListener('click', function (event) {
     const more = event.target.closest && event.target.closest('#moreMenuBtn');
