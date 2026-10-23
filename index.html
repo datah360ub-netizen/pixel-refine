@@ -17,6 +17,19 @@
         rel="stylesheet">
 
   <link rel="stylesheet" href="style.css?v=20261023-7">
+  <style>
+    .more-menu-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid var(--border,#ddd);border-radius:12px;background:var(--surface,rgba(255,255,255,.08));color:var(--text,inherit);font-size:25px;line-height:1;cursor:pointer}
+    .more-menu-btn:hover{border-color:var(--accent,#8b5cf6);transform:translateY(-1px)}
+    .settings-intro{color:var(--muted);font-size:14px;line-height:1.6;margin:8px 0 18px}
+    .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+    .settings-field{display:flex;flex-direction:column;gap:7px;min-width:0;color:var(--text);font-size:13px;font-weight:700}
+    .settings-field select{width:100%;min-width:0;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--card);color:var(--text);font:inherit}
+    .settings-options{display:grid;gap:10px;margin-top:18px}
+    .settings-option{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px}
+    .settings-option input{width:18px;height:18px;accent-color:var(--primary);flex-shrink:0}
+    .settings-saved{margin:14px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+    @media(max-width:520px){.settings-grid{grid-template-columns:1fr}.more-menu-btn{width:36px;height:36px}}
+  </style>
 </head>
 
 <body>
@@ -49,6 +62,15 @@
 
       <button class="account-btn" id="accountBtn" type="button">
         Log in
+      </button>
+
+      <button class="more-menu-btn"
+              id="moreMenuBtn"
+              type="button"
+              aria-label="More options"
+              title="More options"
+              aria-haspopup="dialog">
+        ⋮
       </button>
 
       <button class="theme"
@@ -632,7 +654,94 @@
       modal.setAttribute('aria-hidden', 'true');
     }
   }
+  const countryOptions = [
+    "Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan",
+    "Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi",
+    "Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo (Republic)","Costa Rica","Côte d’Ivoire","Croatia","Cuba","Cyprus","Czechia",
+    "Democratic Republic of the Congo","Denmark","Djibouti","Dominica","Dominican Republic",
+    "Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia",
+    "Fiji","Finland","France",
+    "Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana",
+    "Haiti","Honduras","Hungary",
+    "Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy",
+    "Jamaica","Japan","Jordan",
+    "Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan",
+    "Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg",
+    "Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar",
+    "Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway",
+    "Oman",
+    "Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal",
+    "Qatar",
+    "Romania","Russia","Rwanda",
+    "Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","São Tomé and Príncipe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria",
+    "Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Türkiye","Turkmenistan","Tuvalu",
+    "Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan",
+    "Vanuatu","Vatican City","Venezuela","Vietnam",
+    "Yemen",
+    "Zambia","Zimbabwe"
+  ];
+  const languageOptions = [
+    ["en","English"],["hi","हिन्दी (Hindi)"],["or","ଓଡ଼ିଆ (Odia)"],["bn","বাংলা (Bengali)"],["es","Español (Spanish)"],
+    ["fr","Français (French)"],["pt","Português (Portuguese)"],["ar","العربية (Arabic)"],["zh","中文 (Chinese)"],
+    ["ja","日本語 (Japanese)"],["de","Deutsch (German)"],["ru","Русский (Russian)"],["ur","اردو (Urdu)"],["id","Bahasa Indonesia"],
+    ["it","Italiano (Italian)"],["ko","한국어 (Korean)"],["tr","Türkçe (Turkish)"],["ta","தமிழ் (Tamil)"],["te","తెలుగు (Telugu)"],
+    ["mr","मराठी (Marathi)"],["pa","ਪੰਜਾਬੀ (Punjabi)"]
+  ];
+  function showMoreOptions() {
+    let savedCountry = "India", savedLanguage = "en";
+    try { savedCountry = localStorage.getItem("pixelRefineCountry") || "India"; savedLanguage = localStorage.getItem("pixelRefineLanguage") || "en"; } catch (_) {}
+    const countryHtml = countryOptions.map(c => '<option value="' + c.replace(/&/g,"&amp;").replace(/"/g,"&quot;") + '"' + (c===savedCountry?' selected':'') + '>' + c + '</option>').join("");
+    const languageHtml = languageOptions.map(l => '<option value="' + l[0] + '"' + (l[0]===savedLanguage?' selected':'') + '>' + l[1] + '</option>').join("");
+    openHeaderDialog('More options & settings',
+      '<p class="settings-intro">Choose your country and preferred language. Your choices are saved on this device.</p>' +
+      '<div class="settings-grid">' +
+      '<label class="settings-field">🌍 Country / region<select id="settingsCountry">' + countryHtml + '</select></label>' +
+      '<label class="settings-field">🌐 Language<select id="settingsLanguage">' + languageHtml + '</select></label>' +
+      '</div>' +
+      '<div class="settings-options">' +
+      '<label class="settings-option"><input type="checkbox" id="settingReduceMotion"> Reduce animations</label>' +
+      '<label class="settings-option"><input type="checkbox" id="settingHighContrast"> Higher contrast</label>' +
+      '<label class="settings-option"><input type="checkbox" id="settingCompact"> Compact tool cards</label>' +
+      '<label class="settings-option"><input type="checkbox" id="settingRemember" checked> Remember my preferences on this device</label>' +
+      '</div>' +
+      '<div class="modal-actions"><button class="primary" id="saveMoreSettings" type="button">Save preferences</button></div>' +
+      '<p class="settings-saved" id="settingsSaveStatus" role="status">Note: selecting a language saves your preference; full translation of every page section can be added separately.</p>');
+    const savedChecks = [
+      ["settingReduceMotion","pixelRefineReduceMotion"],
+      ["settingHighContrast","pixelRefineHighContrast"],
+      ["settingCompact","pixelRefineCompact"]
+    ];
+    savedChecks.forEach(([id,key])=>{try{document.getElementById(id).checked=localStorage.getItem(key)==="1"}catch(_){}});
+    document.getElementById("saveMoreSettings").onclick = function() {
+      const remember = document.getElementById("settingRemember").checked;
+      const status = document.getElementById("settingsSaveStatus");
+      const values = [
+        ["pixelRefineCountry",document.getElementById("settingsCountry").value],
+        ["pixelRefineLanguage",document.getElementById("settingsLanguage").value],
+        ["pixelRefineReduceMotion",document.getElementById("settingReduceMotion").checked?"1":"0"],
+        ["pixelRefineHighContrast",document.getElementById("settingHighContrast").checked?"1":"0"],
+        ["pixelRefineCompact",document.getElementById("settingCompact").checked?"1":"0"]
+      ];
+      try {
+        if (remember) values.forEach(([k,v])=>localStorage.setItem(k,v));
+        else values.forEach(([k])=>localStorage.removeItem(k));
+        document.documentElement.lang = document.getElementById("settingsLanguage").value;
+        document.body.classList.toggle("settings-reduce-motion",document.getElementById("settingReduceMotion").checked);
+        document.body.classList.toggle("settings-high-contrast",document.getElementById("settingHighContrast").checked);
+        document.body.classList.toggle("settings-compact",document.getElementById("settingCompact").checked);
+        status.textContent = "Preferences saved on this device. Language selection is saved; full-page translation is not enabled yet.";
+      } catch (_) { status.textContent = "Could not save preferences in this browser."; }
+    };
+  }
+  try {
+    document.body.classList.toggle("settings-reduce-motion",localStorage.getItem("pixelRefineReduceMotion")==="1");
+    document.body.classList.toggle("settings-high-contrast",localStorage.getItem("pixelRefineHighContrast")==="1");
+    document.body.classList.toggle("settings-compact",localStorage.getItem("pixelRefineCompact")==="1");
+    document.documentElement.lang = localStorage.getItem("pixelRefineLanguage") || "en";
+  } catch (_) {}
   document.addEventListener('click', function (event) {
+    const more = event.target.closest && event.target.closest('#moreMenuBtn');
+    if (more) { event.preventDefault(); event.stopImmediatePropagation(); showMoreOptions(); return; }
     const theme = event.target.closest && event.target.closest('#themeBtn');
     if (theme) {
       event.preventDefault();
@@ -671,7 +780,12 @@
     if (button) button.textContent = dark ? '☀' : '☾';
   } catch (_) {}
 })();
-</script>  
+</script>
+<style>
+body.settings-reduce-motion *,body.settings-reduce-motion *::before,body.settings-reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+body.settings-high-contrast{--muted:#d0d3e6}
+body.settings-compact .tool{padding:15px}
+</style>
 
 </body>
  </html>
