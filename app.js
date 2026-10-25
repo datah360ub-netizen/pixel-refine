@@ -196,7 +196,16 @@ function openTool(index) {
   process.onclick = processCurrentTool;
 
   if (t[4] === 'compress') {
-    addOption('Quality', 'quality', 'range', 80, 10, 100);
+    addOption('Target file size', 'targetSize', 'number', 48, 1, 50000);
+    addOption('Size unit', 'targetUnit', 'select', 'KB', [
+      ['KB', 'KB'],
+      ['MB', 'MB']
+    ]);
+    addOption('Output format', 'compressFormat', 'select', 'image/jpeg', [
+      ['image/jpeg', 'JPG'],
+      ['image/webp', 'WebP']
+    ]);
+    addOption('Quality (used if target size cannot be reached)', 'quality', 'range', 80, 10, 100);
   } else if (t[4] === 'resize') {
     addOption('Width (px)', 'width', 'number', 800, 1, 12000);
     addOption('Height (px)', 'height', 'number', 800, 1, 12000);
@@ -709,15 +718,48 @@ async function processCurrentTool() {
     let canvas;
 
     switch (action) {
-      case 'compress':
+      case 'compress': {
         canvas = createCanvas(image.naturalWidth, image.naturalHeight);
         canvas.getContext('2d').drawImage(image, 0, 0);
-        await exportCanvas(
-          canvas,
-          'image/jpeg',
-          Number(getOption('quality', 80)) / 100
-        );
+        const format = getOption('compressFormat', 'image/jpeg');
+        const requested = Number(getOption('targetSize', 48));
+        const unit = getOption('targetUnit', 'KB');
+        const targetBytes = requested * (unit === 'MB' ? 1024 * 1024 : 1024);
+        if (!Number.isFinite(requested) || requested <= 0) {
+          throw new Error('Enter a target size greater than zero.');
+        }
+        let bestBlob = null;
+        let bestQuality = Number(getOption('quality', 80)) / 100;
+        // Try progressively lower JPEG/WebP qualities and keep the closest result
+        // that does not exceed the requested target size, when technically possible.
+        for (let q = Math.max(0.1, bestQuality); q >= 0.1 - 0.001; q = Math.round((q - 0.1) * 100) / 100) {
+          const candidate = await new Promise((resolve, reject) => {
+            canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Could not compress this image.')), format, q);
+          });
+          if (!bestBlob || (candidate.size <= targetBytes && candidate.size > bestBlob.size)) {
+            bestBlob = candidate;
+            bestQuality = q;
+          }
+          if (candidate.size <= targetBytes) break;
+        }
+        if (!bestBlob) throw new Error('Could not compress this image.');
+        const ext = format === 'image/webp' ? 'webp' : 'jpg';
+        const base = (currentFile.name || 'image').replace(/\\.[^.]+$/, '');
+        const filename = base + '-compressed.' + ext;
+        downloadBlob(bestBlob, filename);
+        const resultArea = document.getElementById('resultArea');
+        if (resultArea) {
+          const met = bestBlob.size <= targetBytes;
+          resultArea.innerHTML = '<div class="result-success"><h3>✅ Image compressed</h3><p>Original: ' +
+            (currentFile.size / 1024).toFixed(1) + ' KB · Output: ' + (bestBlob.size / 1024).toFixed(1) +
+            ' KB</p><p>' + (met ? 'Target size reached.' : 'Target size could not be reached at this image resolution; this is the smallest result from the tested quality settings.') +
+            '</p><button class="secondary" id="downloadAgain" type="button">Download Again</button></div>';
+          document.getElementById('downloadAgain').onclick = () => downloadBlob(bestBlob, filename);
+        }
+        setLiveProgress(100, 'Complete', 4);
+        setStatus('Compression complete: ' + (bestBlob.size / 1024).toFixed(1) + ' KB at ' + Math.round(bestQuality * 100) + '% quality.');
         break;
+      }
 
       case 'resize': {
         const originalWidth = image.naturalWidth;
