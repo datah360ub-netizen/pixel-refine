@@ -136,14 +136,14 @@ function openTool(index) {
       <b>Upload your ${t[3] === 'pdf' ? 'document' : 'image'}</b>
       <br><span class="upload-hint">Tap to browse or drag & drop</span>
       <input type="file" id="fileInput" accept="${accept}" aria-label="Choose file">
-            <div class="upload-actions">
+      <div class="upload-actions" id="uploadActions">
         <button class="primary" id="chooseFile" type="button">Choose File</button>
       </div>
-    </div>
-
-    <div id="previewArea" hidden>
-      <img id="preview" alt="Image preview">
-      <p id="fileInfo"></p>
+      <div id="previewArea" hidden>
+        <img id="preview" alt="Image preview">
+        <p id="fileInfo"></p>
+        <button class="primary" id="changeFile" type="button">Change File</button>
+      </div>
     </div>
 
     <div id="optionsArea"></div>
@@ -166,9 +166,11 @@ function openTool(index) {
   const input = document.getElementById('fileInput');
   const drop = document.getElementById('dropZone');
   const choose = document.getElementById('chooseFile');
+  const changeFile = document.getElementById('changeFile');
   const process = document.getElementById('processBtn');
 
   choose.onclick = () => input.click();
+  if (changeFile) changeFile.onclick = e => { e.stopPropagation(); input.click(); };
   drop.onclick = e => {
     if (e.target !== input && e.target !== choose) input.click();
   };
@@ -451,6 +453,8 @@ function loadFile(file) {
   if (isPdfTool) {
     imageState = null;
     document.getElementById('previewArea').hidden = true;
+    document.getElementById('dropZone').classList.remove('has-preview');
+    document.getElementById('uploadActions').hidden = false;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').textContent = 'Process PDF';
     setLiveProgress(0, 'Ready', 0);
@@ -462,6 +466,8 @@ function loadFile(file) {
     const img = document.getElementById('preview');
     img.src = reader.result;
     document.getElementById('previewArea').hidden = false;
+    document.getElementById('dropZone').classList.add('has-preview');
+    document.getElementById('uploadActions').hidden = true;
     document.getElementById('fileInfo').textContent = `${file.name} • ${(file.size / 1024).toFixed(1)} KB`;
     img.onload = () => {
       if (img.naturalWidth > 12000 || img.naturalHeight > 12000) { currentFile = null; document.getElementById('processBtn').disabled = true; setStatus('Image dimensions must not exceed 12,000 × 12,000 pixels.', true); return; }
