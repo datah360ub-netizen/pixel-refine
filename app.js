@@ -512,7 +512,8 @@ function mountManualEditor(sourceUrl, compareUrl = null, label = 'Manual erase e
       <div class="manual-toolbar">
         <button type="button" class="secondary" id="brushErase">🖌️ Erase</button>
         <button type="button" class="secondary" id="brushRestore">🩹 Restore</button>
-        <label>Brush <input id="brushSize" type="range" min="5" max="140" value="32"><span id="brushSizeValue">32 px</span></label>
+        <label>Brush <input id="brushSize" type="range" min="4" max="180" value="32"><span id="brushSizeValue">32 px</span></label>
+        <label>Soft edge <input id="brushSoftness" type="range" min="0" max="100" value="65"><span id="brushSoftnessValue">65%</span></label>
         <button type="button" class="secondary" id="brushUndo">↶ Undo</button>
         <button type="button" class="secondary" id="brushReset">Reset</button>
         <button type="button" class="primary" id="brushDownload">Download PNG</button>
@@ -532,7 +533,7 @@ function mountManualEditor(sourceUrl, compareUrl = null, label = 'Manual erase e
     canvas.width = image.naturalWidth;
     canvas.height = image.naturalHeight;
     ctx.drawImage(image, 0, 0);
-    let mode = 'erase', drawing = false, history = [];
+    let mode = 'erase', drawing = false, history = [], lastPoint = null;
     const remember = () => {
       try { history.push(ctx.getImageData(0, 0, canvas.width, canvas.height)); if (history.length > 20) history.shift(); } catch (_) {}
     };
@@ -547,26 +548,52 @@ function mountManualEditor(sourceUrl, compareUrl = null, label = 'Manual erase e
     };
     eraseBtn.onclick = () => setMode('erase');
     restoreBtn.onclick = () => setMode('restore');
-    brush.oninput = () => document.getElementById('brushSizeValue').textContent = brush.value + ' px';
+    const softness = document.getElementById('brushSoftness');
+    const updateBrushLabels = () => {
+      document.getElementById('brushSizeValue').textContent = brush.value + ' px';
+      document.getElementById('brushSoftnessValue').textContent = softness.value + '%';
+    };
+    brush.oninput = updateBrushLabels;
+    softness.oninput = updateBrushLabels;
     const point = event => {
       const rect = canvas.getBoundingClientRect();
       return {x:(event.clientX-rect.left)*canvas.width/rect.width,y:(event.clientY-rect.top)*canvas.height/rect.height};
     };
-    const paint = event => {
-      const p = point(event), radius = Number(brush.value) / 2;
+    const dab = p => {
+      const radius = Math.max(1, Number(brush.value) / 2);
+      const soft = Number(softness.value) / 100;
       ctx.save();
+      ctx.beginPath();
       if (mode === 'erase') {
+        // Feathered destination-out brush for natural, soft edges.
+        const grad = ctx.createRadialGradient(p.x,p.y,radius*(1-soft),p.x,p.y,radius);
+        grad.addColorStop(0, 'rgba(0,0,0,1)');
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.globalCompositeOperation = 'destination-out';
-        ctx.beginPath(); ctx.arc(p.x,p.y,radius,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = grad;
+        ctx.arc(p.x,p.y,radius,0,Math.PI*2);
+        ctx.fill();
       } else {
-        ctx.beginPath(); ctx.arc(p.x,p.y,radius,0,Math.PI*2); ctx.clip();
-        ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(image,0,0,canvas.width,canvas.height);
+        // Restore pixels from the original photo, not from the already-cutout result.
+        ctx.arc(p.x,p.y,radius,0,Math.PI*2);
+        ctx.clip();
+        ctx.globalCompositeOperation = 'source-over';
+        if (restoreImage.complete && restoreImage.naturalWidth) ctx.drawImage(restoreImage,0,0,canvas.width,canvas.height);
       }
       ctx.restore();
     };
-    canvas.onpointerdown = event => { drawing=true; remember(); canvas.setPointerCapture?.(event.pointerId); paint(event); };
-    canvas.onpointermove = event => { if (drawing) paint(event); };
-    const stop = () => { if (drawing) { drawing=false; remember(); } };
+    const strokeTo = p => {
+      if (!lastPoint) { dab(p); lastPoint=p; return; }
+      const dx=p.x-lastPoint.x, dy=p.y-lastPoint.y;
+      const distance=Math.hypot(dx,dy), spacing=Math.max(1,Number(brush.value)*0.12);
+      const steps=Math.max(1,Math.ceil(distance/spacing));
+      for(let i=1;i<=steps;i++) dab({x:lastPoint.x+dx*i/steps,y:lastPoint.y+dy*i/steps});
+      lastPoint=p;
+    };
+    canvas.style.touchAction = 'none';
+    canvas.onpointerdown = event => { event.preventDefault(); drawing=true; lastPoint=null; remember(); canvas.setPointerCapture?.(event.pointerId); strokeTo(point(event)); };
+    canvas.onpointermove = event => { if (drawing) { event.preventDefault(); strokeTo(point(event)); } };
+    const stop = () => { if (drawing) { drawing=false; lastPoint=null; remember(); } };
     canvas.onpointerup = stop; canvas.onpointercancel = stop;
     document.getElementById('brushUndo').onclick = () => {
       if (history.length > 1) { history.pop(); ctx.putImageData(history[history.length-1],0,0); }
