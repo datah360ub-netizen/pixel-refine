@@ -1616,64 +1616,95 @@ function passwordTool() {
 
 /* ---------- QR Code Generator ---------- */
 
-/*
-  To enable QR generation, include a QR library in index.html.
-  This UI does not pretend to generate a QR code without that library.
-*/
+let qrLibraryPromise;
+function loadQRCodeLibrary() {
+  if (typeof window.QRCode !== 'undefined') return Promise.resolve();
+  if (qrLibraryPromise) return qrLibraryPromise;
+  qrLibraryPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    script.async = true;
+    script.onload = () => typeof window.QRCode !== 'undefined'
+      ? resolve()
+      : reject(new Error('QR library loaded but unavailable'));
+    script.onerror = () => reject(new Error('Could not load QR library. Check your internet connection.'));
+    document.head.appendChild(script);
+  });
+  return qrLibraryPromise;
+}
 
 function qrTool() {
   content.innerHTML = `
     <h2>QR Code Generator</h2>
     <p>Enter text or a website address to create a QR code.</p>
-
-    <label>
-      Text or URL
-      <input id="qrText" type="text"
-        maxlength="2000" placeholder="https://example.com">
+    <label>Text or URL
+      <input id="qrText" type="text" maxlength="2000" placeholder="https://example.com">
     </label>
-
-    <button class="primary" id="generateQR" type="button">
-      Generate QR Code
-    </button>
-
-    <div id="qrOutput"></div>
+    <button class="primary" id="generateQR" type="button">Generate QR Code</button>
+    <div id="qrOutput" style="margin:16px 0;display:flex;justify-content:center;min-height:12px"></div>
+    <button class="secondary" id="downloadQR" type="button" disabled>Download QR PNG</button>
     <p id="qrStatus" role="status"></p>
   `;
-
   modal.classList.add('show');
+  const input = document.getElementById('qrText');
+  const button = document.getElementById('generateQR');
+  const output = document.getElementById('qrOutput');
+  const status = document.getElementById('qrStatus');
+  const download = document.getElementById('downloadQR');
+  let generatedValue = '';
 
-  document.getElementById('generateQR').onclick = () => {
-    const value = document.getElementById('qrText').value.trim();
-    const output = document.getElementById('qrOutput');
-    const status = document.getElementById('qrStatus');
-
+  const makeQR = async () => {
+    const value = input.value.trim();
     output.replaceChildren();
-
+    download.disabled = true;
     if (!value) {
       status.textContent = 'Enter some text or a URL first.';
       return;
     }
-
-    if (typeof window.QRCode === 'undefined') {
-      status.textContent =
-        'QR library is not connected yet. Add a QR code library to enable this tool.';
-      return;
-    }
-
+    button.disabled = true;
+    button.textContent = 'Loading QR generator…';
+    status.textContent = 'Preparing QR code…';
     try {
+      await loadQRCodeLibrary();
       new window.QRCode(output, {
         text: value,
-        width: 220,
-        height: 220
+        width: 256,
+        height: 256,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: window.QRCode.CorrectLevel.M
       });
-
-      status.textContent = 'QR code generated.';
-    } catch {
-      status.textContent = 'Could not generate the QR code.';
+      generatedValue = value;
+      download.disabled = false;
+      status.textContent = 'QR code generated successfully.';
+    } catch (error) {
+      status.textContent = (error.message || 'Could not generate QR code.') + ' Please check internet and try again.';
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Generate QR Code';
     }
   };
+  button.onclick = makeQR;
+  input.addEventListener('keydown', event => { if (event.key === 'Enter') makeQR(); });
+  download.onclick = () => {
+    if (!generatedValue) return;
+    const canvas = output.querySelector('canvas');
+    const img = output.querySelector('img');
+    let dataUrl = canvas ? canvas.toDataURL('image/png') : (img ? img.src : '');
+    if (!dataUrl) {
+      status.textContent = 'QR image is not ready yet. Please generate it again.';
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = 'pixel-refine-qr.png';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    status.textContent = 'QR code PNG downloaded.';
+  };
 }
-
+ 
 /* ---------- Barcode Generator ---------- */
 
 /*
