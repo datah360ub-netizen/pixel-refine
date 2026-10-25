@@ -888,10 +888,10 @@ async function processCurrentTool() {
         // Search quality with binary search instead of stepping down in large jumps.
         // If even the lowest quality is too large, gradually reduce dimensions as a fallback.
         let width = originalWidth, height = originalHeight;
-        for (let dimensionPass = 0; dimensionPass < 12; dimensionPass++) {
+        for (let dimensionPass = 0; dimensionPass < 7; dimensionPass++) {
           let low = 0.05, high = requestedQuality;
           let passBestUnder = null, passBestAny = null, passQualityUnder = low, passQualityAny = low;
-          for (let i = 0; i < 12; i++) {
+          for (let i = 0; i < 6; i++) {
             const q = (low + high) / 2;
             const blob = await encode(width, height, q);
             if (!passBestAny || blob.size < passBestAny.size) { passBestAny = blob; passQualityAny = q; }
