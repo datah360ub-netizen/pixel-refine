@@ -529,6 +529,8 @@ function mountManualEditor(sourceUrl, compareUrl = null, label = 'Manual erase e
   const before = document.getElementById('manualBefore');
   before.src = compareUrl || sourceUrl;
   const image = new Image();
+  const restoreImage = new Image();
+  if (compareUrl) restoreImage.src = compareUrl;
   image.onload = () => {
     canvas.width = image.naturalWidth;
     canvas.height = image.naturalHeight;
