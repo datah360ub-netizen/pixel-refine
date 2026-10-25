@@ -1635,73 +1635,159 @@ function loadQRCodeLibrary() {
 
 function qrTool() {
   content.innerHTML = `
-    <h2>QR Code Generator</h2>
-    <p>Enter text or a website address to create a QR code.</p>
-    <label>Text or URL
-      <input id="qrText" type="text" maxlength="2000" placeholder="https://example.com">
-    </label>
-    <button class="primary" id="generateQR" type="button">Generate QR Code</button>
-    <div id="qrOutput" style="margin:16px 0;display:flex;justify-content:center;min-height:12px"></div>
-    <button class="secondary" id="downloadQR" type="button" disabled>Download QR PNG</button>
-    <p id="qrStatus" role="status"></p>
+    <section class="qr-studio">
+      <h2>✨ Stylish QR Code Studio</h2>
+      <p>Create a custom QR code with your company name underneath.</p>
+      <label>Text or URL
+        <input id="qrText" type="text" maxlength="2000" placeholder="https://example.com">
+      </label>
+      <label>Company / Brand name
+        <input id="qrCompany" type="text" maxlength="80" placeholder="Your Company Name">
+      </label>
+      <div class="qr-options">
+        <label>QR colour
+          <input id="qrColor" type="color" value="#172554" style="width:100%;height:44px;padding:4px">
+        </label>
+        <label>Background
+          <select id="qrBg" style="width:100%;padding:10px;border-radius:10px">
+            <option value="#ffffff">Classic white</option>
+            <option value="#f0f9ff">Ice blue</option>
+            <option value="#fdf2f8">Soft pink</option>
+            <option value="#f0fdf4">Mint</option>
+            <option value="#fff7ed">Warm cream</option>
+          </select>
+        </label>
+        <label>Style
+          <select id="qrStyle" style="width:100%;padding:10px;border-radius:10px">
+            <option value="rounded">Rounded card</option>
+            <option value="minimal">Minimal</option>
+            <option value="gradient">Gradient accent</option>
+          </select>
+        </label>
+      </div>
+      <button class="primary" id="generateQR" type="button">Generate Stylish QR</button>
+      <div id="qrPreviewWrap" style="display:none;margin:18px auto;padding:18px;max-width:340px;border-radius:22px;background:#f8fafc;box-shadow:0 12px 32px rgba(15,23,42,.13);text-align:center">
+        <div id="qrOutput" style="display:flex;justify-content:center;align-items:center;padding:12px;border-radius:14px;background:#fff"></div>
+        <div id="qrBrand" style="margin-top:12px;font-size:20px;font-weight:800;letter-spacing:.3px;color:#172554;overflow-wrap:anywhere"></div>
+        <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;opacity:.6;margin-top:4px">Scan to connect</div>
+      </div>
+      <button class="secondary" id="downloadQR" type="button" disabled>Download branded QR PNG</button>
+      <p id="qrStatus" role="status"></p>
+    </section>
+    <style>
+      .qr-studio .qr-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+      .qr-studio #qrOutput canvas,.qr-studio #qrOutput img{max-width:100%;height:auto}
+      .qr-studio #qrCompany,.qr-studio #qrText{box-sizing:border-box;width:100%}
+      @media(max-width:520px){.qr-studio .qr-options{grid-template-columns:1fr}}
+    </style>
   `;
   modal.classList.add('show');
   const input = document.getElementById('qrText');
+  const companyInput = document.getElementById('qrCompany');
   const button = document.getElementById('generateQR');
   const output = document.getElementById('qrOutput');
   const status = document.getElementById('qrStatus');
   const download = document.getElementById('downloadQR');
+  const preview = document.getElementById('qrPreviewWrap');
+  const brand = document.getElementById('qrBrand');
+  const color = document.getElementById('qrColor');
+  const bg = document.getElementById('qrBg');
+  const style = document.getElementById('qrStyle');
   let generatedValue = '';
+  let generatedCompany = '';
 
   const makeQR = async () => {
     const value = input.value.trim();
     output.replaceChildren();
     download.disabled = true;
-    if (!value) {
-      status.textContent = 'Enter some text or a URL first.';
-      return;
-    }
+    if (!value) { status.textContent = 'Enter some text or a URL first.'; return; }
     button.disabled = true;
     button.textContent = 'Loading QR generator…';
-    status.textContent = 'Preparing QR code…';
+    status.textContent = 'Preparing your design…';
     try {
       await loadQRCodeLibrary();
+      const qrColor = color.value;
+      const background = bg.value;
       new window.QRCode(output, {
-        text: value,
-        width: 256,
-        height: 256,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
-        correctLevel: window.QRCode.CorrectLevel.M
+        text: value, width: 256, height: 256,
+        colorDark: qrColor, colorLight: background,
+        correctLevel: window.QRCode.CorrectLevel.H
       });
       generatedValue = value;
+      generatedCompany = companyInput.value.trim();
+      brand.textContent = generatedCompany || ' ';
+      brand.style.color = qrColor;
+      preview.style.background = style.value === 'gradient'
+        ? 'linear-gradient(135deg,' + background + ',#e0e7ff)'
+        : (style.value === 'minimal' ? background : '#f8fafc');
+      output.style.background = background;
+      output.style.borderRadius = style.value === 'minimal' ? '0' : '14px';
+      preview.style.border = style.value === 'minimal' ? '1px solid #e2e8f0' : 'none';
+      preview.style.boxShadow = style.value === 'minimal' ? 'none' : '0 12px 32px rgba(15,23,42,.13)';
+      preview.style.display = 'block';
       download.disabled = false;
-      status.textContent = 'QR code generated successfully.';
+      status.textContent = 'Stylish QR code generated. Scan-test it before printing.';
     } catch (error) {
       status.textContent = (error.message || 'Could not generate QR code.') + ' Please check internet and try again.';
     } finally {
       button.disabled = false;
-      button.textContent = 'Generate QR Code';
+      button.textContent = 'Generate Stylish QR';
     }
   };
   button.onclick = makeQR;
   input.addEventListener('keydown', event => { if (event.key === 'Enter') makeQR(); });
+  companyInput.addEventListener('input', () => {
+    if (preview.style.display !== 'none') brand.textContent = companyInput.value.trim() || ' ';
+  });
   download.onclick = () => {
     if (!generatedValue) return;
-    const canvas = output.querySelector('canvas');
-    const img = output.querySelector('img');
-    let dataUrl = canvas ? canvas.toDataURL('image/png') : (img ? img.src : '');
-    if (!dataUrl) {
-      status.textContent = 'QR image is not ready yet. Please generate it again.';
+    const qrCanvas = output.querySelector('canvas');
+    const qrImg = output.querySelector('img');
+    if (!qrCanvas && !qrImg) { status.textContent = 'Please generate the QR again.'; return; }
+    const qrSize = 256, pad = 28, brandText = generatedCompany || '';
+    const brandHeight = brandText ? 42 : 10;
+    const footerHeight = 24;
+    const canvas = document.createElement('canvas');
+    canvas.width = qrSize + pad * 2;
+    canvas.height = qrSize + pad * 2 + brandHeight + footerHeight;
+    const ctx = canvas.getContext('2d');
+    const background = bg.value;
+    ctx.fillStyle = style.value === 'gradient' ? '#eef2ff' : background;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    if (style.value !== 'minimal') {
+      ctx.shadowColor = 'rgba(15,23,42,.15)'; ctx.shadowBlur = 14; ctx.fillStyle = background;
+      ctx.beginPath(); ctx.roundRect ? ctx.roundRect(8,8,canvas.width-16,canvas.height-16,18) : ctx.rect(8,8,canvas.width-16,canvas.height-16);
+      ctx.fill(); ctx.shadowBlur = 0;
+    }
+    if (qrCanvas) ctx.drawImage(qrCanvas,pad,pad,qrSize,qrSize);
+    else {
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img,pad,pad,qrSize,qrSize);
+        finishDownload();
+      };
+      img.onerror = () => { status.textContent = 'Could not export QR image. Please try again.'; };
+      img.src = qrImg.src;
       return;
     }
-    const link = document.createElement('a');
-    link.href = dataUrl;
-    link.download = 'pixel-refine-qr.png';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    status.textContent = 'QR code PNG downloaded.';
+    finishDownload();
+    function finishDownload() {
+      if (brandText) {
+        ctx.fillStyle = color.value;
+        ctx.font = 'bold 20px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        let label = brandText;
+        while (ctx.measureText(label).width > canvas.width - 24 && label.length > 4) label = label.slice(0,-1);
+        if (label !== brandText) label = label.slice(0,-1) + '…';
+        ctx.fillText(label,canvas.width/2,pad+qrSize+29);
+      }
+      ctx.fillStyle = '#64748b'; ctx.font = '10px Arial,sans-serif'; ctx.textAlign='center';
+      ctx.fillText('SCAN TO CONNECT',canvas.width/2,canvas.height-18);
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png'); link.download = 'pixel-refine-branded-qr.png';
+      document.body.appendChild(link); link.click(); link.remove();
+      status.textContent = 'Branded QR PNG downloaded.';
+    }
   };
 }
  
