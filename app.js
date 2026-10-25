@@ -1085,6 +1085,10 @@ function exportCanvas(canvas, type = 'image/png', quality) {
         reject(new Error('Could not create the output image.'));
         return;
       }
+      if (type && blob.type && blob.type !== type) {
+        reject(new Error('This browser does not support ' + type.split('/')[1].toUpperCase() + ' export. Please choose PNG, JPG, or WebP.'));
+        return;
+      }
 
       downloadBlob(blob, getOutputFilename(type));
 
