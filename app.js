@@ -729,19 +729,22 @@ async function processCurrentTool() {
           throw new Error('Enter a target size greater than zero.');
         }
         let bestBlob = null;
+        let bestUnderTarget = null;
         let bestQuality = Number(getOption('quality', 80)) / 100;
-        // Try progressively lower JPEG/WebP qualities and keep the closest result
-        // that does not exceed the requested target size, when technically possible.
+        // Try progressively lower JPEG/WebP qualities and choose the largest output
+        // that fits the requested target; if impossible, use the smallest tested output.
         for (let q = Math.max(0.1, bestQuality); q >= 0.1 - 0.001; q = Math.round((q - 0.1) * 100) / 100) {
           const candidate = await new Promise((resolve, reject) => {
             canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Could not compress this image.')), format, q);
           });
-          if (!bestBlob || (candidate.size <= targetBytes && candidate.size > bestBlob.size)) {
-            bestBlob = candidate;
+          if (!bestBlob || candidate.size < bestBlob.size) bestBlob = candidate;
+          if (candidate.size <= targetBytes) {
+            bestUnderTarget = candidate;
             bestQuality = q;
+            break;
           }
-          if (candidate.size <= targetBytes) break;
         }
+        if (bestUnderTarget) bestBlob = bestUnderTarget;
         if (!bestBlob) throw new Error('Could not compress this image.');
         const ext = format === 'image/webp' ? 'webp' : 'jpg';
         const base = (currentFile.name || 'image').replace(/\\.[^.]+$/, '');
