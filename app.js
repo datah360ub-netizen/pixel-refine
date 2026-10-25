@@ -847,32 +847,30 @@ async function processCurrentTool() {
         let width = originalWidth, height = originalHeight;
         for (let dimensionPass = 0; dimensionPass < 12; dimensionPass++) {
           let low = 0.05, high = requestedQuality;
-          let passBest = null, passQuality = low;
-          for (let i = 0; i < 10; i++) {
-            const q = i === 0 ? high : (low + high) / 2;
+          let passBestUnder = null, passBestAny = null, passQualityUnder = low, passQualityAny = low;
+          for (let i = 0; i < 12; i++) {
+            const q = (low + high) / 2;
             const blob = await encode(width, height, q);
-            if (!passBest || (blob.size <= targetBytes && (passBest.size > targetBytes || blob.size > passBest.size)) ||
-                (passBest.size > targetBytes && blob.size < passBest.size)) {
-              passBest = blob;
-              passQuality = q;
-            }
+            if (!passBestAny || blob.size < passBestAny.size) { passBestAny = blob; passQualityAny = q; }
             if (blob.size <= targetBytes) {
-              if (!bestBlob || blob.size > bestBlob.size || bestBlob.size > targetBytes) {
-                bestBlob = blob; bestQuality = q; bestWidth = width; bestHeight = height;
+              if (!passBestUnder || blob.size > passBestUnder.size) {
+                passBestUnder = blob; passQualityUnder = q;
               }
-              metTarget = true;
-              low = q;
+              low = q; // Try higher quality while staying within target.
             } else {
-              high = q;
+              high = q; // Too large: reduce quality.
             }
-            if (Math.abs(high - low) < 0.006) break;
+            if (Math.abs(high - low) < 0.003) break;
           }
-          if (metTarget) break;
-          // Keep smallest candidate at this size; try smaller dimensions to get under target.
-          if (!bestBlob || passBest.size < bestBlob.size) {
-            bestBlob = passBest; bestQuality = passQuality; bestWidth = width; bestHeight = height;
+          if (passBestUnder) {
+            bestBlob = passBestUnder; bestQuality = passQualityUnder;
+            bestWidth = width; bestHeight = height; metTarget = true;
+            break;
           }
-          if (passBest && passBest.size <= targetBytes) { metTarget = true; break; }
+          // Nothing fits at this resolution, so try smaller dimensions.
+          if (!bestBlob || passBestAny.size < bestBlob.size) {
+            bestBlob = passBestAny; bestQuality = passQualityAny; bestWidth = width; bestHeight = height;
+          }
           const scale = Math.min(0.88, Math.sqrt(targetBytes / Math.max(1, (passBest || bestBlob).size)) * 0.94);
           const nextW = Math.max(1, Math.floor(width * scale));
           const nextH = Math.max(1, Math.floor(height * scale));
