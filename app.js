@@ -503,7 +503,45 @@ async function processPdfTool() {
       const font=await source.embedFont(StandardFonts.Helvetica);source.getPages().forEach((pg,i)=>{const {width}=pg.getSize();pg.drawText(String(i+1),{x:width-42,y:18,size:10,font,color:rgb(.25,.25,.25)});});
       downloadBlob(new Blob([await source.save()],{type:'application/pdf'}),name+'-numbered.pdf');setStatus('Page numbers added; PDF downloaded.');
     } else if(tool==='PDF Compressor') {
-      const out=await PDFDocument.load(bytes);downloadBlob(new Blob([await out.save({useObjectStreams:true})],{type:'application/pdf'}),name+'-compressed.pdf');setStatus('PDF re-saved and optimized where possible. Scanned/image-heavy PDFs may not shrink much.');
+      // Real compression: render each page to a canvas, encode it as JPEG at
+      // a chosen quality, then rebuild the PDF with the compressed page images.
+      // This is much more effective for scanned/image-heavy PDFs than re-saving
+      // the original PDF object structure.
+      const qualityInput = prompt('Choose compression quality:\\n1 = Smallest file (lower quality)\\n2 = Balanced (recommended)\\n3 = Better quality (larger file)', '2');
+      if (qualityInput === null) return;
+      const qualityMap = {'1':0.38,'2':0.58,'3':0.76};
+      const jpegQuality = qualityMap[qualityInput] || 0.58;
+      setStatus('Loading PDF renderer… pages will be compressed as JPEG images.');
+      const pdfjs = await import('https://esm.sh/pdfjs-dist@4.4.168/legacy/build/pdf.mjs');
+      const pdf = await pdfjs.getDocument({data:new Uint8Array(bytes)}).promise;
+      const compressed = await PDFDocument.create();
+      for (let p=1; p<=pdf.numPages; p++) {
+        setLiveProgress(15 + Math.round((p-1)/pdf.numPages*70), 'Compressing page '+p+' of '+pdf.numPages, 2);
+        const page = await pdf.getPage(p);
+        const originalViewport = page.getViewport({scale:1});
+        const renderScale = Math.min(1.35, 1800 / Math.max(originalViewport.width, originalViewport.height));
+        const viewport = page.getViewport({scale:Math.max(0.5,renderScale)});
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1,Math.ceil(viewport.width));
+        canvas.height = Math.max(1,Math.ceil(viewport.height));
+        const ctx = canvas.getContext('2d', {alpha:false});
+        if (!ctx) throw new Error('Could not create a canvas to compress this PDF.');
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        await page.render({canvasContext:ctx,viewport}).promise;
+        const jpegBlob = await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Could not compress page '+p+'.')),'image/jpeg',jpegQuality));
+        const jpgBytes = await jpegBlob.arrayBuffer();
+        const embedded = await compressed.embedJpg(jpgBytes);
+        const pageOut = compressed.addPage([originalViewport.width,originalViewport.height]);
+        pageOut.drawImage(embedded,{x:0,y:0,width:originalViewport.width,height:originalViewport.height});
+        canvas.width=0; canvas.height=0;
+      }
+      const compressedBytes = await compressed.save({useObjectStreams:true});
+      const outBlob = new Blob([compressedBytes],{type:'application/pdf'});
+      const beforeKB = (bytes.byteLength/1024).toFixed(1);
+      const afterKB = (outBlob.size/1024).toFixed(1);
+      const change = Math.round((1-outBlob.size/bytes.byteLength)*100);
+      downloadBlob(outBlob,name+'-compressed.pdf');
+      setStatus('Compression complete: '+beforeKB+' KB → '+afterKB+' KB ('+(change>=0?change+'% smaller':Math.abs(change)+'% larger')+'). Note: pages are converted to images, so selectable text/forms/links may not be preserved.');
     } else throw new Error('This PDF tool is not implemented yet.');
     setLiveProgress(100,'Complete',4);
   } catch(e) { console.error('PDF processing failed',e);setLiveProgress(0,'Failed',0);setStatus('PDF processing failed: '+(e.message||e),true); }
