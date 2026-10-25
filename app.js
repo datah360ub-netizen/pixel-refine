@@ -1708,6 +1708,7 @@ function qrTool() {
       await loadQRCodeLibrary();
       const qrColor = color.value;
       const background = bg.value;
+      const selectedStyle = style.value;
       new window.QRCode(output, {
         text: value, width: 256, height: 256,
         colorDark: qrColor, colorLight: background,
@@ -1736,15 +1737,40 @@ function qrTool() {
   };
   button.onclick = makeQR;
   input.addEventListener('keydown', event => { if (event.key === 'Enter') makeQR(); });
-  companyInput.addEventListener('input', () => {
-    if (preview.style.display !== 'none') brand.textContent = companyInput.value.trim() || ' ';
-  });
+  const refreshDesign = () => {
+    if (preview.style.display === 'none' || !generatedValue) return;
+    generatedCompany = companyInput.value.trim();
+    brand.textContent = generatedCompany || ' ';
+    brand.style.color = color.value;
+    const background = bg.value;
+    const selectedStyle = style.value;
+    preview.style.background = selectedStyle === 'gradient'
+      ? 'linear-gradient(135deg,' + background + ',#e0e7ff)'
+      : (selectedStyle === 'minimal' ? background : '#f8fafc');
+    output.style.background = background;
+    output.style.borderRadius = selectedStyle === 'minimal' ? '0' : '14px';
+    preview.style.border = selectedStyle === 'minimal' ? '1px solid #e2e8f0' : 'none';
+    preview.style.boxShadow = selectedStyle === 'minimal' ? 'none' : '0 12px 32px rgba(15,23,42,.13)';
+    // Rebuild QR using the updated foreground/background colours.
+    output.replaceChildren();
+    new window.QRCode(output, {
+      text: generatedValue, width: 256, height: 256,
+      colorDark: color.value, colorLight: background,
+      correctLevel: window.QRCode.CorrectLevel.H
+    });
+    download.disabled = false;
+    status.textContent = 'Design updated. Scan-test before printing.';
+  };
+  companyInput.addEventListener('input', refreshDesign);
+  color.addEventListener('input', refreshDesign);
+  bg.addEventListener('change', refreshDesign);
+  style.addEventListener('change', refreshDesign);
   download.onclick = () => {
     if (!generatedValue) return;
     const qrCanvas = output.querySelector('canvas');
     const qrImg = output.querySelector('img');
     if (!qrCanvas && !qrImg) { status.textContent = 'Please generate the QR again.'; return; }
-    const qrSize = 256, pad = 28, brandText = generatedCompany || '';
+    const qrSize = 256, pad = 28, brandText = companyInput.value.trim() || '';
     const brandHeight = brandText ? 42 : 10;
     const footerHeight = 24;
     const canvas = document.createElement('canvas');
@@ -1752,9 +1778,10 @@ function qrTool() {
     canvas.height = qrSize + pad * 2 + brandHeight + footerHeight;
     const ctx = canvas.getContext('2d');
     const background = bg.value;
-    ctx.fillStyle = style.value === 'gradient' ? '#eef2ff' : background;
+    const selectedStyle = style.value;
+    ctx.fillStyle = selectedStyle === 'gradient' ? '#eef2ff' : background;
     ctx.fillRect(0,0,canvas.width,canvas.height);
-    if (style.value !== 'minimal') {
+    if (selectedStyle !== 'minimal') {
       ctx.shadowColor = 'rgba(15,23,42,.15)'; ctx.shadowBlur = 14; ctx.fillStyle = background;
       ctx.beginPath(); ctx.roundRect ? ctx.roundRect(8,8,canvas.width-16,canvas.height-16,18) : ctx.rect(8,8,canvas.width-16,canvas.height-16);
       ctx.fill(); ctx.shadowBlur = 0;
