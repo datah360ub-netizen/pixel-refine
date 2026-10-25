@@ -291,6 +291,32 @@ function openTool(index) {
     ]);
     addOption('Custom ratio width', 'cropRatioWidth', 'number', 16, 1, 10000);
     addOption('Custom ratio height', 'cropRatioHeight', 'number', 9, 1, 10000);
+    addOption('Print / Photo Size', 'cropStandardSize', 'select', 'original', [
+      ['original', 'Original cropped size'],
+      ['passport_india', 'Indian passport photo — 35 × 45 mm'],
+      ['passport_us', 'US passport photo — 2 × 2 in (51 × 51 mm)'],
+      ['visa_35x45', 'Visa photo — 35 × 45 mm'],
+      ['stamp_25x20', 'Stamp photo — 25 × 20 mm'],
+      ['postcard_4x6', 'Postcard / photo print — 4 × 6 in'],
+      ['photo_5x7', 'Photo print — 5 × 7 in'],
+      ['photo_6x8', 'Photo print — 6 × 8 in'],
+      ['photo_8x10', 'Photo print — 8 × 10 in'],
+      ['a4', 'A4 paper — 210 × 297 mm'],
+      ['a5', 'A5 paper — 148 × 210 mm'],
+      ['a3', 'A3 paper — 297 × 420 mm'],
+      ['letter', 'US Letter — 8.5 × 11 in'],
+      ['legal', 'US Legal — 8.5 × 14 in'],
+      ['wallet', 'Wallet photo — 2.5 × 3.5 in'],
+      ['custom', 'Custom print size (mm)']
+    ]);
+    addOption('Custom print width (mm)', 'cropPrintWidth', 'number', 35, 1, 1000);
+    addOption('Custom print height (mm)', 'cropPrintHeight', 'number', 45, 1, 1500);
+    addOption('Print resolution (DPI)', 'cropDpi', 'select', '300', [
+      ['150', '150 DPI — draft'],
+      ['200', '200 DPI'],
+      ['300', '300 DPI — print quality'],
+      ['600', '600 DPI — high quality']
+    ]);
     addOption('Output pixel preset', 'cropPixels', 'select', 'original', [
       ['original', 'Use cropped image pixels'],
       ['320x320', '320 × 320 px'],
@@ -312,16 +338,25 @@ function openTool(index) {
     const ratioSelect = document.getElementById('cropRatio');
     const ratioWidth = document.getElementById('cropRatioWidth');
     const ratioHeight = document.getElementById('cropRatioHeight');
+    const standardSize = document.getElementById('cropStandardSize');
+    const printWidth = document.getElementById('cropPrintWidth');
+    const printHeight = document.getElementById('cropPrintHeight');
+    const dpi = document.getElementById('cropDpi');
     const updateCustomSizeVisibility = () => {
       const customPixels = preset && preset.value === 'custom';
       const customRatio = ratioSelect && ratioSelect.value === 'custom';
+      const customPrint = standardSize && standardSize.value === 'custom';
       if (customWidth) customWidth.closest('.option').hidden = !customPixels;
       if (customHeight) customHeight.closest('.option').hidden = !customPixels;
       if (ratioWidth) ratioWidth.closest('.option').hidden = !customRatio;
       if (ratioHeight) ratioHeight.closest('.option').hidden = !customRatio;
+      if (printWidth) printWidth.closest('.option').hidden = !customPrint;
+      if (printHeight) printHeight.closest('.option').hidden = !customPrint;
+      if (dpi) dpi.closest('.option').hidden = !standardSize || standardSize.value === 'original';
     };
     if (preset) preset.addEventListener('change', updateCustomSizeVisibility);
     if (ratioSelect) ratioSelect.addEventListener('change', updateCustomSizeVisibility);
+    if (standardSize) standardSize.addEventListener('change', updateCustomSizeVisibility);
     updateCustomSizeVisibility();
   }
 }
@@ -1126,6 +1161,28 @@ async function processCurrentTool() {
 
         let outputWidth = cropWidth;
         let outputHeight = cropHeight;
+        const standardSize = getOption('cropStandardSize', 'original');
+        const standardDimensionsMm = {
+          passport_india: [35, 45], visa_35x45: [35, 45], stamp_25x20: [25, 20],
+          postcard_4x6: [101.6, 152.4], photo_5x7: [127, 177.8], photo_6x8: [152.4, 203.2],
+          photo_8x10: [203.2, 254], a4: [210, 297], a5: [148, 210], a3: [297, 420],
+          wallet: [63.5, 88.9], letter: [215.9, 279.4], legal: [215.9, 355.6],
+          passport_us: [50.8, 50.8]
+        };
+        if (standardSize !== 'original') {
+          const dpi = Math.max(72, Math.min(600, Number(getOption('cropDpi', 300)) || 300));
+          let mm = standardDimensionsMm[standardSize];
+          if (standardSize === 'custom') {
+            mm = [
+              Math.max(1, Math.min(1000, Number(getOption('cropPrintWidth', 35)) || 35)),
+              Math.max(1, Math.min(1500, Number(getOption('cropPrintHeight', 45)) || 45))
+            ];
+          }
+          if (mm) {
+            outputWidth = Math.round(mm[0] / 25.4 * dpi);
+            outputHeight = Math.round(mm[1] / 25.4 * dpi);
+          }
+        }
         const pixelPreset = getOption('cropPixels', 'original');
         if (pixelPreset === 'custom') {
           outputWidth = Math.max(1, Math.min(12000, Number(getOption('cropCustomWidth', 1080)) || 1080));
