@@ -215,14 +215,16 @@ function openTool(index) {
   } else if (t[4] === 'convert') {
     addOption('Output format', 'format', 'select', 'image/png', [
       ['image/png', 'PNG'],
-      ['image/jpeg', 'JPG'],
-      ['image/webp', 'WebP']
+      ['image/jpeg', 'JPG / JPEG'],
+      ['image/webp', 'WebP'],
+      ['image/avif', 'AVIF (if supported by browser)']
     ]);
   } else if (t[4] === 'upscale') {
     addOption('Scale factor', 'scale', 'select', '2', [
       ['2', '2×'],
-      ['3', '3×'],
-      ['4', '4×']
+      ['4', '4×'],
+      ['8', '8×'],
+      ['16', '16×']
     ]);
   } else if (t[4] === 'enhance') {
     addOption('Brightness', 'brightness', 'range', 100, 0, 200);
@@ -823,7 +825,7 @@ async function processCurrentTool() {
         await exportCanvas(
           canvas,
           format,
-          format === 'image/jpeg' ? 0.92 : undefined
+          (format === 'image/jpeg' || format === 'image/webp' || format === 'image/avif') ? 0.92 : undefined
         );
         break;
       }
