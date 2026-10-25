@@ -768,7 +768,7 @@ async function processCurrentTool() {
     button.disabled = true;
     button.textContent = 'Loading AI model...';
     setLiveProgress(5, 'Loading model', 0);
-    setStatus('Connecting to the AI model. First use may download around 40 MB; keep the page open.');
+    setStatus('Connecting to the AI model. First use downloads the AI model; later runs may be faster if your browser caches it. Keep the page open.');
     try {
       const module = await import('https://esm.sh/@imgly/background-removal@1.7.0?bundle&target=es2022');
       const removeBackground = module.default || module.removeBackground;
@@ -778,8 +778,8 @@ async function processCurrentTool() {
       setLiveProgress(32, 'Preparing AI model', 1);
       const config = {
         publicPath: 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/',
-        model: 'isnet_fp16',
-        debug: true,
+        model: 'isnet_quint8',
+        debug: false,
         progress: (key, current, total) => {
           if (total > 0) {
             const percent = Math.round((current / total) * 100);
@@ -790,7 +790,7 @@ async function processCurrentTool() {
       };
       button.textContent = 'Removing background...';
       setLiveProgress(65, 'Removing background', 2);
-      setStatus('AI is separating the subject from the background. This can take a while on phones.');
+      setStatus('AI is separating the subject from the background. The lightweight model is selected for better speed on phones.');
       const outputBlob = await removeBackground(currentFile, config);
       if (!(outputBlob instanceof Blob) || outputBlob.size === 0) {
         throw new Error('The AI returned an empty image.');
