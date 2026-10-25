@@ -530,7 +530,12 @@ function mountManualEditor(sourceUrl, compareUrl = null, label = 'Manual erase e
   before.src = compareUrl || sourceUrl;
   const image = new Image();
   const restoreImage = new Image();
-  if (compareUrl) restoreImage.src = compareUrl;
+  let restoreReady = !compareUrl;
+  if (compareUrl) {
+    restoreImage.onload = () => { restoreReady = true; };
+    restoreImage.onerror = () => { restoreReady = false; };
+    restoreImage.src = compareUrl;
+  }
   image.onload = () => {
     canvas.width = image.naturalWidth;
     canvas.height = image.naturalHeight;
@@ -580,7 +585,8 @@ function mountManualEditor(sourceUrl, compareUrl = null, label = 'Manual erase e
         ctx.arc(p.x,p.y,radius,0,Math.PI*2);
         ctx.clip();
         ctx.globalCompositeOperation = 'source-over';
-        if (restoreImage.complete && restoreImage.naturalWidth) ctx.drawImage(restoreImage,0,0,canvas.width,canvas.height);
+        if (restoreReady && restoreImage.complete && restoreImage.naturalWidth) ctx.drawImage(restoreImage,0,0,canvas.width,canvas.height);
+        else setStatus('Original photo is still loading. Please wait a moment, then use Restore again.');
       }
       ctx.restore();
     };
@@ -797,7 +803,7 @@ async function processCurrentTool() {
     button.disabled = true;
     button.textContent = 'Loading AI model...';
     setLiveProgress(5, 'Loading model', 0);
-    setStatus('Fast mode: large photos are reduced to a 1280px long edge before AI processing. First use still needs to download the model.');
+    setStatus('Fast mode: large photos are reduced to a 960px long edge before AI processing. First use still needs to download the model.');
     try {
       const module = await import('https://esm.sh/@imgly/background-removal@1.7.0?bundle&target=es2022');
       const removeBackground = module.default || module.removeBackground;
@@ -810,8 +816,8 @@ async function processCurrentTool() {
       try {
         const bitmap = await createImageBitmap(currentFile);
         const longestEdge = Math.max(bitmap.width, bitmap.height);
-        if (longestEdge > 1280) {
-          const scale = 1280 / longestEdge;
+        if (longestEdge > 960) {
+          const scale = 960 / longestEdge;
           const fastCanvas = document.createElement('canvas');
           fastCanvas.width = Math.max(1, Math.round(bitmap.width * scale));
           fastCanvas.height = Math.max(1, Math.round(bitmap.height * scale));
@@ -837,7 +843,7 @@ async function processCurrentTool() {
       };
       button.textContent = 'Removing background...';
       setLiveProgress(65, 'Removing background', 2);
-      setStatus('AI is separating the subject from the background. The lightweight model is selected for better speed on phones.');
+      setStatus('AI is separating the subject from the background. Fast mode uses a 960px maximum edge and a lightweight model for better speed on phones.');
       const outputBlob = await removeBackground(processingFile, config);
       if (!(outputBlob instanceof Blob) || outputBlob.size === 0) {
         throw new Error('The AI returned an empty image.');
