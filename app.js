@@ -286,8 +286,11 @@ function openTool(index) {
       ['2:1', 'Panorama 2:1'],
       ['1:2', 'Tall 1:2'],
       ['7:5', 'Photo 7:5'],
-      ['5:7', 'Portrait 5:7']
+      ['5:7', 'Portrait 5:7'],
+      ['custom', 'Custom ratio (set manually)']
     ]);
+    addOption('Custom ratio width', 'cropRatioWidth', 'number', 16, 1, 10000);
+    addOption('Custom ratio height', 'cropRatioHeight', 'number', 9, 1, 10000);
     addOption('Output pixel preset', 'cropPixels', 'select', 'original', [
       ['original', 'Use cropped image pixels'],
       ['320x320', '320 × 320 px'],
@@ -306,15 +309,20 @@ function openTool(index) {
     const preset = document.getElementById('cropPixels');
     const customWidth = document.getElementById('cropCustomWidth');
     const customHeight = document.getElementById('cropCustomHeight');
+    const ratioSelect = document.getElementById('cropRatio');
+    const ratioWidth = document.getElementById('cropRatioWidth');
+    const ratioHeight = document.getElementById('cropRatioHeight');
     const updateCustomSizeVisibility = () => {
-      const custom = preset && preset.value === 'custom';
-      if (customWidth) customWidth.closest('.option').hidden = !custom;
-      if (customHeight) customHeight.closest('.option').hidden = !custom;
+      const customPixels = preset && preset.value === 'custom';
+      const customRatio = ratioSelect && ratioSelect.value === 'custom';
+      if (customWidth) customWidth.closest('.option').hidden = !customPixels;
+      if (customHeight) customHeight.closest('.option').hidden = !customPixels;
+      if (ratioWidth) ratioWidth.closest('.option').hidden = !customRatio;
+      if (ratioHeight) ratioHeight.closest('.option').hidden = !customRatio;
     };
-    if (preset) {
-      preset.addEventListener('change', updateCustomSizeVisibility);
-      updateCustomSizeVisibility();
-    }
+    if (preset) preset.addEventListener('change', updateCustomSizeVisibility);
+    if (ratioSelect) ratioSelect.addEventListener('change', updateCustomSizeVisibility);
+    updateCustomSizeVisibility();
   }
 }
 
@@ -871,7 +879,7 @@ async function processCurrentTool() {
           if (!bestBlob || passBestAny.size < bestBlob.size) {
             bestBlob = passBestAny; bestQuality = passQualityAny; bestWidth = width; bestHeight = height;
           }
-          const scale = Math.min(0.88, Math.sqrt(targetBytes / Math.max(1, (passBest || bestBlob).size)) * 0.94);
+          const scale = Math.min(0.88, Math.sqrt(targetBytes / Math.max(1, (passBestAny || bestBlob).size)) * 0.94);
           const nextW = Math.max(1, Math.floor(width * scale));
           const nextH = Math.max(1, Math.floor(height * scale));
           if (nextW === width && nextH === height) break;
@@ -1094,8 +1102,15 @@ async function processCurrentTool() {
         const ratio = getOption('cropRatio', 'free');
 
         if (ratio !== 'free') {
-          const parts = ratio.split(':').map(Number);
-          const targetRatio = parts[0] / parts[1];
+          let targetRatio;
+          if (ratio === 'custom') {
+            const rw = Math.max(1, Math.min(10000, Number(getOption('cropRatioWidth', 16)) || 16));
+            const rh = Math.max(1, Math.min(10000, Number(getOption('cropRatioHeight', 9)) || 9));
+            targetRatio = rw / rh;
+          } else {
+            const parts = ratio.split(':').map(Number);
+            targetRatio = parts[0] / parts[1];
+          }
           const imageRatio = cropWidth / cropHeight;
 
           if (imageRatio > targetRatio) {
