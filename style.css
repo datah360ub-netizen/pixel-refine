@@ -3123,3 +3123,89 @@ textarea:focus-visible {
   background: repeating-conic-gradient(#bbb 0% 25%, #eee 0% 50%) 50% / 16px 16px;
 }
 .enhancer-live-preview small { opacity: .72; }
+
+
+/* Compact phone layout for Photo Enhancer and other image tools. */
+@media (max-width: 520px) {
+  #modal { padding: 4px !important; }
+  #modalContent {
+    max-height: calc(100dvh - 8px) !important;
+    padding: 10px !important;
+    border-radius: 13px !important;
+    overflow-y: auto;
+  }
+  .tool-modal-head {
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+    padding-right: 24px !important;
+    align-items: center !important;
+  }
+  .tool-modal-head .icon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+    font-size: 18px !important;
+  }
+  .tool-modal-head h2 { font-size: 17px !important; margin-bottom: 2px !important; }
+  .tool-modal-head p { font-size: 11px !important; line-height: 1.35 !important; }
+  .drop {
+    min-height: 92px !important;
+    padding: 9px !important;
+    gap: 5px !important;
+    border-radius: 12px !important;
+  }
+  .drop:not(.has-preview) .upload-icon {
+    width: 28px !important; height: 28px !important; border-radius: 8px !important; font-size: 16px !important;
+  }
+  .drop:not(.has-preview) strong { font-size: 12px !important; }
+  .drop:not(.has-preview) .upload-hint { font-size: 10px !important; line-height: 1.2 !important; }
+  .drop:not(.has-preview) .upload-actions { margin-top: 0 !important; gap: 5px !important; }
+  .drop.has-preview { padding: 5px !important; gap: 4px !important; }
+  .drop #preview { max-height: 105px !important; width: auto !important; max-width: 100% !important; }
+  .drop #fileInfo { margin: 2px 0 !important; font-size: 9px !important; line-height: 1.2 !important; }
+  .drop #changeFile { margin-top: 0 !important; padding: 5px 9px !important; font-size: 10px !important; }
+  #optionsArea {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-top: 9px !important;
+  }
+  #optionsArea .option,
+  #optionsArea .control-group {
+    padding: 7px !important;
+    gap: 4px !important;
+    border-radius: 9px !important;
+  }
+  #optionsArea .option label,
+  #optionsArea .control-group label {
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+  }
+  #optionsArea input[type="range"] { height: 18px !important; margin: 0 !important; }
+  #optionsArea input:not([type="range"]),
+  #optionsArea select,
+  #optionsArea textarea {
+    min-height: 29px !important;
+    padding: 5px !important;
+    font-size: 11px !important;
+  }
+  .enhancer-live-preview {
+    grid-column: 1 / -1 !important;
+    margin: 0 0 2px !important;
+    padding: 6px !important;
+    gap: 4px !important;
+    border-radius: 9px !important;
+  }
+  .enhancer-live-preview strong { font-size: 11px !important; }
+  .enhancer-live-preview canvas {
+    max-height: 105px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin: 0 auto;
+  }
+  .enhancer-live-preview small { font-size: 9px !important; line-height: 1.2 !important; }
+  #processBtn, .modal-actions button, .modal-actions a {
+    min-height: 34px !important;
+    padding: 7px 10px !important;
+    font-size: 12px !important;
+  }
+}
