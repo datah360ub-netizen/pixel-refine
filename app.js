@@ -433,70 +433,92 @@ function mountManualEditor(sourceUrl, compareUrl = null, label = 'Manual erase e
 
 function loadFile(file) {
   if (!currentTool) return;
-
   const isImageTool = currentTool[3] === 'image' || currentTool[0] === 'Image to PDF';
-  if (isImageTool && !file.type.startsWith('image/')) {
-    setStatus('Please choose a valid image file.', true);
-    return;
-  }
-
-  if (file.size > 50 * 1024 * 1024) {
-    setStatus('File is too large. Maximum allowed size is 50 MB.', true);
-    return;
-  }
-
-  if (!isImageTool) {
-    setStatus('This document tool needs a PDF/Office processing service. Image tools accept images only.', true);
-    return;
-  }
-
+  const isPdfTool = currentTool[3] === 'pdf' && currentTool[0] !== 'Image to PDF';
+  if (file.size > 50 * 1024 * 1024) { setStatus('File is too large. Maximum allowed size is 50 MB.', true); return; }
+  if (isImageTool && !file.type.startsWith('image/')) { setStatus('Please choose a valid image file.', true); return; }
+  if (isPdfTool && !(/\.pdf$/i.test(file.name) || file.type === 'application/pdf')) { setStatus('Please choose a PDF file for this tool.', true); return; }
   currentFile = file;
-
+  if (isPdfTool) {
+    imageState = null;
+    document.getElementById('previewArea').hidden = true;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').textContent = 'Process PDF';
+    setLiveProgress(0, 'Ready', 0);
+    setStatus(`PDF ready: ${file.name} • ${(file.size / 1024).toFixed(1)} KB. Press Process PDF.`);
+    return;
+  }
   const reader = new FileReader();
   reader.onload = () => {
     const img = document.getElementById('preview');
     img.src = reader.result;
     document.getElementById('previewArea').hidden = false;
-    document.getElementById('fileInfo').textContent =
-      `${file.name} • ${(file.size / 1024).toFixed(1)} KB`;
-
+    document.getElementById('fileInfo').textContent = `${file.name} • ${(file.size / 1024).toFixed(1)} KB`;
     img.onload = () => {
-      if (img.naturalWidth > 12000 || img.naturalHeight > 12000) {
-        currentFile = null;
-        document.getElementById('processBtn').disabled = true;
-        setStatus('Image dimensions must not exceed 12,000 × 12,000 pixels.', true);
-        return;
-      }
-
-      imageState = {
-        src: img.src,
-        width: img.naturalWidth,
-        height: img.naturalHeight
-      };
-
+      if (img.naturalWidth > 12000 || img.naturalHeight > 12000) { currentFile = null; document.getElementById('processBtn').disabled = true; setStatus('Image dimensions must not exceed 12,000 × 12,000 pixels.', true); return; }
+      imageState = {src:img.src,width:img.naturalWidth,height:img.naturalHeight};
       document.getElementById('processBtn').disabled = false;
+      document.getElementById('processBtn').textContent = 'Process Image';
       setLiveProgress(0, 'Ready', 0);
       setStatus('Image ready to process. Live stages will update while the tool runs.');
       if (currentTool && currentTool[0] === 'Magic Eraser') { setStatus('Manual Magic Eraser is ready below: use Erase/Restore, then Download PNG.'); mountManualEditor(imageState.src, null, 'Magic Eraser — manual brush editor'); }
     };
   };
-
   reader.onerror = () => setStatus('Could not read this file. Please try another one.', true);
   reader.readAsDataURL(file);
-    }
+}
+
+async function processPdfTool() {
+  const button=document.getElementById('processBtn'); button.disabled=true; button.textContent='Processing PDF…';
+  setLiveProgress(8,'Loading PDF engine',0); setStatus('Preparing PDF processing in your browser…');
+  try {
+    const mod=await import('https://esm.sh/pdf-lib@1.17.1?bundle');
+    const PDFDocument=mod.PDFDocument, {StandardFonts,rgb}=mod;
+    if(!PDFDocument) throw new Error('PDF library did not load. Check internet and retry.');
+    const bytes=await currentFile.arrayBuffer(), name=currentFile.name.replace(/\.pdf$/i,'')||'document';
+    const source=await PDFDocument.load(bytes); const tool=currentTool[0]; setLiveProgress(35,'Reading PDF',1);
+    if(tool==='PDF Merger') throw new Error('Merger requires selecting multiple PDF files; the current upload control accepts only one file. Other single-PDF tools are being enabled.');
+    if(tool==='Word to PDF') throw new Error('DOCX-to-PDF needs a document layout renderer that is not currently included.');
+    if(tool==='PDF Protect') throw new Error('Password encryption is not supported by the current PDF library. This tool needs a dedicated encryption library/backend; the file will not be falsely labelled protected.');
+    if(tool==='PDF to Word') {
+      const pdfjs=await import('https://esm.sh/pdfjs-dist@4.4.168/legacy/build/pdf.mjs');
+      const pdf=await pdfjs.getDocument({data:new Uint8Array(bytes)}).promise; let txt='';
+      for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const c=await page.getTextContent();txt+=c.items.map(x=>x.str||'').join(' ')+'\n\n';}
+      downloadBlob(new Blob([txt],{type:'text/plain;charset=utf-8'}),name+'.txt');
+      setStatus('PDF text extracted and downloaded as TXT. Page layout and images are not preserved in this basic export.');
+    } else if(tool==='PDF to JPG') {
+      const pdfjs=await import('https://esm.sh/pdfjs-dist@4.4.168/legacy/build/pdf.mjs');
+      const pdf=await pdfjs.getDocument({data:new Uint8Array(bytes)}).promise;
+      for(let p=1;p<=pdf.numPages;p++){setLiveProgress(35+p/pdf.numPages*50,'Rendering page '+p,2);const page=await pdf.getPage(p);const vp=page.getViewport({scale:1.5});const c=document.createElement('canvas');c.width=Math.ceil(vp.width);c.height=Math.ceil(vp.height);await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;const blob=await new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('JPG export failed')),'image/jpeg',.92));downloadBlob(blob,name+'-page-'+p+'.jpg');}
+      setStatus('Rendered '+pdf.numPages+' page(s) to JPG. Allow multiple downloads if prompted.');
+    } else if(tool==='PDF Splitter'||tool==='PDF Page Extractor') {
+      const total=source.getPageCount();const raw=prompt('Enter pages/ranges (example: 1,3,5-7). For PDF Splitter, leave blank to save each page separately.');
+      if(raw===null)return;let ids=[];
+      if(!raw.trim()&&tool==='PDF Splitter')ids=Array.from({length:total},(_,i)=>i);
+      else for(const part of raw.split(',').map(x=>x.trim()).filter(Boolean)){const m=part.match(/^(\d+)(?:\s*-\s*(\d+))?$/);if(!m)throw new Error('Invalid page range. Example: 1,3,5-7');const a=+m[1],b=+(m[2]||m[1]);if(a<1||b<a||b>total)throw new Error('Pages must be between 1 and '+total);for(let p=a;p<=b;p++)if(!ids.includes(p-1))ids.push(p-1);}
+      if(!ids.length)throw new Error('No pages selected.');
+      if(tool==='PDF Splitter'&&!raw.trim()){for(const id of ids){const out=await PDFDocument.create();const [pg]=await out.copyPages(source,[id]);out.addPage(pg);downloadBlob(new Blob([await out.save()],{type:'application/pdf'}),name+'-page-'+(id+1)+'.pdf');}setStatus('Split into '+ids.length+' PDF files. Allow multiple downloads if asked.');}
+      else{const out=await PDFDocument.create();(await out.copyPages(source,ids)).forEach(pg=>out.addPage(pg));downloadBlob(new Blob([await out.save()],{type:'application/pdf'}),name+'-pages.pdf');setStatus('Selected pages exported as a new PDF.');}
+    } else if(tool==='PDF Page Numbering') {
+      const font=await source.embedFont(StandardFonts.Helvetica);source.getPages().forEach((pg,i)=>{const {width}=pg.getSize();pg.drawText(String(i+1),{x:width-42,y:18,size:10,font,color:rgb(.25,.25,.25)});});
+      downloadBlob(new Blob([await source.save()],{type:'application/pdf'}),name+'-numbered.pdf');setStatus('Page numbers added; PDF downloaded.');
+    } else if(tool==='PDF Compressor') {
+      const out=await PDFDocument.load(bytes);downloadBlob(new Blob([await out.save({useObjectStreams:true})],{type:'application/pdf'}),name+'-compressed.pdf');setStatus('PDF re-saved and optimized where possible. Scanned/image-heavy PDFs may not shrink much.');
+    } else throw new Error('This PDF tool is not implemented yet.');
+    setLiveProgress(100,'Complete',4);
+  } catch(e) { console.error('PDF processing failed',e);setLiveProgress(0,'Failed',0);setStatus('PDF processing failed: '+(e.message||e),true); }
+  finally {button.disabled=false;button.textContent='Process PDF';}
+}
+
 /* ==========================================
    PIXEL REFINE — PART 3
    Image processing and download functions
    ========================================== */
 
 async function processCurrentTool() {
-  if (!currentTool || !currentFile || !imageState) {
-    setStatus(currentTool && currentTool[3] === 'pdf' && currentTool[0] !== 'Image to PDF'
-      ? 'This PDF workflow is not implemented yet. Image to PDF is available; other PDF tools still need PDF-specific processing.'
-      : 'Please upload an image first.', true);
-    return;
-  }
-
+  if (!currentTool || !currentFile) { setStatus('Please upload a file first.', true); return; }
+  if (currentTool[3] === 'pdf' && currentTool[0] !== 'Image to PDF') { await processPdfTool(); return; }
+  if (!imageState) { setStatus('Please upload a valid image first.', true); return; }
   const action = currentTool[4];
 
   const button = document.getElementById('processBtn');
