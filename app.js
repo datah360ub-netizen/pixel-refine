@@ -171,6 +171,7 @@ function openTool(index) {
 
   choose.onclick = () => input.click();
   if (changeFile) changeFile.onclick = e => { e.stopPropagation(); input.click(); };
+  if (t[4] === 'enhance') document.getElementById('optionsArea').addEventListener('input', updateEnhancerLivePreview);
   drop.onclick = e => {
     if (e.target !== input && e.target !== choose) input.click();
   };
@@ -227,9 +228,22 @@ function openTool(index) {
       ['16', '16×']
     ]);
   } else if (t[4] === 'enhance') {
+    const live = document.createElement('div');
+    live.className = 'enhancer-live-preview';
+    live.innerHTML = '<strong>Live preview</strong><canvas id="enhancerPreview"></canvas><small>Move sliders to preview changes instantly.</small>';
+    document.getElementById('optionsArea').appendChild(live);
     addOption('Brightness', 'brightness', 'range', 100, 0, 200);
-    addOption('Contrast', 'contrast', 'range', 110, 0, 200);
-    addOption('Saturation', 'saturation', 'range', 110, 0, 200);
+    addOption('Contrast', 'contrast', 'range', 100, 0, 200);
+    addOption('Highlights', 'highlights', 'range', 0, -100, 100);
+    addOption('Shadows', 'shadows', 'range', 0, -100, 100);
+    addOption('Saturation', 'saturation', 'range', 100, 0, 200);
+    addOption('Vibrance', 'vibrance', 'range', 0, -100, 100);
+    addOption('Colour temperature', 'temperature', 'range', 0, -100, 100);
+    addOption('Hue', 'hue', 'range', 0, -180, 180);
+    addOption('Sharpen', 'sharpen', 'range', 0, 0, 100);
+    addOption('Fade', 'fade', 'range', 0, 0, 100);
+    addOption('Vignette', 'vignette', 'range', 0, 0, 100);
+    addOption('Dehaze', 'dehaze', 'range', 0, 0, 100);
   } else if (t[4] === 'expand') {
     addOption('Extra canvas (%)', 'expand', 'range', 20, 0, 100);
     addOption('Background', 'background', 'select', '#ffffff', [
@@ -250,6 +264,11 @@ function openTool(index) {
     addOption('Text size', 'watermarkSize', 'number', 36, 8, 200);
     addOption('Opacity (%)', 'watermarkOpacity', 'range', 40, 5, 100);
   } else if (t[4] === 'crop') {
+    addOption('Crop shape', 'cropShape', 'select', 'rectangle', [
+      ['rectangle', 'Rectangle'],
+      ['square', 'Square'],
+      ['circle', 'Circle (transparent outside)']
+    ]);
     addOption('Crop ratio', 'cropRatio', 'select', 'free', [
       ['free', 'Free / Original proportions'],
       ['1:1', 'Square 1:1'],
@@ -297,6 +316,83 @@ function openTool(index) {
       updateCustomSizeVisibility();
     }
   }
+}
+
+
+function enhancerFilterString() {
+  const brightness = Number(getOption('brightness', 100));
+  const contrast = Number(getOption('contrast', 100)) + Number(getOption('dehaze', 0)) * 0.25;
+  const saturation = Math.max(0, Number(getOption('saturation', 100)) + Number(getOption('vibrance', 0)) * 0.55);
+  const hue = Number(getOption('hue', 0));
+  return `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg)`;
+}
+function renderEnhancedCanvas(image) {
+  const canvas = createCanvas(image.naturalWidth, image.naturalHeight);
+  const ctx = canvas.getContext('2d');
+  ctx.filter = enhancerFilterString();
+  ctx.drawImage(image, 0, 0);
+  ctx.filter = 'none';
+  const warm = Number(getOption('temperature', 0));
+  if (warm !== 0) {
+    ctx.globalAlpha = Math.abs(warm) / 500;
+    ctx.fillStyle = warm > 0 ? '#ff9b45' : '#4b9dff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1;
+  }
+  const fade = Number(getOption('fade', 0));
+  if (fade > 0) {
+    ctx.globalAlpha = fade / 250;
+    ctx.fillStyle = '#eee5d5';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1;
+  }
+  const vignette = Number(getOption('vignette', 0));
+  if (vignette > 0) {
+    const g = ctx.createRadialGradient(canvas.width/2, canvas.height/2, Math.min(canvas.width,canvas.height)*0.2, canvas.width/2, canvas.height/2, Math.max(canvas.width,canvas.height)*0.72);
+    g.addColorStop(0, 'rgba(0,0,0,0)');
+    g.addColorStop(1, `rgba(0,0,0,${vignette/140})`);
+    ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
+  }
+  const highlights = Number(getOption('highlights', 0));
+  const shadows = Number(getOption('shadows', 0));
+  if (highlights || shadows) {
+    const frame = ctx.getImageData(0,0,canvas.width,canvas.height);
+    const d = frame.data;
+    for (let i=0;i<d.length;i+=4) {
+      const lum=(d[i]+d[i+1]+d[i+2])/3;
+      if (highlights && lum>150) { const f=highlights/100*(lum-150)/105; for(let c=0;c<3;c++) d[i+c]=Math.max(0,Math.min(255,d[i+c]*(1-f))); }
+      if (shadows && lum<120) { const f=shadows/100*(120-lum)/120*0.8; for(let c=0;c<3;c++) d[i+c]=Math.max(0,Math.min(255,d[i+c]+(f>0?(255-d[i+c])*f:d[i+c]*f))); }
+    }
+    ctx.putImageData(frame,0,0);
+  }
+  const sharp = Number(getOption('sharpen', 0));
+  if (sharp > 0) {
+    const src=ctx.getImageData(0,0,canvas.width,canvas.height), out=ctx.createImageData(canvas.width,canvas.height), a=src.data,b=out.data, amount=sharp/100;
+    for(let y=1;y<canvas.height-1;y++) for(let x=1;x<canvas.width-1;x++) {
+      const i=(y*canvas.width+x)*4;
+      for(let c=0;c<3;c++) b[i+c]=Math.max(0,Math.min(255,a[i+c]+amount*(4*a[i+c]-a[i-4+c]-a[i+4+c]-a[i-4*canvas.width+c]-a[i+4*canvas.width+c])));
+      b[i+3]=a[i+3];
+    }
+    ctx.putImageData(out,0,0);
+  }
+  return canvas;
+}
+function updateEnhancerLivePreview() {
+  const img = document.getElementById('preview');
+  const canvas = document.getElementById('enhancerPreview');
+  if (!img || !canvas || !img.complete || !img.naturalWidth) return;
+  const maxSide = 900, scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+  canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.filter = enhancerFilterString();
+  ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  ctx.filter = 'none';
+  const warm=Number(getOption('temperature',0));
+  if(warm){ctx.globalAlpha=Math.abs(warm)/500;ctx.fillStyle=warm>0?'#ff9b45':'#4b9dff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.globalAlpha=1;}
+  const fade=Number(getOption('fade',0)); if(fade){ctx.globalAlpha=fade/250;ctx.fillStyle='#eee5d5';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.globalAlpha=1;}
+  const vignette=Number(getOption('vignette',0)); if(vignette){const g=ctx.createRadialGradient(canvas.width/2,canvas.height/2,Math.min(canvas.width,canvas.height)*.2,canvas.width/2,canvas.height/2,Math.max(canvas.width,canvas.height)*.72);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,`rgba(0,0,0,${vignette/140})`);ctx.fillStyle=g;ctx.fillRect(0,0,canvas.width,canvas.height);}
 }
 
 function addOption(label, id, type, value, min, max) {
@@ -478,6 +574,7 @@ function loadFile(file) {
       document.getElementById('processBtn').textContent = 'Process Image';
       setLiveProgress(0, 'Ready', 0);
       setStatus('Image ready to process. Live stages will update while the tool runs.');
+      if (currentTool && currentTool[4] === 'enhance') updateEnhancerLivePreview();
       if (currentTool && currentTool[0] === 'Magic Eraser') { setStatus('Manual Magic Eraser is ready below: use Erase/Restore, then Download PNG.'); mountManualEditor(imageState.src, null, 'Magic Eraser — manual brush editor'); }
     };
   };
@@ -852,18 +949,7 @@ async function processCurrentTool() {
       }
 
       case 'enhance': {
-        canvas = createCanvas(image.naturalWidth, image.naturalHeight);
-
-        const ctx = canvas.getContext('2d');
-        ctx.filter = [
-          `brightness(${Number(getOption('brightness', 100))}%)`,
-          `contrast(${Number(getOption('contrast', 110))}%)`,
-          `saturate(${Number(getOption('saturation', 110))}%)`
-        ].join(' ');
-
-        ctx.drawImage(image, 0, 0);
-        ctx.filter = 'none';
-
+        canvas = renderEnhancedCanvas(image);
         await exportCanvas(canvas, 'image/png');
         break;
       }
@@ -971,6 +1057,7 @@ async function processCurrentTool() {
       case 'crop': {
         let cropWidth = image.naturalWidth;
         let cropHeight = image.naturalHeight;
+        const shape = getOption('cropShape', 'rectangle');
 
         const ratio = getOption('cropRatio', 'free');
 
@@ -986,6 +1073,7 @@ async function processCurrentTool() {
           }
         }
 
+        if (shape === 'square' || shape === 'circle') cropWidth = cropHeight = Math.min(cropWidth, cropHeight);
         const sx = Math.floor((image.naturalWidth - cropWidth) / 2);
         const sy = Math.floor((image.naturalHeight - cropHeight) / 2);
 
@@ -1002,18 +1090,13 @@ async function processCurrentTool() {
         }
 
         canvas = createCanvas(outputWidth, outputHeight);
-        canvas.getContext('2d').drawImage(
-          image,
-          sx,
-          sy,
-          cropWidth,
-          cropHeight,
-          0,
-          0,
-          outputWidth,
-          outputHeight
-        );
-
+        const cropCtx = canvas.getContext('2d');
+        if (shape === 'circle') {
+          cropCtx.beginPath();
+          cropCtx.arc(outputWidth / 2, outputHeight / 2, Math.min(outputWidth, outputHeight) / 2, 0, Math.PI * 2);
+          cropCtx.clip();
+        }
+        cropCtx.drawImage(image, sx, sy, cropWidth, cropHeight, 0, 0, outputWidth, outputHeight);
         await exportCanvas(canvas, 'image/png');
         break;
       }
