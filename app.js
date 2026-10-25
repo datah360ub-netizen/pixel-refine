@@ -824,51 +824,85 @@ async function processCurrentTool() {
 
     switch (action) {
       case 'compress': {
-        canvas = createCanvas(image.naturalWidth, image.naturalHeight);
-        canvas.getContext('2d').drawImage(image, 0, 0);
         const format = getOption('compressFormat', 'image/jpeg');
         const requested = Number(getOption('targetSize', 48));
         const unit = getOption('targetUnit', 'KB');
         const targetBytes = requested * (unit === 'MB' ? 1024 * 1024 : 1024);
-        if (!Number.isFinite(requested) || requested <= 0) {
-          throw new Error('Enter a target size greater than zero.');
-        }
-        let bestBlob = null;
-        let bestUnderTarget = null;
-        let bestQuality = Number(getOption('quality', 80)) / 100;
-        // Try progressively lower JPEG/WebP qualities and choose the largest output
-        // that fits the requested target; if impossible, use the smallest tested output.
-        for (let q = Math.max(0.1, bestQuality); q >= 0.1 - 0.001; q = Math.round((q - 0.1) * 100) / 100) {
-          const candidate = await new Promise((resolve, reject) => {
-            canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Could not compress this image.')), format, q);
-          });
-          if (!bestBlob || candidate.size < bestBlob.size) bestBlob = candidate;
-          if (candidate.size <= targetBytes) {
-            bestUnderTarget = candidate;
-            bestQuality = q;
-            break;
+        if (!Number.isFinite(requested) || requested <= 0) throw new Error('Enter a target size greater than zero.');
+
+        const originalWidth = image.naturalWidth;
+        const originalHeight = image.naturalHeight;
+        const requestedQuality = Math.max(0.1, Math.min(1, Number(getOption('quality', 80)) / 100));
+        let bestBlob = null, bestQuality = requestedQuality, bestWidth = originalWidth, bestHeight = originalHeight;
+        let metTarget = false;
+        const encode = (w, h, quality) => new Promise((resolve, reject) => {
+          const c = createCanvas(w, h);
+          const cctx = c.getContext('2d');
+          cctx.drawImage(image, 0, 0, w, h);
+          c.toBlob(blob => blob ? resolve(blob) : reject(new Error('This browser could not encode the image.')), format, quality);
+        });
+
+        // Search quality with binary search instead of stepping down in large jumps.
+        // If even the lowest quality is too large, gradually reduce dimensions as a fallback.
+        let width = originalWidth, height = originalHeight;
+        for (let dimensionPass = 0; dimensionPass < 12; dimensionPass++) {
+          let low = 0.05, high = requestedQuality;
+          let passBest = null, passQuality = low;
+          for (let i = 0; i < 10; i++) {
+            const q = i === 0 ? high : (low + high) / 2;
+            const blob = await encode(width, height, q);
+            if (!passBest || (blob.size <= targetBytes && (passBest.size > targetBytes || blob.size > passBest.size)) ||
+                (passBest.size > targetBytes && blob.size < passBest.size)) {
+              passBest = blob;
+              passQuality = q;
+            }
+            if (blob.size <= targetBytes) {
+              if (!bestBlob || blob.size > bestBlob.size || bestBlob.size > targetBytes) {
+                bestBlob = blob; bestQuality = q; bestWidth = width; bestHeight = height;
+              }
+              metTarget = true;
+              low = q;
+            } else {
+              high = q;
+            }
+            if (Math.abs(high - low) < 0.006) break;
           }
+          if (metTarget) break;
+          // Keep smallest candidate at this size; try smaller dimensions to get under target.
+          if (!bestBlob || passBest.size < bestBlob.size) {
+            bestBlob = passBest; bestQuality = passQuality; bestWidth = width; bestHeight = height;
+          }
+          if (passBest && passBest.size <= targetBytes) { metTarget = true; break; }
+          const scale = Math.min(0.88, Math.sqrt(targetBytes / Math.max(1, (passBest || bestBlob).size)) * 0.94);
+          const nextW = Math.max(1, Math.floor(width * scale));
+          const nextH = Math.max(1, Math.floor(height * scale));
+          if (nextW === width && nextH === height) break;
+          width = nextW; height = nextH;
         }
-        if (bestUnderTarget) bestBlob = bestUnderTarget;
         if (!bestBlob) throw new Error('Could not compress this image.');
+        // Final result prefers the closest file at or under target size.
         const ext = format === 'image/webp' ? 'webp' : 'jpg';
         const base = (currentFile.name || 'image').replace(/\\.[^.]+$/, '');
         const filename = base + '-compressed.' + ext;
         downloadBlob(bestBlob, filename);
         const resultArea = document.getElementById('resultArea');
         if (resultArea) {
-          const met = bestBlob.size <= targetBytes;
+          const actualKB = bestBlob.size / 1024;
+          const targetKB = targetBytes / 1024;
+          const sizeMessage = metTarget
+            ? 'Target met: output is at or below your requested size.'
+            : 'Exact target was not possible even after reducing dimensions; this is the closest small result found.';
           resultArea.innerHTML = '<div class="result-success"><h3>✅ Image compressed</h3><p>Original: ' +
-            (currentFile.size / 1024).toFixed(1) + ' KB · Output: ' + (bestBlob.size / 1024).toFixed(1) +
-            ' KB</p><p>' + (met ? 'Target size reached.' : 'Target size could not be reached at this image resolution; this is the smallest result from the tested quality settings.') +
-            '</p><button class="secondary" id="downloadAgain" type="button">Download Again</button></div>';
+            (currentFile.size / 1024).toFixed(1) + ' KB · Output: ' + actualKB.toFixed(1) +
+            ' KB · Target: ' + targetKB.toFixed(1) + ' KB</p><p>Output dimensions: ' + bestWidth + ' × ' + bestHeight +
+            (bestWidth !== originalWidth || bestHeight !== originalHeight ? ' (resized to meet size)' : '') +
+            '</p><p>' + sizeMessage + '</p><button class="secondary" id="downloadAgain" type="button">Download Again</button></div>';
           document.getElementById('downloadAgain').onclick = () => downloadBlob(bestBlob, filename);
         }
         setLiveProgress(100, 'Complete', 4);
-        setStatus('Compression complete: ' + (bestBlob.size / 1024).toFixed(1) + ' KB at ' + Math.round(bestQuality * 100) + '% quality.');
+        setStatus('Compression complete: ' + (bestBlob.size / 1024).toFixed(1) + ' KB. Output dimensions ' + bestWidth + ' × ' + bestHeight + '.');
         break;
       }
-
       case 'resize': {
         const originalWidth = image.naturalWidth;
         const originalHeight = image.naturalHeight;
