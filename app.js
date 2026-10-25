@@ -735,7 +735,7 @@ async function processCurrentTool() {
       setLiveProgress(32, 'Preparing AI model', 1);
       const config = {
         publicPath: 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/',
-        model: 'isnet_quint8',
+        model: 'isnet_fp16',
         debug: true,
         progress: (key, current, total) => {
           if (total > 0) {
