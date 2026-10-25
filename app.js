@@ -768,7 +768,7 @@ async function processCurrentTool() {
     button.disabled = true;
     button.textContent = 'Loading AI model...';
     setLiveProgress(5, 'Loading model', 0);
-    setStatus('Connecting to the AI model. First use downloads the AI model; later runs may be faster if your browser caches it. Keep the page open.');
+    setStatus('Fast mode: large photos are reduced to a 1280px long edge before AI processing. First use still needs to download the model.');
     try {
       const module = await import('https://esm.sh/@imgly/background-removal@1.7.0?bundle&target=es2022');
       const removeBackground = module.default || module.removeBackground;
@@ -776,6 +776,24 @@ async function processCurrentTool() {
         throw new Error('Background-removal function was not found in the loaded library.');
       }
       setLiveProgress(32, 'Preparing AI model', 1);
+      // Pre-scale large photos to reduce browser memory and CPU time on phones.
+      let processingFile = currentFile;
+      try {
+        const bitmap = await createImageBitmap(currentFile);
+        const longestEdge = Math.max(bitmap.width, bitmap.height);
+        if (longestEdge > 1280) {
+          const scale = 1280 / longestEdge;
+          const fastCanvas = document.createElement('canvas');
+          fastCanvas.width = Math.max(1, Math.round(bitmap.width * scale));
+          fastCanvas.height = Math.max(1, Math.round(bitmap.height * scale));
+          fastCanvas.getContext('2d').drawImage(bitmap, 0, 0, fastCanvas.width, fastCanvas.height);
+          processingFile = await fastCanvas.convertToBlob({ type: 'image/png' });
+          setStatus('Fast mode: resized photo to ' + fastCanvas.width + ' × ' + fastCanvas.height + ' to speed up processing.');
+        }
+        bitmap.close();
+      } catch (resizeError) {
+        console.warn('Fast pre-resize skipped:', resizeError);
+      }
       const config = {
         publicPath: 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/',
         model: 'isnet_quint8',
@@ -791,7 +809,7 @@ async function processCurrentTool() {
       button.textContent = 'Removing background...';
       setLiveProgress(65, 'Removing background', 2);
       setStatus('AI is separating the subject from the background. The lightweight model is selected for better speed on phones.');
-      const outputBlob = await removeBackground(currentFile, config);
+      const outputBlob = await removeBackground(processingFile, config);
       if (!(outputBlob instanceof Blob) || outputBlob.size === 0) {
         throw new Error('The AI returned an empty image.');
       }
