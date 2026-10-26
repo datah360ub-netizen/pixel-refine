@@ -165,7 +165,36 @@ function openMakerTool(kind) {
       .theme-classic{border-top:7px solid #26385b}.theme-modern{border-top:7px solid #6155e8}.theme-creative{border-top:7px solid #f07851}
       .theme-royal{border:8px double #a98436;text-align:center;padding:35px 22px}.theme-minimal{text-align:center;border:1px solid #d8d8d8}.theme-elegant{border-top:8px solid #7b4a69;text-align:center;background:#fffafc}
       .theme-floral{border:7px solid #d9a5b5;text-align:center;background:#fff9fb}.theme-luxury{border:7px solid #b18a45;text-align:center;background:#fffdf7}.theme-festive{border:7px solid #cb583f;text-align:center;background:#fff8ef}
-      .theme-professional{border-top:8px solid #2c5c78}.theme-simple{border:1px solid #ccc}.theme-bold{border-top:10px solid #5b4ce2}
+      .theme-professional{border-top:8px solid #2c5c78}.theme-simple{border:1px solid #ccc}.maker-preview{position:relative;isolation:isolate}.maker-preview:before,.maker-preview:after{pointer-events:none;position:absolute;z-index:-1;content:"";inset:10px;border:1px solid currentColor;opacity:.22}.maker-resume{padding:0 22px 25px!important}.maker-resume h2{font-size:30px;padding-bottom:8px;border-bottom:2px solid currentColor}.maker-resume h3{font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:7px 10px;background:#8882;border-left:4px solid currentColor}.maker-certificate{display:flex;flex-direction:column;justify-content:center;min-height:460px!important;padding:44px 30px!important;text-align:center;background-image:radial-gradient(ellipse at top,#c7a65c22,transparent 52%),radial-gradient(ellipse at bottom,#c7a65c22,transparent 52%)}.maker-certificate:before{inset:12px;border:4px double currentColor;opacity:.75}.maker-certificate:after{inset:20px;border:1px solid currentColor;opacity:.4}.maker-certificate .maker-large{font-family:Georgia,serif;font-style:italic;font-size:36px}.maker-certificate .maker-rule{width:58%;margin:18px auto}.maker-certificate h2{font-family:Georgia,serif;font-size:30px;text-transform:uppercase;letter-spacing:1.4px}.maker-invitation{display:flex;flex-direction:column;justify-content:center;min-height:460px!important;padding:42px 28px!important;text-align:center}.maker-invitation:before{inset:12px;border:2px solid currentColor;outline:1px solid currentColor;outline-offset:5px;opacity:.55}.maker-invitation:after{content:"✦  ❧  ✦";inset:auto 0 16px;text-align:center;border:0;font-size:20px;letter-spacing:10px;opacity:.65}.maker-invitation h2{font-family:Georgia,serif;font-size:32px;font-weight:500;text-transform:uppercase}.maker-visiting{padding:34px 25px!important}.maker-visiting h2{font-size:28px;letter-spacing:1px;text-transform:uppercase}.maker-visiting .maker-kicker{display:inline-block;padding:7px 12px;background:currentColor;color:white}.maker-receipt{padding:34px 26px!important;background-image:repeating-linear-gradient(0deg,transparent 0 31px,#8881 32px)}.maker-receipt .maker-amount{display:inline-block;padding:12px 18px;border:2px dashed currentColor;border-radius:8px}.theme-bold{border-top:10px solid #5b4ce2}
+      /* Premium layouts: distinct visual treatments, not just recoloured borders */
+      .maker-preview{position:relative;isolation:isolate;background-image:radial-gradient(circle at 8% 8%,#d9c9a51c 0 2px,transparent 3px),radial-gradient(circle at 92% 92%,#d9c9a51c 0 2px,transparent 3px)}
+      .maker-preview:before,.maker-preview:after{pointer-events:none;position:absolute;z-index:-1;content:"";inset:10px;border:1px solid currentColor;opacity:.22}
+      .maker-resume{padding:0 22px 25px!important;border-radius:2px}
+      .maker-resume h2{font-size:30px;letter-spacing:.2px;padding-bottom:8px;border-bottom:2px solid currentColor}
+      .maker-resume h3{font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:7px 10px;background:color-mix(in srgb,currentColor 10%,transparent);border-left:4px solid currentColor}
+      .maker-certificate{display:flex;flex-direction:column;justify-content:center;min-height:460px!important;padding:44px 30px!important;text-align:center;background-image:radial-gradient(ellipse at top,#c7a65c22,transparent 52%),radial-gradient(ellipse at bottom,#c7a65c22,transparent 52%)}
+      .maker-certificate:before{inset:12px;border:4px double currentColor;opacity:.75}
+      .maker-certificate:after{inset:20px;border:1px solid currentColor;opacity:.4}
+      .maker-certificate .maker-large{font-family:Georgia,serif;font-style:italic;font-size:36px;letter-spacing:.5px}
+      .maker-certificate .maker-rule{width:58%;margin:18px auto}
+      .maker-certificate h2{font-family:Georgia,serif;font-size:30px;text-transform:uppercase;letter-spacing:1.4px}
+      .maker-invitation{display:flex;flex-direction:column;justify-content:center;min-height:460px!important;padding:42px 28px!important;text-align:center;border-radius:3px}
+      .maker-invitation:before{inset:12px;border:2px solid currentColor;outline:1px solid currentColor;outline-offset:5px;opacity:.55}
+      .maker-invitation:after{content:"✦  ❧  ✦";inset:auto 0 16px;text-align:center;border:0;font-size:20px;letter-spacing:10px;opacity:.65}
+      .maker-invitation h2{font-family:Georgia,serif;font-weight:500;font-size:32px;letter-spacing:1px;text-transform:uppercase}
+      .maker-invitation .maker-large{font-family:Georgia,serif;font-size:26px;font-weight:500}
+      .maker-visiting{padding:34px 25px!important;border-radius:2px}
+      .maker-visiting h2{font-size:28px;letter-spacing:1px;text-transform:uppercase}
+      .maker-visiting .maker-kicker{display:inline-block;padding:7px 12px;background:currentColor;color:white;letter-spacing:2px}
+      .maker-receipt{padding:34px 26px!important;background-image:repeating-linear-gradient(0deg,transparent 0 31px,#8881 32px)}
+      .maker-receipt h2{font-size:24px;text-transform:uppercase;letter-spacing:1px}
+      .maker-receipt .maker-amount{display:inline-block;padding:12px 18px;border:2px dashed currentColor;border-radius:8px}
+      .theme-midnight.maker-certificate,.theme-black.maker-certificate{background-image:radial-gradient(ellipse at top,#d6b76b33,transparent 55%)}
+      .theme-floral.maker-invitation{background-image:radial-gradient(circle at 0 0,#d99aaf55 0 22px,transparent 23px),radial-gradient(circle at 100% 100%,#d99aaf55 0 22px,transparent 23px),linear-gradient(135deg,#fff9fb,#fff 50%,#fff6fa)}
+      .theme-luxury.maker-invitation,.theme-royal.maker-invitation{background-image:radial-gradient(circle at 0 0,#b18a4540 0 30px,transparent 31px),radial-gradient(circle at 100% 100%,#b18a4540 0 30px,transparent 31px),linear-gradient(135deg,#fffdf7,#f8efd9)}
+      .theme-festive.maker-invitation{background-image:radial-gradient(circle at 12% 12%,#ef8b4a55 0 5px,transparent 6px),radial-gradient(circle at 88% 20%,#e3bc4e66 0 7px,transparent 8px),radial-gradient(circle at 18% 86%,#d45e4d44 0 8px,transparent 9px),linear-gradient(135deg,#fff8ef,#fff)}
+      .theme-emerald.maker-certificate,.theme-royal.maker-certificate{box-shadow:inset 0 0 0 5px #ffffff70,inset 0 0 0 9px currentColor}
+      .theme-copper.maker-visiting:before,.theme-midnight.maker-visiting:before{border:2px solid currentColor;opacity:.55}
       .theme-midnight{background:linear-gradient(145deg,#101827,#263449);color:#f5d99a;border:5px double #c9a45c;text-align:center}
       .theme-emerald{background:linear-gradient(145deg,#f7fff9,#e0f0e7);color:#145a43;border:7px double #4c9877}
       .theme-burgundy{background:linear-gradient(145deg,#fff8f7,#f5e5e7);color:#762c42;border:7px double #a85b69;text-align:center}
@@ -183,7 +212,7 @@ function openMakerTool(kind) {
   function value(key){const el=form.elements.namedItem(key);return el?String(el.value||'').trim():'';}
   function line(label,key){const v=value(key);return v?`<p><b>${esc(label)}:</b> ${esc(v)}</p>`:'';}
   function updatePreview(){
-    preview.className='maker-preview theme-'+theme.value;
+    preview.className='maker-preview maker-'+kind+' theme-'+theme.value;
     preview.style.minHeight=orientation.value==='landscape'?'280px':'460px';
     preview.style.aspectRatio=orientation.value==='landscape'?'1.414 / 1':'0.707 / 1';
     const photo=photoData?'<img src="'+photoData+'" alt="Uploaded photo" style="display:block;max-width:100px;max-height:110px;object-fit:cover;margin:0 auto 12px;border-radius:8px">':'';
