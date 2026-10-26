@@ -103,6 +103,7 @@ document.addEventListener('keydown', e => {
 function closeModal() {
   modal.classList.remove('show');
   currentFile = null;
+  currentFiles = [];
   imageState = null;
 }
 
@@ -110,6 +111,7 @@ function openTool(index) {
   const t = tools[index];
   currentTool = t;
   currentFile = null;
+  currentFiles = [];
   imageState = null;
 
   if (t[4] === 'password') return passwordTool();
@@ -117,7 +119,7 @@ function openTool(index) {
   if (t[4] === 'barcode') return barcodeTool();
   if (t[4] === 'utility') return utilityTool();
 
-  const accept = t[0] === 'Image to PDF' ? 'image/*' : (t[3] === 'pdf' ? '.pdf,.doc,.docx' : 'image/*');
+  const accept = t[0] === 'Image to PDF' ? 'image/*' : (t[0] === 'Word to PDF' ? '.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document' : (t[3] === 'pdf' ? '.pdf,application/pdf' : 'image/*'));
 
   content.innerHTML = `
     <div class="tool-modal-head">
@@ -135,7 +137,7 @@ function openTool(index) {
       <div class="upload-icon">☁️</div>
       <b>Upload your ${t[3] === 'pdf' ? 'document' : 'image'}</b>
       <br><span class="upload-hint">Tap to browse or drag & drop</span>
-      <input type="file" id="fileInput" accept="${accept}" aria-label="Choose file">
+      <input type="file" id="fileInput" accept="${accept}" ${t[0] === 'PDF Merger' ? 'multiple' : ''} aria-label="Choose file">
       <div class="upload-actions" id="uploadActions">
         <button class="primary" id="chooseFile" type="button">Choose File</button>
       </div>
@@ -177,7 +179,22 @@ function openTool(index) {
   };
 
   input.onchange = () => {
-    if (input.files && input.files[0]) loadFile(input.files[0]);
+    if (!input.files || !input.files.length) return;
+    if (currentTool && currentTool[0] === 'PDF Merger') {
+      currentFiles = Array.from(input.files);
+      const invalid = currentFiles.find(f => !(/\\.pdf$/i.test(f.name) || f.type === 'application/pdf'));
+      if (invalid) { currentFiles = []; setStatus('Please select PDF files only.', true); return; }
+      if (currentFiles.length < 2) { setStatus('Select at least two PDF files to merge.', true); return; }
+      currentFile = currentFiles[0];
+      document.getElementById('previewArea').hidden = true;
+      document.getElementById('uploadActions').hidden = false;
+      document.getElementById('processBtn').disabled = false;
+      document.getElementById('processBtn').textContent = 'Merge PDFs';
+      setStatus(currentFiles.length + ' PDF files selected. They will be merged in selection order.');
+      return;
+    }
+    currentFiles = [];
+    loadFile(input.files[0]);
   };
 
   drop.ondragover = e => {
@@ -669,8 +686,22 @@ async function processPdfTool() {
     if(!PDFDocument) throw new Error('PDF library did not load. Check internet and retry.');
     const bytes=await currentFile.arrayBuffer(), name=currentFile.name.replace(/\.pdf$/i,'')||'document';
     const source=await PDFDocument.load(bytes); const tool=currentTool[0]; setLiveProgress(35,'Reading PDF',1);
-    if(tool==='PDF Merger') throw new Error('Merger requires selecting multiple PDF files; the current upload control accepts only one file. Other single-PDF tools are being enabled.');
-    if(tool==='Word to PDF') throw new Error('DOCX-to-PDF needs a document layout renderer that is not currently included.');
+    if(tool==='PDF Merger') {
+      if (!currentFiles || currentFiles.length < 2) throw new Error('Choose at least two PDF files first.');
+      const merged = await PDFDocument.create();
+      for (let i=0;i<currentFiles.length;i++) {
+        setLiveProgress(15 + Math.round((i/currentFiles.length)*70), 'Merging file '+(i+1)+' of '+currentFiles.length, 2);
+        const data = await currentFiles[i].arrayBuffer();
+        const doc = await PDFDocument.load(data);
+        const pages = await merged.copyPages(doc, doc.getPageIndices());
+        pages.forEach(page => merged.addPage(page));
+      }
+      const out = await merged.save();
+      downloadBlob(new Blob([out], {type:'application/pdf'}), 'pixel-refine-merged.pdf');
+      setStatus('Successfully merged '+currentFiles.length+' PDF files into one download.');
+    } else if(tool==='Word to PDF') {
+      throw new Error('DOC/DOCX-to-PDF layout conversion is not available in this browser build yet. Please use Print → Save as PDF in Word/Google Docs; other PDF tools can run locally.');
+    }
     if(tool==='PDF Protect') throw new Error('Password encryption is not supported by the current PDF library. This tool needs a dedicated encryption library/backend; the file will not be falsely labelled protected.');
     if(tool==='PDF to Word') {
       const pdfjs=await import('https://esm.sh/pdfjs-dist@4.4.168/legacy/build/pdf.mjs');
