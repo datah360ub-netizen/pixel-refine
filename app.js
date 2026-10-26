@@ -115,7 +115,7 @@ function closeModal() {
   imageState = null;
 }
 
-function openMakerTool(kind) {
+function openMakerTool(kind, chosenTheme) {
   const configs = {
     resume: {title:'Resume / CV Maker',subtitle:'Create a clean, professional resume with live preview.',icon:'📄',themes:[['Executive Navy','modern'],['Classic Blue','classic'],['Creative Coral','creative'],['Midnight Gold','midnight'],['Emerald Luxe','emerald'],['Royal Burgundy','burgundy'],['Monochrome Pro','mono'],['Violet Gradient','violet'],['Teal Accent','teal'],['Copper Edge','copper'],['Minimal White','minimal'],['Premium Black','black']],fields:[
       ['Full name','name','Your full name'],['Job title','role','e.g. Sales Executive'],['Email','email','you@example.com'],['Phone','phone','+91 ...'],['City','city','City, State'],['Professional summary','summary','A short introduction about your experience and strengths'],['Highest qualification','qualification','10th / 12th / Graduation / Post Graduation'],['College / University / School','college','Institution name'],['Course / Stream','course','e.g. B.Com, Science, Arts'],['Passing year','year','Year'],['Skills','skills','Communication, Excel, Teamwork'],['Experience','experience','Role — Company — Dates\nKey responsibilities and achievements'],['Education','education','Additional education details']
@@ -135,6 +135,29 @@ function openMakerTool(kind) {
   };
   const cfg = configs[kind];
   if (!cfg) return;
+  if (!chosenTheme) {
+    const esc = PR.safeText;
+    content.innerHTML = `
+      <div class="tool-modal-head"><div class="icon">${cfg.icon}</div><div><h2>Choose Your ${cfg.title} Design</h2><p>First choose a design below. Then fill in your details.</p></div></div>
+      <div class="maker-gallery">${cfg.themes.map((x,i)=>`<button type="button" class="maker-theme-card" data-theme="${esc(x[1])}">
+        <div class="maker-swatch maker-swatch-${esc(x[1])} maker-swatch-kind-${kind}">
+          ${kind==='certificate'?'<small>CERTIFICATE</small><strong>Your Name</strong><i>✦ ─── ✦</i><span>OF ACHIEVEMENT</span>':kind==='invitation'?'<i>❧ ✿ ❧</i><small>YOU ARE INVITED</small><strong>Special Occasion</strong><span>Save the Date</span>':kind==='resume'?'<b>YOUR NAME</b><small>PROFESSIONAL TITLE</small><hr><span>PROFILE · EXPERIENCE · EDUCATION</span><i>▰ ▰ ▰</i>':kind==='visiting'?'<b>YOUR BRAND</b><hr><strong>Your Name</strong><small>DESIGNATION</small><span>☎  ✉  www.example.com</span>':'<b>BUSINESS NAME</b><hr><strong>PAYMENT RECEIPT</strong><span>Amount: ₹ 0000</span><i>✓ PAID</i>'}
+        </div><span class="maker-theme-name">${esc(x[0])}</span><span class="maker-theme-choose">Choose this design</span>
+      </button>`).join('')}</div>
+      <style>
+      .maker-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:20px}
+      .maker-theme-card{min-width:0;text-align:left;border:1px solid var(--border,#34364c);background:var(--card,#17192b);padding:9px;border-radius:14px;cursor:pointer;color:var(--text,#fff);transition:transform .18s,border-color .18s,box-shadow .18s}
+      .maker-theme-card:hover,.maker-theme-card:focus{transform:translateY(-3px);border-color:#d1ad65;box-shadow:0 8px 22px #0003;outline:none}
+      .maker-swatch{height:145px;box-sizing:border-box;padding:18px 12px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:7px;overflow:hidden;text-align:center;position:relative;box-shadow:inset 0 0 0 1px #0001}
+      .maker-swatch:before{content:"";position:absolute;inset:6px;border:1px solid currentColor;opacity:.35;pointer-events:none}
+      .maker-swatch strong{font-family:Georgia,serif;font-size:16px;line-height:1.2}.maker-swatch small{font-size:8px;letter-spacing:1.5px;font-weight:700}.maker-swatch span{font-size:8px;letter-spacing:1px}.maker-swatch i{font-style:normal;font-size:14px}.maker-swatch hr{width:75%;border:0;border-top:2px solid currentColor;margin:2px}.maker-swatch-kind-resume{align-items:flex-start;text-align:left;padding-left:20px}.maker-swatch-kind-visiting{align-items:flex-start;text-align:left;padding-left:20px}.maker-swatch-kind-receipt{align-items:flex-start;text-align:left;padding-left:20px}
+      .maker-theme-name{display:block;font-size:13px;font-weight:800;padding:10px 2px 4px}.maker-theme-choose{display:block;font-size:11px;color:#d5b46c;padding:0 2px 3px}
+      .maker-swatch-modern{background:linear-gradient(135deg,#fff,#e8edf8);color:#253a61;border-top:5px solid #536ce0}.maker-swatch-classic{background:#fff;color:#26385b;border-top:6px solid #26385b}.maker-swatch-creative{background:linear-gradient(135deg,#fff4ed,#fff);color:#c45d44;border-top:6px solid #f07851}.maker-swatch-midnight{background:linear-gradient(145deg,#101827,#263449);color:#f5d99a;border:4px double #c9a45c}.maker-swatch-emerald{background:linear-gradient(145deg,#f7fff9,#dcefe5);color:#145a43;border:5px double #4c9877}.maker-swatch-burgundy{background:linear-gradient(145deg,#fff8f7,#f2e0e5);color:#762c42;border:5px double #a85b69}.maker-swatch-mono{background:#fff;color:#171717;border:2px solid #171717}.maker-swatch-violet{background:linear-gradient(135deg,#fbf8ff,#e9e0ff);color:#4d3388;border-top:6px solid #8064c8}.maker-swatch-teal{background:linear-gradient(135deg,#f5ffff,#dff4f1);color:#126b70;border:4px solid #4aa6a4}.maker-swatch-copper{background:linear-gradient(135deg,#fffaf5,#f3e1d2);color:#8a4b2b;border:5px double #bd8159}.maker-swatch-black{background:linear-gradient(145deg,#171717,#303030);color:#f7f0df;border:4px solid #bd9a58}.maker-swatch-royal,.maker-swatch-luxury{background:linear-gradient(135deg,#fffdf7,#f5e8c9);color:#80612b;border:5px double #c3a35a}.maker-swatch-floral{background:radial-gradient(circle at 0 0,#d99aaf 0 22px,transparent 23px),radial-gradient(circle at 100% 100%,#d99aaf 0 22px,transparent 23px),linear-gradient(135deg,#fff9fb,#fff6fa);color:#75435a;border:4px solid #d9a5b5}.maker-swatch-festive{background:radial-gradient(circle at 12% 12%,#ef8b4a55 0 7px,transparent 8px),linear-gradient(135deg,#fff8ef,#fff);color:#a84431;border:4px solid #cb583f}.maker-swatch-elegant{background:#fffafc;color:#7b4a69;border:4px double #bd9db0}.maker-swatch-navy{background:linear-gradient(135deg,#fffdf7,#e9eef6);color:#172e52;border:5px double #c3a35a}.maker-swatch-professional{background:#f5fbff;color:#2c5c78;border-top:6px solid #2c5c78}.maker-swatch-simple{background:#fff;color:#333;border:1px solid #ccc}.maker-swatch-bold{background:linear-gradient(135deg,#171717,#3d3d3d);color:#fff;border-bottom:8px solid #5b4ce2}.maker-swatch-minimal{background:#fff;color:#333;border:1px solid #ddd}.maker-swatch-elegant strong,.maker-swatch-floral strong,.maker-swatch-luxury strong,.maker-swatch-royal strong{font-family:Georgia,serif}
+      @media(max-width:720px){.maker-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.maker-swatch{height:125px;padding:14px 8px}.maker-swatch strong{font-size:14px}}
+      </style>`;
+    content.querySelectorAll('.maker-theme-card').forEach(card=>card.addEventListener('click',()=>openMakerTool(kind,card.dataset.theme)));
+    return;
+  }
   currentTool = null; currentFile = null; currentFiles = []; imageState = null;
   const esc = PR.safeText;
   content.innerHTML = `
@@ -142,7 +165,7 @@ function openMakerTool(kind) {
     <div class="maker-layout">
       <form id="makerForm" class="maker-form">
         <label class="maker-label">Choose a theme
-          <select id="makerTheme">${cfg.themes.map(x=>`<option value="${x[1]}">${x[0]}</option>`).join('')}</select>
+          <select id="makerTheme">${cfg.themes.map(x=>`<option value="${x[1]}" ${x[1]===chosenTheme?'selected':''}>${x[0]}</option>`).join('')}</select>
         </label>
         <label class="maker-label">Orientation<select id="makerOrientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label>
         <label class="maker-label">Photo / logo (optional)<input type="file" id="makerPhoto" accept="image/*"></label>
