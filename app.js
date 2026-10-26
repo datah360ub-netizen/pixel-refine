@@ -44,6 +44,11 @@ tools.push(
   ["Image Metadata Cleaner","Prepare images for metadata/privacy cleaning.","🧹","image","advanced"]
 );
 
+  ["Online Resume / CV Maker","Create a professional resume with editable themes.","📄","utility","maker","resume"],
+  ["Online Certificate Maker","Design certificates with elegant themes and your own details.","🏅","utility","maker","certificate"],
+  ["Online Invitation Card Maker","Create invitations for birthdays, weddings and events.","💌","utility","maker","invitation"],
+  ["Online Receipt Maker","Make printable payment receipts with totals and details.","🧾","utility","maker","receipt"],
+
 const grid = document.getElementById('toolGrid');
 const search = document.getElementById('search');
 const count = document.getElementById('count');
@@ -107,7 +112,85 @@ function closeModal() {
   imageState = null;
 }
 
+function openMakerTool(kind) {
+  const configs = {
+    resume: {title:'Resume / CV Maker',subtitle:'Create a clean, professional resume with live preview.',icon:'📄',themes:[['Modern','modern'],['Classic','classic'],['Creative','creative']],fields:[
+      ['Full name','name','Your full name'],['Job title','role','e.g. Sales Executive'],['Email','email','you@example.com'],['Phone','phone','+91 ...'],['City','city','City, State'],['Professional summary','summary','A short introduction about your experience and strengths'],['Skills','skills','Communication, Excel, Teamwork'],['Experience','experience','Role — Company — Dates\nKey responsibilities and achievements'],['Education','education','Degree / Qualification — Institution — Year']
+    ]},
+    certificate: {title:'Certificate Maker',subtitle:'Make a polished certificate for a course, event or achievement.',icon:'🏅',themes:[['Royal','royal'],['Minimal','minimal'],['Elegant','elegant']],fields:[
+      ['Recipient name','name','Full name'],['Certificate title','award','Certificate of Achievement'],['Description','summary','For successfully completing...'],['Organization / issuer','issuer','Organization name'],['Presented by','presenter','Name / role'],['Date','date',new Date().toISOString().slice(0,10)],['Certificate ID (optional)','code','CERT-001']
+    ]},
+    invitation: {title:'Invitation Card Maker',subtitle:'Create a beautiful invitation and save it as PDF.',icon:'💌',themes:[['Floral','floral'],['Luxury','luxury'],['Festive','festive']],fields:[
+      ['Event title','event','You are invited'],['Host name','host','Hosted by...'],['Guest / occasion details','summary','Join us to celebrate...'],['Date','date',new Date().toISOString().slice(0,10)],['Time','time','6:00 PM'],['Venue','venue','Venue and address'],['RSVP / contact','contact','Phone or contact details']
+    ]},
+    receipt: {title:'Receipt Maker',subtitle:'Create a clear payment receipt with amount and transaction details.',icon:'🧾',themes:[['Professional','professional'],['Simple','simple'],['Bold','bold']],fields:[
+      ['Business / seller name','issuer','Business name'],['Business contact / address','address','Address, phone, email'],['Receipt number','code','REC-001'],['Customer name','name','Customer name'],['Description / items','summary','Service or items supplied'],['Amount (₹)','amount','0.00'],['Tax / extra charges (₹)','tax','0.00'],['Payment method','method','Cash / UPI / Card'],['Payment date','date',new Date().toISOString().slice(0,10)],['Notes (optional)','notes','Thank you for your business']
+    ]}
+  };
+  const cfg = configs[kind];
+  if (!cfg) return;
+  currentTool = null; currentFile = null; currentFiles = []; imageState = null;
+  const esc = PR.safeText;
+  content.innerHTML = `
+    <div class="tool-modal-head"><div class="icon">${cfg.icon}</div><div><h2>${cfg.title}</h2><p>${cfg.subtitle}</p></div></div>
+    <div class="maker-layout">
+      <form id="makerForm" class="maker-form">
+        <label class="maker-label">Choose a theme
+          <select id="makerTheme">${cfg.themes.map(x=>`<option value="${x[1]}">${x[0]}</option>`).join('')}</select>
+        </label>
+        ${cfg.fields.map(f=>`<label class="maker-label">${esc(f[0])}${['summary','experience','education','skills','address','notes'].includes(f[1])?`<textarea name="${f[1]}" placeholder="${esc(f[2])}" rows="${f[1]==='summary'||f[1]==='experience'?3:2}"></textarea>`:`<input name="${f[1]}" ${f[1]==='date'?'type="date"':'type="text"'} placeholder="${esc(f[2])}">`}</label>`).join('')}
+        <div class="maker-actions"><button type="button" class="primary" id="makerPrint">Download / Print PDF</button><button type="button" class="secondary" id="makerReset">Reset fields</button></div>
+        <p class="maker-note">Your entries stay in this browser page; this maker does not upload them to a server. Choose “Save as PDF” in the print dialog to download a PDF.</p>
+      </form>
+      <div class="maker-preview-wrap"><div class="maker-preview theme-${cfg.themes[0][1]}" id="makerPreview"></div></div>
+    </div>
+    <style>
+      .maker-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:18px}
+      .maker-form{display:grid;gap:12px;min-width:0}.maker-label{display:grid;gap:6px;font-size:13px;font-weight:700;color:var(--text,#fff)}
+      .maker-label input,.maker-label textarea,.maker-label select{width:100%;box-sizing:border-box;border:1px solid var(--border,#45465e);border-radius:10px;padding:11px;background:var(--card,#17192b);color:var(--text,#fff);font:inherit;font-weight:400}
+      .maker-label textarea{resize:vertical}.maker-actions{display:flex;flex-wrap:wrap;gap:9px}.maker-note{font-size:12px;line-height:1.5;opacity:.75}
+      .maker-preview-wrap{min-width:0;overflow:auto;background:#e9eaf2;border-radius:14px;padding:12px;align-self:start}
+      .maker-preview{box-sizing:border-box;width:100%;min-height:460px;background:white;color:#202238;padding:28px 22px;box-shadow:0 5px 20px #0002;overflow-wrap:anywhere;font-family:Arial,sans-serif}
+      .maker-preview h2{font-size:26px;line-height:1.2;margin:0 0 12px}.maker-preview h3{font-size:17px;margin:16px 0 6px}.maker-preview p{white-space:pre-wrap;line-height:1.5;margin:7px 0;font-size:13px}
+      .maker-preview .maker-kicker{font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700}.maker-preview .maker-rule{height:3px;background:currentColor;opacity:.3;margin:18px 0}
+      .maker-preview .maker-center{text-align:center}.maker-preview .maker-large{font-size:30px;font-weight:800}.maker-preview .maker-amount{font-size:28px;font-weight:800}
+      .theme-classic{border-top:7px solid #26385b}.theme-modern{border-top:7px solid #6155e8}.theme-creative{border-top:7px solid #f07851}
+      .theme-royal{border:8px double #a98436;text-align:center;padding:35px 22px}.theme-minimal{text-align:center;border:1px solid #d8d8d8}.theme-elegant{border-top:8px solid #7b4a69;text-align:center;background:#fffafc}
+      .theme-floral{border:7px solid #d9a5b5;text-align:center;background:#fff9fb}.theme-luxury{border:7px solid #b18a45;text-align:center;background:#fffdf7}.theme-festive{border:7px solid #cb583f;text-align:center;background:#fff8ef}
+      .theme-professional{border-top:8px solid #2c5c78}.theme-simple{border:1px solid #ccc}.theme-bold{border-top:10px solid #5b4ce2}
+      @media(max-width:680px){.maker-layout{grid-template-columns:1fr}.maker-preview{min-height:360px}.maker-preview-wrap{order:2}}
+    </style>`;
+  const form=document.getElementById('makerForm'), preview=document.getElementById('makerPreview'), theme=document.getElementById('makerTheme');
+  function value(key){const el=form.elements.namedItem(key);return el?String(el.value||'').trim():'';}
+  function line(label,key){const v=value(key);return v?`<p><b>${esc(label)}:</b> ${esc(v)}</p>`:'';}
+  function updatePreview(){
+    preview.className='maker-preview theme-'+theme.value;
+    if(kind==='resume'){
+      preview.innerHTML=`<div class="maker-kicker">${esc(value('role')||'Professional Resume')}</div><h2>${esc(value('name')||'Your Name')}</h2><p>${[value('email'),value('phone'),value('city')].filter(Boolean).map(esc).join(' · ')||'Email · Phone · Location'}</p><div class="maker-rule"></div><h3>Professional Summary</h3><p>${esc(value('summary')||'Add a short professional summary using the form.')}</p><h3>Key Skills</h3><p>${esc(value('skills')||'Add your skills.')}</p><h3>Experience</h3><p>${esc(value('experience')||'Add your work experience.')}</p><h3>Education</h3><p>${esc(value('education')||'Add your education details.')}</p>`;
+    }else if(kind==='certificate'){
+      preview.innerHTML=`<div class="maker-center"><p class="maker-kicker">${esc(value('issuer')||'Certificate')}</p><h2>${esc(value('award')||'Certificate of Achievement')}</h2><p>This certificate is proudly presented to</p><p class="maker-large">${esc(value('name')||'Recipient Name')}</p><div class="maker-rule"></div><p>${esc(value('summary')||'For outstanding effort and achievement.')}</p><p>${esc(value('date')||'Date')}</p><br><p><b>${esc(value('presenter')||'Authorized Signatory')}</b></p><p>${esc(value('code')?'Certificate ID: '+value('code'):'')}</p></div>`;
+    }else if(kind==='invitation'){
+      preview.innerHTML=`<div class="maker-center"><p class="maker-kicker">${esc(value('host')||'You are invited')}</p><h2>${esc(value('event')||'Special Occasion')}</h2><div class="maker-rule"></div><p>${esc(value('summary')||'We would be delighted by your presence.')}</p><p class="maker-large">${esc(value('date')||'Date')}</p><p>${esc(value('time')||'Time')}</p><p><b>${esc(value('venue')||'Venue')}</b></p><div class="maker-rule"></div><p>${esc(value('contact')||'Please RSVP')}</p></div>`;
+    }else{
+      const amount=Number(value('amount'))||0,tax=Number(value('tax'))||0;
+      preview.innerHTML=`<div class="maker-kicker">PAYMENT RECEIPT</div><h2>${esc(value('issuer')||'Business Name')}</h2>${line('Contact','address')}<div class="maker-rule"></div>${line('Receipt No.','code')}${line('Date','date')}${line('Received from','name')}<h3>Description</h3><p>${esc(value('summary')||'Items or services')}</p><div class="maker-rule"></div><p class="maker-amount">₹${(amount+tax).toFixed(2)}</p><p>Amount: ₹${amount.toFixed(2)} · Tax / charges: ₹${tax.toFixed(2)}</p>${line('Payment method','method')}${line('Notes','notes')}<div class="maker-rule"></div><p>Thank you for your payment.</p>`;
+    }
+  }
+  form.addEventListener('input',updatePreview); theme.addEventListener('change',updatePreview);
+  document.getElementById('makerReset').onclick=()=>{form.reset();updatePreview();};
+  document.getElementById('makerPrint').onclick=()=>{
+    updatePreview();
+    const printWindow=window.open('','_blank');
+    if(!printWindow){setStatus('Please allow pop-ups for this site to print or save your document.',true);return;}
+    printWindow.document.open();
+    printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(cfg.title)}</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{margin:0;padding:24px;font-family:Arial,sans-serif;color:#202238}.maker-preview{box-sizing:border-box;max-width:900px;min-height:500px;margin:auto;padding:42px;background:white;border:1px solid #ddd;overflow-wrap:anywhere}.maker-preview h2{font-size:28px;margin:0 0 12px}.maker-preview h3{margin:18px 0 6px}.maker-preview p{white-space:pre-wrap;line-height:1.55}.maker-kicker{font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:bold}.maker-rule{height:2px;background:currentColor;opacity:.3;margin:18px 0}.maker-center{text-align:center}.maker-large{font-size:30px;font-weight:800}.maker-amount{font-size:28px;font-weight:800}.theme-royal{border:8px double #a98436;text-align:center}.theme-minimal{text-align:center}.theme-elegant{border-top:8px solid #7b4a69;text-align:center;background:#fffafc}.theme-floral{border:7px solid #d9a5b5;text-align:center;background:#fff9fb}.theme-luxury{border:7px solid #b18a45;text-align:center;background:#fffdf7}.theme-festive{border:7px solid #cb583f;text-align:center;background:#fff8ef}.theme-professional{border-top:8px solid #2c5c78}.theme-simple{border:1px solid #ccc}.theme-bold{border-top:10px solid #5b4ce2}.theme-modern{border-top:7px solid #6155e8}.theme-classic{border-top:7px solid #26385b}.theme-creative{border-top:7px solid #f07851}@page{margin:12mm}@media print{body{padding:0}.maker-preview{max-width:none;min-height:0;box-shadow:none;break-inside:avoid}}</style></head><body><div id="makerPrintDoc" class="${preview.className}">${preview.innerHTML}</div><script>window.onload=()=>setTimeout(()=>window.print(),300);<\/script></body></html>`);
+    printWindow.document.close();
+  };
+  updatePreview(); modal.classList.add('show'); modal.setAttribute('aria-hidden','false');
+}
+
 function openTool(index) {
+  if (t[4] === 'maker') return openMakerTool(t[5]);
   const t = tools[index];
   currentTool = t;
   currentFile = null;
