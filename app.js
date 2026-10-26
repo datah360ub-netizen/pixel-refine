@@ -136,6 +136,7 @@ function openMakerTool(kind, chosenTheme) {
   const cfg = configs[kind];
   if (!cfg) return;
   if (!chosenTheme) {
+    modal.classList.add('show');
     const esc = PR.safeText;
     content.innerHTML = `
       <div class="tool-modal-head"><div class="icon">${cfg.icon}</div><div><h2>Choose Your ${cfg.title} Design</h2><p>First choose a design below. Then fill in your details.</p></div></div>
