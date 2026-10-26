@@ -190,8 +190,8 @@ function openMakerTool(kind) {
 }
 
 function openTool(index) {
-  if (t[4] === 'maker') return openMakerTool(t[5]);
   const t = tools[index];
+  if (t[4] === 'maker') return openMakerTool(t[5]);
   currentTool = t;
   currentFile = null;
   currentFiles = [];
