@@ -182,7 +182,7 @@ function openTool(index) {
     if (!input.files || !input.files.length) return;
     if (currentTool && currentTool[0] === 'PDF Merger') {
       currentFiles = Array.from(input.files);
-      const invalid = currentFiles.find(f => !(/\\.pdf$/i.test(f.name) || f.type === 'application/pdf'));
+      const invalid = currentFiles.find(f => !(/\.pdf$/i.test(f.name) || f.type === 'application/pdf'));
       if (invalid) { currentFiles = []; setStatus('Please select PDF files only.', true); return; }
       if (currentFiles.length < 2) { setStatus('Select at least two PDF files to merge.', true); return; }
       currentFile = currentFiles[0];
@@ -700,6 +700,8 @@ async function processPdfTool() {
       const out = await merged.save();
       downloadBlob(new Blob([out], {type:'application/pdf'}), 'pixel-refine-merged.pdf');
       setStatus('Successfully merged '+currentFiles.length+' PDF files into one download.');
+      setLiveProgress(100,'Complete',4);
+      return;
     } else if(tool==='Word to PDF') {
       throw new Error('DOC/DOCX-to-PDF layout conversion is not available in this browser build yet. Please use Print → Save as PDF in Word/Google Docs; other PDF tools can run locally.');
     }
