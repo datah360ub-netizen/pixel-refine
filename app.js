@@ -144,6 +144,8 @@ function openMakerTool(kind) {
         <label class="maker-label">Choose a theme
           <select id="makerTheme">${cfg.themes.map(x=>`<option value="${x[1]}">${x[0]}</option>`).join('')}</select>
         </label>
+        <label class="maker-label">Orientation<select id="makerOrientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label>
+        <label class="maker-label">Photo / logo (optional)<input type="file" id="makerPhoto" accept="image/*"></label>
         ${cfg.fields.map(f=>`<label class="maker-label">${esc(f[0])}${['summary','experience','education','skills','address','notes'].includes(f[1])?`<textarea name="${f[1]}" placeholder="${esc(f[2])}" rows="${f[1]==='summary'||f[1]==='experience'?3:2}"></textarea>`:`<input name="${f[1]}" ${f[1]==='date'?'type="date"':'type="text"'} placeholder="${esc(f[2])}">`}</label>`).join('')}
         <div class="maker-actions"><button type="button" class="primary" id="makerPrint">Download / Print PDF</button><button type="button" class="secondary" id="makerReset">Reset fields</button></div>
         <p class="maker-note">Your entries stay in this browser page; this maker does not upload them to a server. Choose “Save as PDF” in the print dialog to download a PDF.</p>
@@ -166,25 +168,30 @@ function openMakerTool(kind) {
       .theme-professional{border-top:8px solid #2c5c78}.theme-simple{border:1px solid #ccc}.theme-bold{border-top:10px solid #5b4ce2}
       @media(max-width:680px){.maker-layout{grid-template-columns:1fr}.maker-preview{min-height:360px}.maker-preview-wrap{order:2}}
     </style>`;
-  const form=document.getElementById('makerForm'), preview=document.getElementById('makerPreview'), theme=document.getElementById('makerTheme');
+  const form=document.getElementById('makerForm'), preview=document.getElementById('makerPreview'), theme=document.getElementById('makerTheme'), orientation=document.getElementById('makerOrientation');
+  let photoData='';
+  document.getElementById('makerPhoto').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{photoData=String(reader.result||'');updatePreview();};reader.readAsDataURL(file);});
   function value(key){const el=form.elements.namedItem(key);return el?String(el.value||'').trim():'';}
   function line(label,key){const v=value(key);return v?`<p><b>${esc(label)}:</b> ${esc(v)}</p>`:'';}
   function updatePreview(){
     preview.className='maker-preview theme-'+theme.value;
+    preview.style.minHeight=orientation.value==='landscape'?'280px':'460px';
+    preview.style.aspectRatio=orientation.value==='landscape'?'1.414 / 1':'0.707 / 1';
+    const photo=photoData?'<img src="'+photoData+'" alt="Uploaded photo" style="display:block;max-width:100px;max-height:110px;object-fit:cover;margin:0 auto 12px;border-radius:8px">':'';
     if(kind==='resume'){
-      preview.innerHTML=`<div class="maker-kicker">${esc(value('role')||'Professional Resume')}</div><h2>${esc(value('name')||'Your Name')}</h2><p>${[value('email'),value('phone'),value('city')].filter(Boolean).map(esc).join(' · ')||'Email · Phone · Location'}</p><div class="maker-rule"></div><h3>Professional Summary</h3><p>${esc(value('summary')||'Add a short professional summary using the form.')}</p><h3>Key Skills</h3><p>${esc(value('skills')||'Add your skills.')}</p><h3>Experience</h3><p>${esc(value('experience')||'Add your work experience.')}</p><h3>Education</h3><p>${esc(value('education')||'Add your education details.')}</p>`;
+      preview.innerHTML=`${photo}<div class="maker-kicker">${esc(value('role')||'Professional Resume')}</div><h2>${esc(value('name')||'Your Name')}</h2><p>${[value('email'),value('phone'),value('city')].filter(Boolean).map(esc).join(' · ')||'Email · Phone · Location'}</p><div class="maker-rule"></div><h3>Professional Summary</h3><p>${esc(value('summary')||'Add a short professional summary using the form.')}</p><h3>Key Skills</h3><p>${esc(value('skills')||'Add your skills.')}</p><h3>Experience</h3><p>${esc(value('experience')||'Add your work experience.')}</p><h3>Education</h3><p>${esc(value('education')||'Add your education details.')}</p>`;
     }else if(kind==='certificate'){
       preview.innerHTML=`<div class="maker-center"><p class="maker-kicker">${esc(value('issuer')||'Certificate')}</p><h2>${esc(value('award')||'Certificate of Achievement')}</h2><p>This certificate is proudly presented to</p><p class="maker-large">${esc(value('name')||'Recipient Name')}</p><div class="maker-rule"></div><p>${esc(value('summary')||'For outstanding effort and achievement.')}</p><p>${esc(value('date')||'Date')}</p><br><p><b>${esc(value('presenter')||'Authorized Signatory')}</b></p><p>${esc(value('code')?'Certificate ID: '+value('code'):'')}</p></div>`;
     }else if(kind==='invitation'){
-      preview.innerHTML=`<div class="maker-center"><p class="maker-kicker">${esc(value('host')||'You are invited')}</p><h2>${esc(value('event')||'Special Occasion')}</h2><div class="maker-rule"></div><p>${esc(value('summary')||'We would be delighted by your presence.')}</p><p class="maker-large">${esc(value('date')||'Date')}</p><p>${esc(value('time')||'Time')}</p><p><b>${esc(value('venue')||'Venue')}</b></p><div class="maker-rule"></div><p>${esc(value('contact')||'Please RSVP')}</p></div>`;
+      preview.innerHTML=`<div class="maker-center">${photo}<p class="maker-kicker">${esc(value('occasion')||value('host')||'You are invited')}</p><h2>${esc(value('event')||'Special Occasion')}</h2><div class="maker-rule"></div><p>${esc(value('summary')||'We would be delighted by your presence.')}</p><p class="maker-large">${esc(value('date')||'Date')}</p><p>${esc(value('time')||'Time')}</p><p><b>${esc(value('venue')||'Venue')}</b></p><div class="maker-rule"></div><p>${esc(value('contact')||'Please RSVP')}</p></div>`;
     }else if(kind==='visiting'){
-      preview.innerHTML=`<div class="maker-kicker">${esc(value('issuer')||'Your Company')}</div><h2>${esc(value('name')||'Your Name')}</h2><p><b>${esc(value('role')||'Your Profession')}</b></p><div class="maker-rule"></div><p>${esc(value('phone')||'Phone number')}</p><p>${esc(value('email')||'Email address')}</p><p>${esc(value('website')||'Website')}</p>${line('Address','address')}<p>${esc(value('summary')||'Your tagline or services')}</p>`;
+      preview.innerHTML=`${photo}<div class="maker-kicker">${esc(value('issuer')||'Your Company')}</div><h2>${esc(value('name')||'Your Name')}</h2><p><b>${esc(value('role')||'Your Profession')}</b></p><div class="maker-rule"></div><p>${esc(value('phone')||'Phone number')}</p><p>${esc(value('email')||'Email address')}</p><p>${esc(value('website')||'Website')}</p>${line('Address','address')}<p>${esc(value('summary')||'Your tagline or services')}</p>`;
     }else{
       const amount=Number(value('amount'))||0,tax=Number(value('tax'))||0;
       preview.innerHTML=`<div class="maker-kicker">PAYMENT RECEIPT</div><h2>${esc(value('issuer')||'Business Name')}</h2>${line('Contact','address')}<div class="maker-rule"></div>${line('Receipt No.','code')}${line('Date','date')}${line('Received from','name')}<h3>Description</h3><p>${esc(value('summary')||'Items or services')}</p><div class="maker-rule"></div><p class="maker-amount">₹${(amount+tax).toFixed(2)}</p><p>Amount: ₹${amount.toFixed(2)} · Tax / charges: ₹${tax.toFixed(2)}</p>${line('Payment method','method')}${line('Notes','notes')}<div class="maker-rule"></div><p>Thank you for your payment.</p>`;
     }
   }
-  form.addEventListener('input',updatePreview); theme.addEventListener('change',updatePreview);
+  form.addEventListener('input',updatePreview); theme.addEventListener('change',updatePreview); orientation.addEventListener('change',updatePreview);
   document.getElementById('makerReset').onclick=()=>{form.reset();updatePreview();};
   document.getElementById('makerPrint').onclick=()=>{
     updatePreview();
