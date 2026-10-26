@@ -711,15 +711,80 @@ async function processPdfTool() {
       setLiveProgress(100,'Complete',4);
       return;
     } else if(tool==='Word to PDF') {
-      throw new Error('DOC/DOCX-to-PDF layout conversion is not available in this browser build yet. Please use Print → Save as PDF in Word/Google Docs; other PDF tools can run locally.');
+      if (!/\.docx$/i.test(currentFile.name)) throw new Error('Please upload a .docx file. Legacy .doc files are not supported by this browser converter yet.');
+      setLiveProgress(18,'Reading Word document',0);
+      const mammoth = await import('https://esm.sh/mammoth@1.8.0?bundle');
+      const mammothApi = mammoth.default || mammoth;
+      const extracted = await mammothApi.extractRawText({arrayBuffer:bytes});
+      const textContent = (extracted.value || '').replace(/\r/g,'').trim();
+      if (!textContent) throw new Error('No readable text was found in this DOCX file. It may contain only images or unsupported content.');
+      setLiveProgress(50,'Building PDF pages',2);
+      const outDoc = await PDFDocument.create();
+      const font = await outDoc.embedFont(StandardFonts.Helvetica);
+      const fontBold = await outDoc.embedFont(StandardFonts.HelveticaBold);
+      const pageWidth=595.28, pageHeight=841.89, margin=48, fontSize=11, lineHeight=15;
+      let page=outDoc.addPage([pageWidth,pageHeight]), y=pageHeight-margin;
+      const maxWidth=pageWidth-margin*2;
+      const paragraphs=textContent.split(/\n+/);
+      for (const paragraph of paragraphs) {
+        const words=paragraph.split(/\s+/); let line='';
+        const wrapped=[];
+        for(const word of words) {
+          const test=line ? line+' '+word : word;
+          if(font.widthOfTextAtSize(test,fontSize)>maxWidth && line){wrapped.push(line);line=word;} else line=test;
+        }
+        if(line) wrapped.push(line);
+        if(!wrapped.length) wrapped.push('');
+        for(const ln of wrapped) {
+          if(y<margin){page=outDoc.addPage([pageWidth,pageHeight]);y=pageHeight-margin;}
+          page.drawText(ln.slice(0,400),{x:margin,y,size:fontSize,font:font,color:rgb(0.12,0.12,0.12)});
+          y-=lineHeight;
+        }
+        y-=5;
+      }
+      const out=await outDoc.save();
+      downloadBlob(new Blob([out],{type:'application/pdf'}),name+'.pdf');
+      setStatus('Word text converted to PDF. Basic text and paragraphs are preserved; original styling, tables and images may not be preserved.');
     }
-    if(tool==='PDF Protect') throw new Error('Password encryption is not supported by the current PDF library. This tool needs a dedicated encryption library/backend; the file will not be falsely labelled protected.');
+    if(tool==='PDF Protect') throw new Error('Password encryption is not supported in this browser build yet. This tool cannot securely add a PDF password without a dedicated encryption library or backend.');
     if(tool==='PDF to Word') {
+      setLiveProgress(18,'Extracting PDF text',0);
       const pdfjs=await loadPdfJs();
-      const pdf=await pdfjs.getDocument({data:new Uint8Array(bytes)}).promise; let txt='';
-      for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const c=await page.getTextContent();txt+=c.items.map(x=>x.str||'').join(' ')+'\n\n';}
-      downloadBlob(new Blob([txt],{type:'text/plain;charset=utf-8'}),name+'.txt');
-      setStatus('PDF text extracted and downloaded as TXT. Page layout and images are not preserved in this basic export.');
+      const pdf=await pdfjs.getDocument({data:new Uint8Array(bytes)}).promise;
+      const paragraphs=[];
+      for(let p=1;p<=pdf.numPages;p++){
+        setLiveProgress(18+Math.round(p/pdf.numPages*55),'Reading page '+p+' of '+pdf.numPages,1);
+        const page=await pdf.getPage(p);
+        const c=await page.getTextContent();
+        const items=(c.items||[]).filter(x=>typeof x.str==='string' && x.str.trim());
+        // Group text by approximate baseline to avoid flattening all text into one line.
+        const rows=[];
+        for(const item of items){
+          const y=Math.round(item.transform?.[5]||0);
+          let row=rows.find(r=>Math.abs(r.y-y)<=3);
+          if(!row){row={y,items:[]};rows.push(row);}
+          row.items.push(item);
+        }
+        rows.sort((a,b)=>b.y-a.y);
+        for(const row of rows){
+          row.items.sort((a,b)=>(a.transform?.[4]||0)-(b.transform?.[4]||0));
+          const line=row.items.map(x=>x.str.trim()).filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+          if(line) paragraphs.push(line);
+        }
+        paragraphs.push('');
+      }
+      const extractedText=paragraphs.join('\n').trim();
+      if(!extractedText) throw new Error('No selectable text was found in this PDF. If it is a scanned/image-only PDF, OCR is needed before conversion.');
+      setLiveProgress(78,'Creating Word document',2);
+      const docxModule=await import('https://esm.sh/docx@8.5.0?bundle');
+      const docxApi=docxModule.default || docxModule;
+      const DocumentClass=docxApi.Document, PackerClass=docxApi.Packer, ParagraphClass=docxApi.Paragraph;
+      if(!DocumentClass||!PackerClass||!ParagraphClass) throw new Error('Word document engine could not be loaded. Please retry with a stable internet connection.');
+      const doc = new DocumentClass({sections:[{properties:{},children:extractedText.split('\n').map(line=>new ParagraphClass({text:line}))}]});
+      const blob=await PackerClass.toBlob(doc);
+      downloadBlob(blob,name+'.docx');
+      setLiveProgress(100,'Complete',4);
+      setStatus('Word document created as DOCX. Text and approximate line breaks are preserved; original PDF formatting, columns and images may not be preserved.');
     } else if(tool==='PDF to JPG') {
       const pdfjs=await loadPdfJs();
       const pdf=await pdfjs.getDocument({data:new Uint8Array(bytes)}).promise;
