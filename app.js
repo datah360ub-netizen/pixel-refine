@@ -641,7 +641,8 @@ function loadFile(file) {
   const isPdfTool = currentTool[3] === 'pdf' && currentTool[0] !== 'Image to PDF';
   if (file.size > 50 * 1024 * 1024) { setStatus('File is too large. Maximum allowed size is 50 MB.', true); return; }
   if (isImageTool && !file.type.startsWith('image/')) { setStatus('Please choose a valid image file.', true); return; }
-  if (isPdfTool && !(/\.pdf$/i.test(file.name) || file.type === 'application/pdf')) { setStatus('Please choose a PDF file for this tool.', true); return; }
+  if (isPdfTool && currentTool[0] === 'Word to PDF' && /\.(doc|docx)$/i.test(file.name)) { currentFile = file; imageState = null; document.getElementById('previewArea').hidden = true; document.getElementById('uploadActions').hidden = false; document.getElementById('processBtn').disabled = false; document.getElementById('processBtn').textContent = 'Convert to PDF'; setStatus('Word file selected. Note: DOC/DOCX layout conversion is not enabled in this browser build yet.', true); return; }
+  if (isPdfTool && !(/\.pdf$/i.test(file.name) || file.type === 'application/pdf')) { setStatus(currentTool[0] === 'Word to PDF' ? 'Please choose a .doc or .docx Word document.' : 'Please choose a PDF file for this tool.', true); return; }
   currentFile = file;
   if (isPdfTool) {
     imageState = null;
