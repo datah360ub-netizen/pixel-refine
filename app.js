@@ -45,10 +45,11 @@ tools.push(
 );
 
 tools.push(
-  ["Online Resume / CV Maker","Create a professional resume with editable themes.","📄","utility","maker","resume"],
-  ["Online Certificate Maker","Design certificates with elegant themes and your own details.","🏅","utility","maker","certificate"],
-  ["Online Invitation Card Maker","Create invitations for birthdays, weddings and events.","💌","utility","maker","invitation"],
-  ["Online Receipt Maker","Make printable payment receipts with totals and details.","🧾","utility","maker","receipt"]
+  ["Online Resume / CV Maker","Create a professional resume with editable themes.","📄","design","maker","resume"],
+  ["Online Certificate Maker","Design certificates with elegant themes and your own details.","🏅","design","maker","certificate"],
+  ["Online Invitation Card Maker","Create invitations for birthdays, weddings and events.","💌","design","maker","invitation"],
+  ["Online Receipt Maker","Make printable payment receipts with totals and details.","🧾","design","maker","receipt"],
+  ["Online Visiting Card Maker","Create a stylish business card with contact and company details.","💼","design","maker","visiting"]
 );
 
 const grid = document.getElementById('toolGrid');
@@ -125,6 +126,9 @@ function openMakerTool(kind) {
     invitation: {title:'Invitation Card Maker',subtitle:'Create a beautiful invitation and save it as PDF.',icon:'💌',themes:[['Floral','floral'],['Luxury','luxury'],['Festive','festive']],fields:[
       ['Event title','event','You are invited'],['Host name','host','Hosted by...'],['Guest / occasion details','summary','Join us to celebrate...'],['Date','date',new Date().toISOString().slice(0,10)],['Time','time','6:00 PM'],['Venue','venue','Venue and address'],['RSVP / contact','contact','Phone or contact details']
     ]},
+    visiting: {title:'Visiting Card Maker',subtitle:'Create a professional business card with your contact details.',icon:'💼',themes:[['Modern','modern'],['Elegant','elegant'],['Bold','bold']],fields:[
+      ['Full name','name','Your name'],['Job title','role','e.g. Designer / Consultant'],['Company / brand','issuer','Company name'],['Phone','phone','+91 ...'],['Email','email','you@example.com'],['Website','website','www.example.com'],['Address (optional)','address','Business address'],['Tagline / services','summary','What you do or your tagline']
+    ]},
     receipt: {title:'Receipt Maker',subtitle:'Create a clear payment receipt with amount and transaction details.',icon:'🧾',themes:[['Professional','professional'],['Simple','simple'],['Bold','bold']],fields:[
       ['Business / seller name','issuer','Business name'],['Business contact / address','address','Address, phone, email'],['Receipt number','code','REC-001'],['Customer name','name','Customer name'],['Description / items','summary','Service or items supplied'],['Amount (₹)','amount','0.00'],['Tax / extra charges (₹)','tax','0.00'],['Payment method','method','Cash / UPI / Card'],['Payment date','date',new Date().toISOString().slice(0,10)],['Notes (optional)','notes','Thank you for your business']
     ]}
@@ -173,6 +177,8 @@ function openMakerTool(kind) {
       preview.innerHTML=`<div class="maker-center"><p class="maker-kicker">${esc(value('issuer')||'Certificate')}</p><h2>${esc(value('award')||'Certificate of Achievement')}</h2><p>This certificate is proudly presented to</p><p class="maker-large">${esc(value('name')||'Recipient Name')}</p><div class="maker-rule"></div><p>${esc(value('summary')||'For outstanding effort and achievement.')}</p><p>${esc(value('date')||'Date')}</p><br><p><b>${esc(value('presenter')||'Authorized Signatory')}</b></p><p>${esc(value('code')?'Certificate ID: '+value('code'):'')}</p></div>`;
     }else if(kind==='invitation'){
       preview.innerHTML=`<div class="maker-center"><p class="maker-kicker">${esc(value('host')||'You are invited')}</p><h2>${esc(value('event')||'Special Occasion')}</h2><div class="maker-rule"></div><p>${esc(value('summary')||'We would be delighted by your presence.')}</p><p class="maker-large">${esc(value('date')||'Date')}</p><p>${esc(value('time')||'Time')}</p><p><b>${esc(value('venue')||'Venue')}</b></p><div class="maker-rule"></div><p>${esc(value('contact')||'Please RSVP')}</p></div>`;
+    }else if(kind==='visiting'){
+      preview.innerHTML=`<div class="maker-kicker">${esc(value('issuer')||'Your Company')}</div><h2>${esc(value('name')||'Your Name')}</h2><p><b>${esc(value('role')||'Your Profession')}</b></p><div class="maker-rule"></div><p>${esc(value('phone')||'Phone number')}</p><p>${esc(value('email')||'Email address')}</p><p>${esc(value('website')||'Website')}</p>${line('Address','address')}<p>${esc(value('summary')||'Your tagline or services')}</p>`;
     }else{
       const amount=Number(value('amount'))||0,tax=Number(value('tax'))||0;
       preview.innerHTML=`<div class="maker-kicker">PAYMENT RECEIPT</div><h2>${esc(value('issuer')||'Business Name')}</h2>${line('Contact','address')}<div class="maker-rule"></div>${line('Receipt No.','code')}${line('Date','date')}${line('Received from','name')}<h3>Description</h3><p>${esc(value('summary')||'Items or services')}</p><div class="maker-rule"></div><p class="maker-amount">₹${(amount+tax).toFixed(2)}</p><p>Amount: ₹${amount.toFixed(2)} · Tax / charges: ₹${tax.toFixed(2)}</p>${line('Payment method','method')}${line('Notes','notes')}<div class="maker-rule"></div><p>Thank you for your payment.</p>`;
