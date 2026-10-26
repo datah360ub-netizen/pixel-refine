@@ -44,10 +44,12 @@ tools.push(
   ["Image Metadata Cleaner","Prepare images for metadata/privacy cleaning.","🧹","image","advanced"]
 );
 
+tools.push(
   ["Online Resume / CV Maker","Create a professional resume with editable themes.","📄","utility","maker","resume"],
   ["Online Certificate Maker","Design certificates with elegant themes and your own details.","🏅","utility","maker","certificate"],
   ["Online Invitation Card Maker","Create invitations for birthdays, weddings and events.","💌","utility","maker","invitation"],
-  ["Online Receipt Maker","Make printable payment receipts with totals and details.","🧾","utility","maker","receipt"],
+  ["Online Receipt Maker","Make printable payment receipts with totals and details.","🧾","utility","maker","receipt"]
+);
 
 const grid = document.getElementById('toolGrid');
 const search = document.getElementById('search');
