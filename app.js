@@ -678,6 +678,14 @@ function loadFile(file) {
   reader.readAsDataURL(file);
 }
 
+async function loadPdfJs() {
+  const pdfjs = await import('https://esm.sh/pdfjs-dist@4.4.168/legacy/build/pdf.mjs');
+  if (!pdfjs.GlobalWorkerOptions) throw new Error('PDF renderer did not initialize correctly.');
+  // Explicit worker URL fixes PDF.js v4 error: No "GlobalWorkerOptions.workerSrc" specified.
+  pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+  return pdfjs;
+}
+
 async function processPdfTool() {
   const button=document.getElementById('processBtn'); button.disabled=true; button.textContent='Processing PDF…';
   setLiveProgress(8,'Loading PDF engine',0); setStatus('Preparing PDF processing in your browser…');
@@ -707,13 +715,13 @@ async function processPdfTool() {
     }
     if(tool==='PDF Protect') throw new Error('Password encryption is not supported by the current PDF library. This tool needs a dedicated encryption library/backend; the file will not be falsely labelled protected.');
     if(tool==='PDF to Word') {
-      const pdfjs=await import('https://esm.sh/pdfjs-dist@4.4.168/legacy/build/pdf.mjs');
+      const pdfjs=await loadPdfJs();
       const pdf=await pdfjs.getDocument({data:new Uint8Array(bytes)}).promise; let txt='';
       for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const c=await page.getTextContent();txt+=c.items.map(x=>x.str||'').join(' ')+'\n\n';}
       downloadBlob(new Blob([txt],{type:'text/plain;charset=utf-8'}),name+'.txt');
       setStatus('PDF text extracted and downloaded as TXT. Page layout and images are not preserved in this basic export.');
     } else if(tool==='PDF to JPG') {
-      const pdfjs=await import('https://esm.sh/pdfjs-dist@4.4.168/legacy/build/pdf.mjs');
+      const pdfjs=await loadPdfJs();
       const pdf=await pdfjs.getDocument({data:new Uint8Array(bytes)}).promise;
       for(let p=1;p<=pdf.numPages;p++){setLiveProgress(35+p/pdf.numPages*50,'Rendering page '+p,2);const page=await pdf.getPage(p);const vp=page.getViewport({scale:1.5});const c=document.createElement('canvas');c.width=Math.ceil(vp.width);c.height=Math.ceil(vp.height);await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;const blob=await new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('JPG export failed')),'image/jpeg',.92));downloadBlob(blob,name+'-page-'+p+'.jpg');}
       setStatus('Rendered '+pdf.numPages+' page(s) to JPG. Allow multiple downloads if prompted.');
@@ -738,7 +746,7 @@ async function processPdfTool() {
       const qualityMap = {'1':0.38,'2':0.58,'3':0.76};
       const jpegQuality = qualityMap[qualityInput] || 0.58;
       setStatus('Loading PDF renderer… pages will be compressed as JPEG images.');
-      const pdfjs = await import('https://esm.sh/pdfjs-dist@4.4.168/legacy/build/pdf.mjs');
+      const pdfjs = await loadPdfJs();
       const pdf = await pdfjs.getDocument({data:new Uint8Array(bytes)}).promise;
       const compressed = await PDFDocument.create();
       for (let p=1; p<=pdf.numPages; p++) {
@@ -937,6 +945,32 @@ async function processCurrentTool() {
     }, 'image/png');
     return;
   }
+  if (currentTool[0] === 'Image Metadata Cleaner') {
+    const button = document.getElementById('processBtn');
+    button.disabled = true; button.textContent = 'Cleaning metadata…';
+    setLiveProgress(20, 'Reading image', 0);
+    try {
+      const image = await loadImage(imageState.src);
+      setLiveProgress(55, 'Removing embedded metadata', 2);
+      const canvas = createCanvas(image.naturalWidth, image.naturalHeight);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Could not prepare image for metadata cleaning.');
+      ctx.drawImage(image, 0, 0);
+      // Re-encoding through canvas removes EXIF, GPS, and other embedded metadata.
+      const mime = /\.jpe?g$/i.test(currentFile.name) ? 'image/jpeg' : 'image/png';
+      const blob = await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('Could not export cleaned image.')), mime, 0.94));
+      setLiveProgress(90, 'Preparing download', 3);
+      downloadBlob(blob, (currentFile.name.replace(/\.[^.]+$/, '') || 'image') + '-metadata-clean.' + (mime === 'image/jpeg' ? 'jpg' : 'png'));
+      setLiveProgress(100, 'Complete', 4);
+      setStatus('Metadata cleaned. The exported image has been re-encoded to remove embedded EXIF/GPS metadata.');
+    } catch (error) {
+      setStatus('Metadata cleaning failed: ' + (error.message || error), true);
+    } finally {
+      button.disabled = false; button.textContent = 'Process Image';
+    }
+    return;
+  }
+
   if (action === 'advanced') {
     setStatus('This feature needs its own AI model or processing backend and is not connected yet.', true);
     return;
